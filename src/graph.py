@@ -16,7 +16,7 @@ class RoadGraph:
     nend: int
 
     def __init__(self):
-        self.hardcoded_graph_2()
+        self.mass_hardcoded_graph()
 
     def __print_edge_volumes(self):
         """Pretty print of the edges current volumes. Useful for debug purposes"""
@@ -103,3 +103,27 @@ class RoadGraph:
             volume=0,
             free_flow_travel_time=0.92,
             capacity=50)  # other recommended path
+
+    def mass_hardcoded_graph(self):
+        """Hardcoded graph with one path for each MaaS service. The graph is origin -> destination with only one edge per service"""
+        self.graph = nx.DiGraph()
+        self.graph.add_nodes_from(range(0,5))
+        self.nstart = 0
+        self.nend = 4
+        self.graph.add_edges_from(
+            [(0, 1), (1, 4)], color='red',
+            volume=0,
+            free_flow_travel_time=1,
+            capacity=20)
+
+        self.graph.add_edges_from(
+            [(0, 2), (2, 4)], color='blue',
+            volume=0,
+            free_flow_travel_time=1,
+            capacity=50)
+
+        self.graph.add_edges_from(
+            [(0, 3), (3, 4)], color='green',
+            volume=0,
+            free_flow_travel_time=1,
+            capacity=70)

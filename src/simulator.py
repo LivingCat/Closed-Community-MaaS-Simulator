@@ -39,6 +39,46 @@ class Simulator:
         random.seed(seed)
         # plt.ion()
 
+    def draw_graph(self):
+
+        
+        #Trying to display graph
+        # plt.ion()
+        display_graph = self.graph.graph
+
+        colors = [display_graph[u][v]['color'] for u, v in display_graph.edges]
+
+        # weights = [display_graph[u][v]['weight']
+        #            for u, v in display_graph.edges]
+
+        print(display_graph.number_of_edges())
+
+        pos = nx.spring_layout(display_graph)
+        elarge = display_graph.edges(data=True)
+
+        # nodes
+        nx.draw_networkx_nodes(display_graph, pos, node_size=700)
+
+        # edges
+        nx.draw_networkx_edges(display_graph, pos, edgelist=elarge,
+                               width=6, edge_color=colors)
+
+        # labels
+        nx.draw_networkx_labels(display_graph, pos, edgelist=elarge,
+                                width=6)
+        print("vou desenhar o graph espero eu")
+        plt.axis('off')
+
+        display_graph.clear()
+        plt.title("graph!!!")
+        plt.draw()
+        # plt.ioff()
+        # plt.pause(0.01)
+        plt.waitforbuttonpress(0)
+        plt.clf()
+
+
+
     def run(self):
         # Empty actors list, in case of consecutive calls to this method
         self.actors = []
@@ -74,33 +114,8 @@ class Simulator:
             if not a.reached_dest():
                 a.total_travel_time = self.max_run_time
 
-        #Trying to display graph
-        display_graph = self.graph.graph
-        # plt.ion()
-
-        
-        pos = nx.spring_layout(display_graph)
-        elarge = display_graph.edges(data=True)
-
-        # nodes
-        nx.draw_networkx_nodes(display_graph, pos, node_size=700)
-
-        # edges
-        nx.draw_networkx_edges(display_graph, pos, edgelist=elarge,
-                               width=6)
-
-         # labels
-        nx.draw_networkx_labels(display_graph, pos, edgelist=elarge,
-                               width=6)
-        print("vou desenhar o graph espero eu")
-        plt.axis('off')
-
-        display_graph.clear()
-        plt.title("graph!!!")
-        plt.draw()
-        # plt.ioff()
-        plt.pause(0.01)
-        plt.clf()
+        self.draw_graph()
+     
 
     def get_time_from_traffic_distribution(self) -> float:
         result = self.traffic_distribution()

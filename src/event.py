@@ -80,6 +80,7 @@ class EdgeStartEvent(Event):
         sim.graph.add_vehicle(self.edge)
 
         self.actor.add_time_for_edge(self.edge, tt)
+        # sim.draw_graph()
         return [EdgeEndEvent(self.at_time + tt, self.actor, self.edge)]
 
 
@@ -105,6 +106,7 @@ class EdgeEndEvent(Event):
         sim.graph.remove_vehicle(self.edge)
 
         if not self.actor.reached_dest():
+            # sim.draw_graph()
             # Time it starts next edge its equal to the time this event ended
             return [EdgeStartEvent(self.at_time, self.actor, self.actor.get_next_travel_edge(self.at_time))]
 
