@@ -23,6 +23,7 @@ import numpy as np
 import json
 import os.path
 import networkx as nx
+import matplotlib.pyplot as plt
 
 PREVISION_ATIS = 1
 REAL_ATIS = 2
@@ -190,7 +191,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
     if display_plots:
         plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
         plot_accumulated_edges_graphs(results['edges_atis_natis'], len(all_s))
-
+        
+    plt.waitforbuttonpress(0)   
     return results
 
 

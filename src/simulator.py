@@ -7,6 +7,8 @@ from queue import PriorityQueue
 from event import CreateActorEvent, AccidentEvent
 from graph import RoadGraph
 from utils import MultimodalDistribution
+import networkx as nx
+import matplotlib.pyplot as plt
 
 import random
 
@@ -35,6 +37,7 @@ class Simulator:
         self.actors = None
 
         random.seed(seed)
+        # plt.ion()
 
     def run(self):
         # Empty actors list, in case of consecutive calls to this method
@@ -70,6 +73,34 @@ class Simulator:
         for a in self.actors:
             if not a.reached_dest():
                 a.total_travel_time = self.max_run_time
+
+        #Trying to display graph
+        display_graph = self.graph.graph
+        # plt.ion()
+
+        
+        pos = nx.spring_layout(display_graph)
+        elarge = display_graph.edges(data=True)
+
+        # nodes
+        nx.draw_networkx_nodes(display_graph, pos, node_size=700)
+
+        # edges
+        nx.draw_networkx_edges(display_graph, pos, edgelist=elarge,
+                               width=6)
+
+         # labels
+        nx.draw_networkx_labels(display_graph, pos, edgelist=elarge,
+                               width=6)
+        print("vou desenhar o graph espero eu")
+        plt.axis('off')
+
+        display_graph.clear()
+        plt.title("graph!!!")
+        plt.draw()
+        # plt.ioff()
+        plt.pause(0.01)
+        plt.clf()
 
     def get_time_from_traffic_distribution(self) -> float:
         result = self.traffic_distribution()
