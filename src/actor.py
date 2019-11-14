@@ -4,7 +4,6 @@ Class to represent an Actor, its information, decision-making process, and behav
 
 from abc import ABC
 from typing import List, Tuple
-from atis import Atis
 from collections import defaultdict
 
 
@@ -24,27 +23,22 @@ class Actor(AbstractActor):
     NODE_INDEX = 1
 
     base_route: List[int]
-    atis: Atis
+
     # Tuple[time actor arrived to node, node]
     traveled_nodes: List[Tuple[float, int]]
 
     route_travel_time: defaultdict
     total_travel_time: float
 
-    def __init__(self, route: List[int], atis: Atis):
+    def __init__(self, route: List[int]):
         super().__init__()
         self.base_route = route
-        self.atis = atis
         self.route_travel_time = defaultdict(lambda: 0.0)
         self.total_travel_time = 0.0
         self.start_time = 0.0
 
     def __repr__(self):
         return "A%d :: TI %.4f :: TTT %.4f" % (self.actor_id, round(self.start_time, 4), round(self.total_travel_time, 4))
-
-    def uses_atis(self) -> bool:
-        """Check if this actor uses Atis"""
-        return self.atis is not None
 
     def add_time_for_edge(self, edge: Tuple[int, int], tt: float):
         self.route_travel_time[edge] = tt
@@ -58,15 +52,8 @@ class Actor(AbstractActor):
 
     def get_next_travel_edge(self, timestamp: float) -> Tuple[int, int]:
         """Gets the next edge to be traveled"""
-        if not self.uses_atis():
-            return (self.traveled_nodes[-1][self.NODE_INDEX],
-                    self.base_route[len(self.traveled_nodes)])
-        else:
-            return self.atis.get_edge_prediction(
-                self.traveled_nodes[-1][self.NODE_INDEX],
-                self.base_route[-1],
-                timestamp
-            )
+        return (self.traveled_nodes[-1][self.NODE_INDEX],
+                self.base_route[len(self.traveled_nodes)])
 
     def start_trip(self, at_time: float):
         """Make the actor start the route, at the given time"""

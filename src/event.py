@@ -44,15 +44,15 @@ class CreateActorEvent(Event):
         self.actor_constructor = actor_constructor
 
     def act(self, sim: simulator.Simulator):
-        a = self.actor_constructor(sim.graph, sim.atis)
+        a = self.actor_constructor(sim.graph)
         sim.actors.append(a)
 
         if sim.config.verbose:
-            print("%f" % round(self.at_time, 5), " -- created actor %d | atis: %s" %
-                  (a.actor_id, str(a.uses_atis())))
+            print("%f" % round(self.at_time, 5), " -- created actor %d" %
+                  (a.actor_id))
 
         # updating general stats only
-        sim.stats.add_actor(self.at_time, a.uses_atis())
+        sim.stats.add_actor(self.at_time)
         a.start_trip(self.at_time)
         return [EdgeStartEvent(self.at_time,
                                a,
@@ -74,7 +74,7 @@ class EdgeStartEvent(Event):
         Updates simulator's statistics (e.g. increase load/traffic on edge).
         """
         sim.stats.add_actor_edge(
-            self.at_time, self.edge, self.actor.uses_atis())
+            self.at_time, self.edge)
 
         tt = sim.graph.get_edge_real_travel_time(self.edge)
         sim.graph.add_vehicle(self.edge)
@@ -100,7 +100,7 @@ class EdgeEndEvent(Event):
         and creates following EdgeStartEvent (if trip is not over).
         """
         sim.stats.remove_actor_edge(
-            self.at_time, self.edge, self.actor.uses_atis())
+            self.at_time, self.edge)
 
         self.actor.travel(self.at_time, self.edge)
         sim.graph.remove_vehicle(self.edge)
@@ -115,7 +115,7 @@ class EdgeEndEvent(Event):
 
         # updating general stats
         self.actor.update_total_tt()
-        sim.stats.remove_actor(self.at_time, self.actor.uses_atis())
+        sim.stats.remove_actor(self.at_time)
         return []
 
 

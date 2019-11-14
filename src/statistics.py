@@ -19,9 +19,9 @@ class SimStats:
     edges_flow_over_time: DefaultDict[Tuple[int, int], List[Tuple[float, int]]]
     # differencing between using atis or not
     # time, using atis, not using atis
-    actors_atis: List[Tuple[float, int, int]]
+    actors_atis: List[Tuple[float, int]]
     edges_flow_atis = DefaultDict[Tuple[int, int],
-                                  List[Tuple[float, int, int]]]
+                                  List[Tuple[float,int]]]
 
     def __init__(self, g: graph.RoadGraph, save_path="data"):
         self.save_path = save_path
@@ -29,42 +29,40 @@ class SimStats:
         self.actors = []
         self.actors_in_graph = [(0.0, 0)]
         self.edges_flow_over_time = defaultdict(lambda: [(0.0, 0)])
-        self.actors_atis = [(0.0, 0, 0)]
-        self.edges_flow_atis = defaultdict(lambda: [(0.0, 0, 0)])
+        self.actors_atis = [(0.0, 0)]
+        self.edges_flow_atis = defaultdict(lambda: [(0.0, 0)])
         pass
 
-    def update_num_actors(self, ts: float, delta: int, has_atis: bool):
+    def update_num_actors(self, ts: float, delta: int):
         """Update the number of actors in the network"""
         self.actors_in_graph.append((ts, delta + self.actors_in_graph[-1][1]))
         self.actors_atis.append((ts,
-                                 delta if has_atis else 0,
-                                 delta if not has_atis else 0))
+                                 delta))
 
-    def add_actor(self, ts: float, has_atis: bool):
+    def add_actor(self, ts: float):
         """Add an actor to the network"""
-        self.update_num_actors(ts, 1, has_atis)
+        self.update_num_actors(ts, 1)
 
-    def remove_actor(self, ts: float, has_atis: bool):
+    def remove_actor(self, ts: float):
         """Remove an actor from the network"""
-        self.update_num_actors(ts, -1, has_atis)
+        self.update_num_actors(ts, -1)
 
-    def update_num_actors_edge(self, edge: Tuple[int, int], ts: float, delta: int, has_atis: bool):
+    def update_num_actors_edge(self, edge: Tuple[int, int], ts: float, delta: int):
         """Update the number of actors in a given edge"""
         self.edges_flow_over_time[edge].append(
             (ts, delta + self.edges_flow_over_time[edge][-1][1]))
 
         self.edges_flow_atis[edge].append((
             ts,
-            delta if has_atis else 0,
-            delta if not has_atis else 0))
+            delta))
 
-    def add_actor_edge(self, ts: float, edge: Tuple[int, int], has_atis: bool):
+    def add_actor_edge(self, ts: float, edge: Tuple[int, int]):
         """Add an actor to the given edge"""
-        self.update_num_actors_edge(edge, ts, 1, has_atis)
+        self.update_num_actors_edge(edge, ts, 1)
 
-    def remove_actor_edge(self, ts: float, edge: Tuple[int, int], has_atis: bool):
+    def remove_actor_edge(self, ts: float, edge: Tuple[int, int]):
         """Remove an actor from the given edge"""
-        self.update_num_actors_edge(edge, ts, -1, has_atis)
+        self.update_num_actors_edge(edge, ts, -1)
 
     def add_actors(self, actors: List[Actor]):
         """Store the actors present in the simulation"""

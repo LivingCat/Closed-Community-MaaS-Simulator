@@ -19,7 +19,6 @@ class Simulator:
     def __init__(self,
                  config,
                  actor_constructor,
-                 atis_constructor,
                  stats_constructor,
                  traffic_distribution=MultimodalDistribution.default(),
                  seed=42):
@@ -28,11 +27,9 @@ class Simulator:
         self.graph = RoadGraph()
         self.num_actors = config.num_actors
         self.actor_constructor = actor_constructor
-        self.atis_constructor = atis_constructor
         self.stats_constructor = stats_constructor
         self.traffic_distribution = traffic_distribution
         self.max_run_time = config.max_run_time
-        self.atis = None
         self.stats = None
         self.actors = None
 
@@ -95,11 +92,6 @@ class Simulator:
             event_queue.put_nowait(ae.get_priorized())
         # elements in form (time, event), to be ordered by first tuple member
 
-        # Create the Universal Atis
-        self.atis = self.atis_constructor(self.graph,
-                                          self.traffic_distribution,
-                                          event_queue)
-
         # Start Simulation
         while event_queue.qsize() > 0:
             _, event = event_queue.get_nowait()
@@ -114,7 +106,7 @@ class Simulator:
             if not a.reached_dest():
                 a.total_travel_time = self.max_run_time
 
-        self.draw_graph()
+        # self.draw_graph()
      
 
     def get_time_from_traffic_distribution(self) -> float:

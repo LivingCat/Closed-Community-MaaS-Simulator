@@ -12,12 +12,13 @@ def plot_accumulated_actor_graph(actors_flow_acc: List[List[float]], n_runs):
     """Plot the road network occupation during the simulation"""
     # Your x and y axis
     data = np.array(actors_flow_acc)
-    x, y, z = data[:, 0], data[:, 1], data[:, 2]
-    y = [y/n_runs, z/n_runs]
+    x, y = data[:, 0], data[:, 1]
+    # y = [y/n_runs, z/n_runs]
+    y = y / n_runs
 
     # use a known color palette (see..)
     pal = sns.color_palette("Set1")
-    plt.stackplot(x, y, labels=['with atis', 'without atis'],
+    plt.stackplot(x, y, labels=['without atis'],
                   colors=pal, alpha=0.4)
     plt.xlabel("hours")
     plt.ylabel("actors in graph")
@@ -34,8 +35,8 @@ def plot_accumulated_edges_graphs(edges_accumulated: Dict[str, List[List[float]]
     for i, e_key in enumerate(edge_list):
         edge_data = edges_accumulated[e_key]
         edge_data = np.array(edge_data)
-        x, y, z = edge_data[:, 0], edge_data[:, 1], edge_data[:, 2]
-        y = [y / n_runs, z / n_runs]
+        x, y = edge_data[:, 0], edge_data[:, 1]
+        y = y / n_runs
 
         ax = fig.add_subplot(
             4,
@@ -47,7 +48,7 @@ def plot_accumulated_edges_graphs(edges_accumulated: Dict[str, List[List[float]]
                 transform=ax.transAxes)
 
         pal = sns.color_palette("Set1")
-        ax.stackplot(x, y, labels=['atis', 'natis'], colors=pal, alpha=0.4)
+        ax.stackplot(x, y, labels=['natis'], colors=pal, alpha=0.4)
         ax.legend(loc='upper right')
         plt.xlim(right=28)
 
