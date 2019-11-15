@@ -9,7 +9,7 @@ from collections import defaultdict
 import graph
 import numpy as np
 
-from actor import Actor
+from actor import CarActor
 
 
 class SimStats:
@@ -64,7 +64,7 @@ class SimStats:
         """Remove an actor from the given edge"""
         self.update_num_actors_edge(edge, ts, -1)
 
-    def add_actors(self, actors: List[Actor]):
+    def add_actors(self, actors: List[CarActor]):
         """Store the actors present in the simulation"""
         self.actors = actors
 

@@ -3,7 +3,7 @@ Main project source file.
 """
 from typing import List, Tuple
 
-from actor import Actor
+from actor import CarActor
 from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs
 from simulator import Simulator
 from graph import RoadGraph
@@ -74,7 +74,7 @@ def actor_constructor(graph: RoadGraph):
                     for r in possible_routes]
     routes_probs = softmax_travel_times(routes_times)
     idx = np.random.choice(len(possible_routes), p=routes_probs)
-    return Actor(
+    return CarActor(
         possible_routes[idx])
 
 

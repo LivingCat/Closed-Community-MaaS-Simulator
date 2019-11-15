@@ -64,7 +64,7 @@ class EdgeStartEvent(Event):
     Represents point in time in which an Actor starts travelling along an Edge.
     """
 
-    def __init__(self, at_time: float, a: actor.Actor, edge: Tuple[int, int]):
+    def __init__(self, at_time: float, a: actor.CarActor, edge: Tuple[int, int]):
         super().__init__(at_time)
         self.actor = a
         self.edge = edge
@@ -89,7 +89,7 @@ class EdgeEndEvent(Event):
     Represents point in time in which an Actor terminates travelling along an Edge.
     """
 
-    def __init__(self, at_time: float, a: actor.Actor, edge: Tuple[int, int]):
+    def __init__(self, at_time: float, a: actor.CarActor, edge: Tuple[int, int]):
         super().__init__(at_time)
         self.actor = a
         self.edge = edge

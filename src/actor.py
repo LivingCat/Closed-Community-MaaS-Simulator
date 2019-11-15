@@ -9,16 +9,6 @@ from collections import defaultdict
 
 class AbstractActor(ABC):
 
-    static_model_id = 1
-
-    def __init__(self):
-        """"Initializer for the ID of all actor models"""
-        self.actor_id = AbstractActor.static_model_id
-        AbstractActor.static_model_id += 1
-
-
-class Actor(AbstractActor):
-
     TIME_INDEX = 0
     NODE_INDEX = 1
 
@@ -30,12 +20,16 @@ class Actor(AbstractActor):
     route_travel_time: defaultdict
     total_travel_time: float
 
+    static_model_id = 1
+
     def __init__(self, route: List[int]):
-        super().__init__()
         self.base_route = route
         self.route_travel_time = defaultdict(lambda: 0.0)
         self.total_travel_time = 0.0
         self.start_time = 0.0
+        """"Initializer for the ID of all actor models"""
+        self.actor_id = AbstractActor.static_model_id
+        AbstractActor.static_model_id += 1
 
     def __repr__(self):
         return "A%d :: TI %.4f :: TTT %.4f" % (self.actor_id, round(self.start_time, 4), round(self.total_travel_time, 4))
@@ -80,3 +74,15 @@ class Actor(AbstractActor):
                    self.traveled_nodes[i][self.TIME_INDEX],
                    self.traveled_nodes[i][self.TIME_INDEX]
                    - self.traveled_nodes[i-1][self.TIME_INDEX]))
+
+class CarActor(AbstractActor):
+
+    emission : float
+    total_route_emissions : float
+    
+    def __init__(self, route: List[int]):
+        
+        super().__init__(route)
+        self.emission = 0.0
+        self.total_route_emissions = 0.0
+
