@@ -38,7 +38,7 @@ class SimStats:
     def update_num_actors(self, actor: AbstractActor, ts: float, delta: int):
         """Update the number of actors in the network"""
         self.actors_in_graph.append((ts, delta + self.actors_in_graph[-1][1]))
-        self.actors_atis[str(type(actor))].append((ts,
+        self.actors_atis[str(type(actor).__name__)].append((ts,
                                  delta))
         # self.actors_atis.append((ts, delta))
 
@@ -56,7 +56,7 @@ class SimStats:
         self.edges_flow_over_time[edge].append(
             (ts, delta + self.edges_flow_over_time[edge][-1][1]))
 
-        self.edges_flow_atis[edge][str(type(actor))].append((
+        self.edges_flow_atis[edge][str(type(actor).__name__)].append((
             ts,
             delta))
 

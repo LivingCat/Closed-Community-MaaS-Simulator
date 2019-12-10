@@ -43,7 +43,9 @@ def plot_accumulated_edges_graphs(edges_accumulated: Dict[str,Dict[str, List[Lis
     edge_list = sorted(list(edges_accumulated.keys()))
 
     for i, e_key in enumerate(edge_list):
-        for actor in edges_accumulated[e_key]:
+        actor_key_list = sorted(list(edges_accumulated[e_key].keys()))
+
+        for actor in actor_key_list:
 
             edge_data = edges_accumulated[e_key][actor]
             edge_data = np.array(edge_data)

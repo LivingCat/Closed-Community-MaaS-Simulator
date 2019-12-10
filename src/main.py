@@ -3,7 +3,7 @@ Main project source file.
 """
 from typing import List, Tuple
 
-from actor import CarActor, BusActor
+from actor import CarActor, BusActor, SharedCarActor
 from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs
 from simulator import Simulator
 from graph import RoadGraph
@@ -67,7 +67,7 @@ def print_args(args):
     print()
 
 
-def actor_constructor(graph: RoadGraph, isCar: bool):
+def actor_constructor(graph: RoadGraph, service: str):
     """Calculate possible routes and give each one a probability based on how little time it takes to transverse it"""
     possible_routes = graph.get_all_routes()
     routes_times = [graph.get_optimal_route_travel_time(r)
@@ -76,12 +76,19 @@ def actor_constructor(graph: RoadGraph, isCar: bool):
     idx = np.random.choice(len(possible_routes), p=routes_probs)
 
     #Choose which Actor to create
-    if(isCar):
-        return CarActor(
+
+    if(service == 'CarActor'):
+         return CarActor(
+             possible_routes[idx])
+    elif(service == 'BusActor'):
+         return BusActor(
+             possible_routes[idx])
+    elif(service == 'SharedCarActor'):
+        return SharedCarActor(
             possible_routes[idx])
-    else:
-        return BusActor(
-            possible_routes[idx])
+    else: #Default Car Actor
+         return CarActor(
+             possible_routes[idx])
 
 
 

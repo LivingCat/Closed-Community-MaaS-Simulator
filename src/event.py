@@ -48,10 +48,14 @@ class CreateActorEvent(Event):
 
     def act(self, sim: simulator.Simulator):
 
-        if(random.randint(0,10) > 3):
-            a = self.actor_constructor(sim.graph, True)
+        random_num = random.randint(0, 10)
+        if(random_num < 3):
+            a = self.actor_constructor(sim.graph, 'CarActor')
+        elif(random_num < 9):
+            a = self.actor_constructor(sim.graph, 'BusActor')
         else:
-            a = self.actor_constructor(sim.graph, False)
+            a = self.actor_constructor(sim.graph, 'SharedCarActor')
+
         sim.actors.append(a)
 
         if sim.config.verbose:
