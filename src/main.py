@@ -141,54 +141,71 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         for key in s.actors_atis.keys():
             s.actors_atis[key] = s.actors_atis[key][1:]
             for tuple in s.actors_atis[key]:
-                actors_flow[key].append(tuple) 
+                actors_flow[key].append(tuple)
 
     for key in actors_flow.keys():
         actors_flow[key] = sorted(actors_flow[key], key=lambda t: t[0])
 
-
     actors_flow_acc = defaultdict(lambda: [(0.0, 0)])
-
-    print(actors_flow)
 
     for key in actors_flow.keys():
         for actor_tuple in actors_flow[key]:
             actors_flow_acc[key].append([actor_tuple[0],
                                         actor_tuple[1] + actors_flow_acc[key][-1][1]])
-    
-    plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
-    plt.waitforbuttonpress(0)
-    print("manel")
+
+    # plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
+    # plt.waitforbuttonpress(0)
 
     results['actors_atis_natis'] = actors_flow_acc
 
     # the above but for every edge
-    results['edges_atis_natis'] = defaultdict(lambda: [])
+    inner_default_dict = lambda: defaultdict(lambda: [])
+    results['edges_occupation'] = defaultdict(inner_default_dict)
+
     for s in all_s:
         edges = s.edges_flow_atis
-        print(edges.items)
         for key in edges.keys():
-            results['edges_atis_natis'][str(key)].append(edges[key])
+            for service in edges[key]:
+                results['edges_occupation'][str(
+                    key)][service].append(edges[key][service])
     
+    from utils import pretty 
+
+    # pretty(results['edges_atis_natis'])
     # print(results['edges_atis_natis'])
-    for e_key in results['edges_atis_natis'].keys():
-        edge_flow = [edge_tuple for edges in results['edges_atis_natis'][e_key]
-                     for edge_tuple in edges]
 
-        edge_flow = sorted(edge_flow, key=lambda t: t[0])
+    for e_key in results['edges_occupation'].keys():
+        edge_flow = defaultdict(lambda: [(0.0, 0)])
+        # pretty(results['edges_occupation'][e_key])
+        for actor_key in results['edges_occupation'][e_key]:
+            for tuple_list in results['edges_occupation'][e_key][actor_key]:
+                tuple_list = tuple_list[1:]
+                for tuple in tuple_list:
+                    edge_flow[actor_key].append(tuple)
 
-        edge_flow_acc = [[0.0, 0]]
-        for edge_tuple in edge_flow:
-            edge_flow_acc.append([edge_tuple[0],
-                                  edge_tuple[1] + edge_flow_acc[-1][1]])
-        edge_flow_acc = edge_flow_acc[1:]
-        print("acumulado")
-        print(edge_flow_acc)
-        results['edges_atis_natis'][e_key] = edge_flow_acc
+        print(edge_flow)
+        for key in edge_flow.keys():
+            edge_flow[key] = sorted(edge_flow[key], key=lambda t: t[0])
+
+        edge_flow_acc = defaultdict(lambda: [(0.0, 0)])
+        for actor_key in edge_flow.keys():
+            for edge_tuple in edge_flow[actor_key]:
+                edge_flow_acc[actor_key].append([edge_tuple[0],
+                                    edge_tuple[1] + edge_flow_acc[actor_key][-1][1]])
+
+
+        for actor_key in edge_flow_acc.keys():
+            edge_flow_acc[actor_key] = edge_flow_acc[actor_key][1:]
+
+        # print("acc")
+        # print(edge_flow_acc)
+        results['edges_occupation'][e_key] = edge_flow_acc
+        pretty(results['edges_occupation'])
+
 
     if display_plots:
         plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
-        plot_accumulated_edges_graphs(results['edges_atis_natis'], len(all_s))
+        plot_accumulated_edges_graphs(results['edges_occupation'], len(all_s))
         
     plt.waitforbuttonpress(0)   
     return results

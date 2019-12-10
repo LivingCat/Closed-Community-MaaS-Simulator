@@ -31,7 +31,8 @@ class SimStats:
         self.edges_flow_over_time = defaultdict(lambda: [(0.0, 0)])
         self.actors_atis = defaultdict(lambda: [(0.0, 0)])
         # self.actors_atis = [(0.0, 0)]
-        self.edges_flow_atis = defaultdict(lambda: [(0.0, 0)])
+        inner_default_dict = lambda: defaultdict(lambda: [(0.0, 0)])
+        self.edges_flow_atis = defaultdict(inner_default_dict)
         pass
 
     def update_num_actors(self, actor: AbstractActor, ts: float, delta: int):
@@ -50,22 +51,22 @@ class SimStats:
         """Remove an actor from the network"""
         self.update_num_actors(actor, ts, -1)
 
-    def update_num_actors_edge(self, edge: Tuple[int, int], ts: float, delta: int):
+    def update_num_actors_edge(self, actor: AbstractActor, edge: Tuple[int, int], ts: float, delta: int):
         """Update the number of actors in a given edge"""
         self.edges_flow_over_time[edge].append(
             (ts, delta + self.edges_flow_over_time[edge][-1][1]))
 
-        self.edges_flow_atis[edge].append((
+        self.edges_flow_atis[edge][str(type(actor))].append((
             ts,
             delta))
 
-    def add_actor_edge(self, ts: float, edge: Tuple[int, int]):
+    def add_actor_edge(self, actor: AbstractActor, ts: float, edge: Tuple[int, int]):
         """Add an actor to the given edge"""
-        self.update_num_actors_edge(edge, ts, 1)
+        self.update_num_actors_edge(actor, edge, ts, 1)
 
-    def remove_actor_edge(self, ts: float, edge: Tuple[int, int]):
+    def remove_actor_edge(self,actor: AbstractActor, ts: float, edge: Tuple[int, int]):
         """Remove an actor from the given edge"""
-        self.update_num_actors_edge(edge, ts, -1)
+        self.update_num_actors_edge(actor, edge, ts, -1)
 
     def add_actors(self, actors: List[AbstractActor]):
         """Store the actors present in the simulation"""

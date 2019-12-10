@@ -36,28 +36,31 @@ def plot_accumulated_actor_graph(actors_flow_acc: Dict[str, List[List[float]]], 
     plt.show()
 
 
-def plot_accumulated_edges_graphs(edges_accumulated: Dict[str, List[List[float]]], n_runs):
+def plot_accumulated_edges_graphs(edges_accumulated: Dict[str,Dict[str, List[List[float]]]], n_runs):
     """Plot the actors occupation of all edges during the simulation"""
     fig = plt.figure()
     n_edges = len(edges_accumulated.keys())
     edge_list = sorted(list(edges_accumulated.keys()))
+
     for i, e_key in enumerate(edge_list):
-        edge_data = edges_accumulated[e_key]
-        edge_data = np.array(edge_data)
-        x, y = edge_data[:, 0], edge_data[:, 1]
-        y = y / n_runs
+        for actor in edges_accumulated[e_key]:
 
-        ax = fig.add_subplot(
-            4,
-            int((n_edges / 4 + 0.5)),
-            i + 1
-        )
-        ax.text(.2, .9, str(e_key),
-                horizontalalignment='right',
-                transform=ax.transAxes)
+            edge_data = edges_accumulated[e_key][actor]
+            edge_data = np.array(edge_data)
+            x, y = edge_data[:, 0], edge_data[:, 1]
+            y = y / n_runs
 
-        pal = sns.color_palette("Set1")
-        ax.stackplot(x, y, labels=['natis'], colors=pal, alpha=0.4)
+            ax = fig.add_subplot(
+                4,
+                int((n_edges / 4 + 0.5)),
+                i + 1
+            )
+            ax.text(.2, .9, str(e_key),
+                    horizontalalignment='right',
+                    transform=ax.transAxes)
+
+            pal = sns.color_palette("Set1")
+            ax.plot(x, y, label=actor, alpha=0.4)
         ax.legend(loc='upper right')
         plt.xlim(right=28)
 

@@ -65,3 +65,12 @@ def softmax_travel_times(travel_times):
 def compute_average_over_time(dist: List[Tuple[float, int]]):
     dist = np.array(dist)
     return trapz(dist[:, 1], dist[:, 0]) / dist[-1][0]
+
+
+def pretty(d, indent=0):
+   for key, value in d.items():
+      print('\t' * indent + str(key))
+      if isinstance(value, dict):
+         pretty(value, indent+1)
+      else:
+         print('\t' * (indent+1) + str(value))

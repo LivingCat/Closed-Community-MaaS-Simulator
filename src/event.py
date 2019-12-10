@@ -48,11 +48,9 @@ class CreateActorEvent(Event):
 
     def act(self, sim: simulator.Simulator):
 
-        if(random.randint(0,10) < 3):
-            print("is car")
+        if(random.randint(0,10) > 3):
             a = self.actor_constructor(sim.graph, True)
         else:
-            print("no car")
             a = self.actor_constructor(sim.graph, False)
         sim.actors.append(a)
 
@@ -83,7 +81,7 @@ class EdgeStartEvent(Event):
         """
         Updates simulator's statistics (e.g. increase load/traffic on edge).
         """
-        sim.stats.add_actor_edge(
+        sim.stats.add_actor_edge(self.actor,
             self.at_time, self.edge)
 
         tt = sim.graph.get_edge_real_travel_time(self.edge)
@@ -109,7 +107,7 @@ class EdgeEndEvent(Event):
         Updates simulator's statistics (e.g. decrease load/traffic on edge),
         and creates following EdgeStartEvent (if trip is not over).
         """
-        sim.stats.remove_actor_edge(
+        sim.stats.remove_actor_edge(self.actor,
             self.at_time, self.edge)
 
         self.actor.travel(self.at_time, self.edge)
