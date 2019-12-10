@@ -8,18 +8,27 @@ import numpy as np
 import pandas as pd
 
 
-def plot_accumulated_actor_graph(actors_flow_acc: List[List[float]], n_runs):
+def plot_accumulated_actor_graph(actors_flow_acc: Dict[str, List[List[float]]], n_runs):
     """Plot the road network occupation during the simulation"""
-    # Your x and y axis
-    data = np.array(actors_flow_acc)
-    x, y = data[:, 0], data[:, 1]
-    # y = [y/n_runs, z/n_runs]
-    y = y / n_runs
 
-    # use a known color palette (see..)
-    pal = sns.color_palette("Set1")
-    plt.stackplot(x, y, labels=['without atis'],
-                  colors=pal, alpha=0.4)
+    fig = plt.figure()
+
+
+    ax1 = fig.add_subplot(111)
+
+
+    print(actors_flow_acc.keys())
+    for key in actors_flow_acc.keys():
+        # Your x and y axis
+        data = np.array(actors_flow_acc[key])
+        x, y = data[:, 0], data[:, 1]
+        # y = [y/n_runs, z/n_runs]
+        y = y / n_runs
+
+        # use a known color palette (see..)
+    
+        pal = sns.color_palette("Set1")
+        ax1.plot(x, y, label=key, alpha=0.4)
     plt.xlabel("hours")
     plt.ylabel("actors in graph")
     plt.legend(loc='upper right')

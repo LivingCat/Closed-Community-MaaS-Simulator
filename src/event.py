@@ -7,8 +7,11 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 
+import random
+
 import simulator
 import actor
+
 
 
 class Event(ABC):
@@ -44,7 +47,13 @@ class CreateActorEvent(Event):
         self.actor_constructor = actor_constructor
 
     def act(self, sim: simulator.Simulator):
-        a = self.actor_constructor(sim.graph)
+
+        if(random.randint(0,10) < 3):
+            print("is car")
+            a = self.actor_constructor(sim.graph, True)
+        else:
+            print("no car")
+            a = self.actor_constructor(sim.graph, False)
         sim.actors.append(a)
 
         if sim.config.verbose:
@@ -52,8 +61,9 @@ class CreateActorEvent(Event):
                   (a.actor_id))
 
         # updating general stats only
-        sim.stats.add_actor(self.at_time)
+        sim.stats.add_actor(a,self.at_time)
         a.start_trip(self.at_time)
+
         return [EdgeStartEvent(self.at_time,
                                a,
                                a.get_next_travel_edge(self.at_time))]
@@ -64,7 +74,7 @@ class EdgeStartEvent(Event):
     Represents point in time in which an Actor starts travelling along an Edge.
     """
 
-    def __init__(self, at_time: float, a: actor.CarActor, edge: Tuple[int, int]):
+    def __init__(self, at_time: float, a: actor.AbstractActor, edge: Tuple[int, int]):
         super().__init__(at_time)
         self.actor = a
         self.edge = edge
@@ -89,7 +99,7 @@ class EdgeEndEvent(Event):
     Represents point in time in which an Actor terminates travelling along an Edge.
     """
 
-    def __init__(self, at_time: float, a: actor.CarActor, edge: Tuple[int, int]):
+    def __init__(self, at_time: float, a: actor.AbstractActor, edge: Tuple[int, int]):
         super().__init__(at_time)
         self.actor = a
         self.edge = edge
@@ -115,7 +125,7 @@ class EdgeEndEvent(Event):
 
         # updating general stats
         self.actor.update_total_tt()
-        sim.stats.remove_actor(self.at_time)
+        sim.stats.remove_actor(self.actor,self.at_time)
         return []
 
 

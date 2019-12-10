@@ -3,7 +3,7 @@ Main project source file.
 """
 from typing import List, Tuple
 
-from actor import CarActor
+from actor import CarActor, BusActor
 from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs
 from simulator import Simulator
 from graph import RoadGraph
@@ -67,15 +67,21 @@ def print_args(args):
     print()
 
 
-def actor_constructor(graph: RoadGraph):
+def actor_constructor(graph: RoadGraph, isCar: bool):
     """Calculate possible routes and give each one a probability based on how little time it takes to transverse it"""
     possible_routes = graph.get_all_routes()
     routes_times = [graph.get_optimal_route_travel_time(r)
                     for r in possible_routes]
     routes_probs = softmax_travel_times(routes_times)
     idx = np.random.choice(len(possible_routes), p=routes_probs)
-    return CarActor(
-        possible_routes[idx])
+
+    #Choose which Actor to create
+    if(isCar):
+        return CarActor(
+            possible_routes[idx])
+    else:
+        return BusActor(
+            possible_routes[idx])
 
 
 
@@ -130,33 +136,54 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
     }
 
     # gather new information with atis separation
-    actors_flow = [actor_tuple for s in all_s for actor_tuple in s.actors_atis]
+    actors_flow = defaultdict(lambda: [(0.0, 0)])
+    for s in all_s:
+        for key in s.actors_atis.keys():
+            s.actors_atis[key] = s.actors_atis[key][1:]
+            for tuple in s.actors_atis[key]:
+                actors_flow[key].append(tuple) 
 
-    actors_flow = sorted(actors_flow, key=lambda t: t[0])
-    actors_flow_acc = [[0.0, 0]]
-    for actor_tuple in actors_flow:
-        # print(actor_tuple)
-        actors_flow_acc.append([actor_tuple[0],
-                                actor_tuple[1] + actors_flow_acc[-1][1]])
-    actors_flow_acc = actors_flow_acc[1:]
+    for key in actors_flow.keys():
+        actors_flow[key] = sorted(actors_flow[key], key=lambda t: t[0])
+
+
+    actors_flow_acc = defaultdict(lambda: [(0.0, 0)])
+
+    print(actors_flow)
+
+    for key in actors_flow.keys():
+        for actor_tuple in actors_flow[key]:
+            actors_flow_acc[key].append([actor_tuple[0],
+                                        actor_tuple[1] + actors_flow_acc[key][-1][1]])
+    
+    plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
+    plt.waitforbuttonpress(0)
+    print("manel")
+
     results['actors_atis_natis'] = actors_flow_acc
 
     # the above but for every edge
     results['edges_atis_natis'] = defaultdict(lambda: [])
     for s in all_s:
         edges = s.edges_flow_atis
+        print(edges.items)
         for key in edges.keys():
             results['edges_atis_natis'][str(key)].append(edges[key])
-
+    
+    # print(results['edges_atis_natis'])
     for e_key in results['edges_atis_natis'].keys():
         edge_flow = [edge_tuple for edges in results['edges_atis_natis'][e_key]
                      for edge_tuple in edges]
+
         edge_flow = sorted(edge_flow, key=lambda t: t[0])
+
         edge_flow_acc = [[0.0, 0]]
         for edge_tuple in edge_flow:
             edge_flow_acc.append([edge_tuple[0],
                                   edge_tuple[1] + edge_flow_acc[-1][1]])
         edge_flow_acc = edge_flow_acc[1:]
+        print("acumulado")
+        print(edge_flow_acc)
         results['edges_atis_natis'][e_key] = edge_flow_acc
 
     if display_plots:

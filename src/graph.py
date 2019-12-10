@@ -16,7 +16,7 @@ class RoadGraph:
     nend: int
 
     def __init__(self):
-        self.hardcoded_graph_2()
+        self.mass_hardcoded_graph()
 
     def __print_edge_volumes(self):
         """Pretty print of the edges current volumes. Useful for debug purposes"""
@@ -114,7 +114,7 @@ class RoadGraph:
             [(0, 1), (1, 4)], color='red',
             volume=0,
             free_flow_travel_time=1,
-            capacity=20)
+            capacity=50)
 
         self.graph.add_edges_from(
             [(0, 2), (2, 4)], color='blue',

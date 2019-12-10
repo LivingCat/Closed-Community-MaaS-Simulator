@@ -86,3 +86,13 @@ class CarActor(AbstractActor):
         self.emission = 0.0
         self.total_route_emissions = 0.0
 
+class BusActor(AbstractActor):
+
+    emission: float
+    total_route_emissions: float
+
+    def __init__(self, route: List[int]):
+        super().__init__(route)
+        self.emission = 0.0
+        self.total_route_emissions = 0.0
+
