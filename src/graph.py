@@ -18,6 +18,9 @@ class RoadGraph:
     def __init__(self):
         self.mass_hardcoded_graph()
 
+        for edge in self.graph.edges:
+            print(self.get_edge_data(edge))
+
     def __print_edge_volumes(self):
         """Pretty print of the edges current volumes. Useful for debug purposes"""
         print("Volumes:")
@@ -37,13 +40,20 @@ class RoadGraph:
         """Get edge related data. ATIS data endpoint"""
         return self.graph.edges[edge[0], edge[1]]
 
-    def get_possible_routes(self, src_node: int, dest_node: int):
+    def get_possible_routes(self, src_node: int, dest_node: int, actor: str):
         """Get all possible routes from the src_node to the destiny_node"""
-        return list(nx.all_simple_paths(self.graph, src_node, dest_node))
+        possible_edges = []
 
-    def get_all_routes(self) -> List[List[int]]:
+        for edge in self.graph.edges:
+            allowed_actors = (self.get_edge_data(edge)['allowed_actors'])
+            if(actor in allowed_actors):
+                possible_edges.append(edge)
+        new_graph = nx.Graph(possible_edges)        
+        return list(nx.all_simple_paths(new_graph, src_node, dest_node))
+
+    def get_all_routes(self, actor: str) -> List[List[int]]:
         # results in [[0, 1, 3], [0, 2, 1, 3], [0, 2, 3]]
-        return self.get_possible_routes(self.nstart, self.nend)
+        return self.get_possible_routes(self.nstart, self.nend, actor)
         # this below doesn't work bc it forces to go through all nodes
         # return nx.all_topological_sorts(self.graph)
 
@@ -112,18 +122,21 @@ class RoadGraph:
         self.nend = 4
         self.graph.add_edges_from(
             [(0, 1), (1, 4)], color='red',
+            allowed_actors = ['SharedCarActor'],
             volume=0,
             free_flow_travel_time=1,
             capacity=50)
 
         self.graph.add_edges_from(
             [(0, 2), (2, 4)], color='blue',
+            allowed_actors=['CarActor'],
             volume=0,
             free_flow_travel_time=1,
             capacity=50)
 
         self.graph.add_edges_from(
             [(0, 3), (3, 4)], color='green',
+            allowed_actors=['BusActor'],
             volume=0,
             free_flow_travel_time=1,
             capacity=70)

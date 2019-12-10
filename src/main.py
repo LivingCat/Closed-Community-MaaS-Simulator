@@ -69,7 +69,7 @@ def print_args(args):
 
 def actor_constructor(graph: RoadGraph, service: str):
     """Calculate possible routes and give each one a probability based on how little time it takes to transverse it"""
-    possible_routes = graph.get_all_routes()
+    possible_routes = graph.get_all_routes(service)
     routes_times = [graph.get_optimal_route_travel_time(r)
                     for r in possible_routes]
     routes_probs = softmax_travel_times(routes_times)
@@ -176,7 +176,6 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
                 results['edges_occupation'][str(
                     key)][service].append(edges[key][service])
     
-    from utils import pretty 
 
     # pretty(results['edges_atis_natis'])
     # print(results['edges_atis_natis'])
@@ -190,7 +189,6 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
                 for tuple in tuple_list:
                     edge_flow[actor_key].append(tuple)
 
-        print(edge_flow)
         for key in edge_flow.keys():
             edge_flow[key] = sorted(edge_flow[key], key=lambda t: t[0])
 
@@ -207,7 +205,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         # print("acc")
         # print(edge_flow_acc)
         results['edges_occupation'][e_key] = edge_flow_acc
-        pretty(results['edges_occupation'])
+
 
 
     if display_plots:

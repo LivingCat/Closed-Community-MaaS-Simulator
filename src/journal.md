@@ -27,3 +27,7 @@ python src/main.py -r 100
 # 09-12-2019
 
 * In the process of changing actors_flow to be a dictionary for all services (actors)
+
+# 10-12-2019
+
+* Charts now show statistics for different actors - actor chart and edge chart
