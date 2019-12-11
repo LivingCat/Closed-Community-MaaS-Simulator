@@ -3,11 +3,8 @@ python src/main.py -r 100
 
 
 # To Do
-* Make different actors - bus,car,shared car
-* Make edges only let certain actors traverse them
-* Create routes for actors according to the edges specifications
+* Add people that choose a mean of transport
 * Write stats to a file
-* Parser for graph
 * Think about others possible parsers, maybe for population
 * Think about attributes the population will have - relationships 
 * Utility function - paper
@@ -15,6 +12,12 @@ python src/main.py -r 100
 * Stats about occupancy of edges, type of actors, number people chose each service, utility
 * Bus event 10 in 10 minutes? 
 * Incentives - think about how Cat can introduce them later in an easy breazy way
+
+# Done
+* Make different actors - bus,car,shared car
+* Make edges only let certain actors traverse them
+* Create routes for actors according to the edges specifications
+* Parser for graph
 
 # Things to have until 15/12
 * Make different actors - bus,car,shared car
@@ -34,3 +37,7 @@ python src/main.py -r 100
 # 10-12-2019
 
 * Charts now show statistics for different actors - actor chart and edge chart
+
+# 11-12-2019
+
+* Graph is created based on a json file (no longer hardcoded)

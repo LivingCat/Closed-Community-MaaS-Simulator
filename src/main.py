@@ -225,8 +225,6 @@ def read_json_file(file: str):
 
 
 
-
-
 def main(args):
     if args.traffic_peaks is None:
         # Needed since "action=append" doesn't overwrite "default=X"
@@ -234,16 +232,15 @@ def main(args):
 
     print_args(args)
 
-    print(args.json_file)
-    file_content = read_json_file(args.json_file)
-    print(file_content)
-    
+    input_config = read_json_file(args.json_file)
 
     sim = Simulator(config=args,
+                    input_config = input_config,
                     actor_constructor=partial(
                         actor_constructor),
                     stats_constructor=stats_constructor,
-                    traffic_distribution=MultimodalDistribution(*args.traffic_peaks))
+                    traffic_distribution=MultimodalDistribution(*args.traffic_peaks)
+                    )
 
     # gather stats from all runs
     all_stats = []

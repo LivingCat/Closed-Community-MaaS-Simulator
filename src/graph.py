@@ -15,8 +15,9 @@ class RoadGraph:
     nstart: int
     nend: int
 
-    def __init__(self):
-        self.mass_hardcoded_graph()
+    def __init__(self,input_config):
+        self.create_graph(input_config)
+        # self.mass_hardcoded_graph()
 
     def __print_edge_volumes(self):
         """Pretty print of the edges current volumes. Useful for debug purposes"""
@@ -137,3 +138,20 @@ class RoadGraph:
             volume=0,
             free_flow_travel_time=1,
             capacity=70)
+
+    def create_graph(self, input_config):
+        """Creates a graph from from input file configuration"""
+        self.graph = nx.DiGraph()
+        self.graph.add_nodes_from(range(0, int(input_config["graph"]["num_nodes"])))
+        self.nstart = int(input_config["graph"]["start_node"])
+        self.nend = int(input_config["graph"]["end_node"])
+        edges_list = input_config["graph"]["edges_list"]
+        for key in edges_list.keys():
+            self.graph.add_edges_from(
+                [(int(key.split(',')[0]), int(key.split(',')[1]))], 
+                color=edges_list[key]["color"],
+                allowed_actors=edges_list[key]["allowed_actors"],
+                volume=edges_list[key]["volume"],
+                free_flow_travel_time=edges_list[key]["free_flow_travel_time"],
+                capacity=edges_list[key]["capacity"]
+                )

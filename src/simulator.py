@@ -18,13 +18,14 @@ class Simulator:
 
     def __init__(self,
                  config,
+                 input_config,
                  actor_constructor,
                  stats_constructor,
                  traffic_distribution=MultimodalDistribution.default(),
                  seed=42):
-
         self.config = config
-        self.graph = RoadGraph()
+        self.input_config = input_config
+        self.graph = RoadGraph(input_config)
         self.num_actors = config.num_actors
         self.actor_constructor = actor_constructor
         self.stats_constructor = stats_constructor
@@ -81,7 +82,7 @@ class Simulator:
         self.actors = []
 
         # Cleaning road graph
-        self.graph = RoadGraph()
+        self.graph = RoadGraph(self.input_config)
 
         # Create the Statistics module
         self.stats = self.stats_constructor(self.graph)
