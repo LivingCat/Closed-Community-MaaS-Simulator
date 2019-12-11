@@ -1,0 +1,57 @@
+{
+    "graph": {
+        "num_nodes": 5,
+		"start_node":0,
+		"end_node":4,
+		"edges_list": {
+			"0,1": {
+				"color":"red",
+				"volume":0,
+				"free_flow_travel_time":1,
+				"capacity":50,
+                "allowed_actors": ["SharedCarActor"]
+                },
+				
+			"1,4": {
+				"color":"red",
+				"volume":0,
+				"free_flow_travel_time":1,
+				"capacity":50,
+                "allowed_actors": ["SharedCarActor"]
+                },
+				
+			"0,2": {
+				"color":"blue",
+				"volume":0,
+				"free_flow_travel_time":1,
+				"capacity":50,
+                "allowed_actors": ["CarActor"]
+                },
+				
+			"2,4": {
+				"color":"blue",
+				"volume":0,
+				"free_flow_travel_time":1,
+				"capacity":50,
+                "allowed_actors": ["CarActor"]
+                },
+				
+			"0,3": {
+				"color":"green",
+				"volume":0,
+				"free_flow_travel_time":1,
+				"capacity":70,
+                "allowed_actors": ["BusActor"]
+                },
+				
+			"3,4": {
+				"color":"green",
+				"volume":0,
+				"free_flow_travel_time":1,
+				"capacity":70,
+                "allowed_actors": ["BusActor"]
+                }			
+            }
+        }
+}
+
