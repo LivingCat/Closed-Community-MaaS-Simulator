@@ -24,6 +24,9 @@ python src/main.py -r 100
 # Might have
 * Gif showing the occupation of the edges
 
+# Probs not
+* Each service has one color
+
 # 09-12-2019
 
 * In the process of changing actors_flow to be a dictionary for all services (actors)

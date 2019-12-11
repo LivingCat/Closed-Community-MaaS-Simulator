@@ -23,11 +23,14 @@ import json
 import os.path
 import networkx as nx
 import matplotlib.pyplot as plt
+import json
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Systems Modelling and Simulation')
+
+    parser.add_argument("-js", "--json", default="input.json", type=str, dest='json_file', metavar="JSON", help="input configuration file")
 
     parser.add_argument("-n", "--num_actors", default=500, type=int, metavar="N",
                         help="number of vehicles/actors to generate per simulation run")
@@ -215,6 +218,14 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
     plt.waitforbuttonpress(0)   
     return results
 
+def read_json_file(file: str):
+    f = open(file, "r")
+    content = f.read()
+    return json.loads(content)
+
+
+
+
 
 def main(args):
     if args.traffic_peaks is None:
@@ -222,6 +233,11 @@ def main(args):
         args.traffic_peaks = [(8, 3), (18, 3)]
 
     print_args(args)
+
+    print(args.json_file)
+    file_content = read_json_file(args.json_file)
+    print(file_content)
+    
 
     sim = Simulator(config=args,
                     actor_constructor=partial(

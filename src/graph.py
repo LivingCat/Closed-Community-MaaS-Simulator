@@ -18,9 +18,6 @@ class RoadGraph:
     def __init__(self):
         self.mass_hardcoded_graph()
 
-        for edge in self.graph.edges:
-            print(self.get_edge_data(edge))
-
     def __print_edge_volumes(self):
         """Pretty print of the edges current volumes. Useful for debug purposes"""
         print("Volumes:")
