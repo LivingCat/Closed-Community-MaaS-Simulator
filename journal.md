@@ -1,5 +1,5 @@
 # How to run
-python src/main.py -r 100
+python src/main.py -r 100 -js ex.json
 
 
 # To Do
@@ -12,6 +12,7 @@ python src/main.py -r 100
 * Stats about occupancy of edges, type of actors, number people chose each service, utility
 * Bus event 10 in 10 minutes? 
 * Incentives - think about how Cat can introduce them later in an easy breazy way
+* Utility factors- how to account for sociability? For now we are going to only have the awareness of the impact of the chosen service
 
 # Done
 * Make different actors - bus,car,shared car
@@ -20,9 +21,11 @@ python src/main.py -r 100
 * Parser for graph
 
 # Things to have until 15/12
-* Make different actors - bus,car,shared car
-* Make edges only let certain actors traverse them
-* Create routes for actors according to the edges specifications
+* [X] Make different actors - bus,car,shared car
+* [X] Make edges only let certain actors traverse them
+* [X] Create routes for actors according to the edges specifications
+* [ ] Utility function
+
 
 # Might have
 * Gif showing the occupation of the edges

@@ -2,7 +2,6 @@
 File with functions/constants dedicated to configure/help the simulations.
 Constants like the ones mentioned in the report and distribution functions.
 """
-
 import math
 import random
 from typing import List, Tuple
@@ -74,3 +73,11 @@ def pretty(d, indent=0):
          pretty(value, indent+1)
       else:
          print('\t' * (indent+1) + str(value))
+
+
+def get_time_from_traffic_distribution(distribution) -> float:
+    result = distribution()
+    while not 0.0 < result < 24.0:
+        result = distribution()
+    return result
+

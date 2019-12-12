@@ -7,8 +7,9 @@ from actor import CarActor, BusActor, SharedCarActor
 from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs
 from simulator import Simulator
 from graph import RoadGraph
+from user import User,Personality
 from queue import PriorityQueue
-from utils import softmax_travel_times, compute_average_over_time, MultimodalDistribution
+from utils import softmax_travel_times, compute_average_over_time, MultimodalDistribution, get_time_from_traffic_distribution
 from statistics import SimStats
 from ipdb import set_trace
 from pprint import pprint
@@ -224,7 +225,6 @@ def read_json_file(file: str):
     return json.loads(content)
 
 
-
 def main(args):
     if args.traffic_peaks is None:
         # Needed since "action=append" doesn't overwrite "default=X"
@@ -233,6 +233,10 @@ def main(args):
     print_args(args)
 
     input_config = read_json_file(args.json_file)
+
+    #Create users
+    # users = create_users(
+    #     input_config["users"]["num_users"], MultimodalDistribution(*args.traffic_peaks))
 
     sim = Simulator(config=args,
                     input_config = input_config,

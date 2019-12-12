@@ -52,6 +52,9 @@
                 "allowed_actors": ["BusActor"]
                 }			
             }
-        }
+		},
+	"users":{
+		"num_users": 100
+	}
 }
 

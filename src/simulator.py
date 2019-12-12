@@ -6,7 +6,8 @@ from typing import List
 from queue import PriorityQueue
 from event import CreateActorEvent, AccidentEvent
 from graph import RoadGraph
-from utils import MultimodalDistribution
+from utils import MultimodalDistribution, get_time_from_traffic_distribution
+from user import User, Personality
 import networkx as nx
 import matplotlib.pyplot as plt
 
@@ -80,6 +81,7 @@ class Simulator:
     def run(self):
         # Empty actors list, in case of consecutive calls to this method
         self.actors = []
+        self.users = self.create_users()
 
         # Cleaning road graph
         self.graph = RoadGraph(self.input_config)
@@ -89,13 +91,18 @@ class Simulator:
 
         # Create the Simulation Actors
         event_queue = PriorityQueue()
-        for ae in self.create_actors_events() + self.create_accident_events():
+        create_actor_events = self.create_actors_events(self.users)
+        # print("users {}".format(len(self.users)))
+
+        for ae in create_actor_events:
             event_queue.put_nowait(ae.get_priorized())
+        
         # elements in form (time, event), to be ordered by first tuple member
 
         # Start Simulation
         while event_queue.qsize() > 0:
             _, event = event_queue.get_nowait()
+            # print(event.at_time)
             new_events = event.act(self)
             for ev in new_events:
                 # If event doesn't exceed max_run_time
@@ -108,23 +115,28 @@ class Simulator:
                 a.total_travel_time = self.max_run_time
 
         # self.draw_graph()
-     
 
-    def get_time_from_traffic_distribution(self) -> float:
-        result = self.traffic_distribution()
-        while not 0.0 < result < 24.0:
-            result = self.traffic_distribution()
-        return result
-
-    def create_actors_events(self) -> List[CreateActorEvent]:
+    def create_actors_events(self,users: [User]) -> List[CreateActorEvent]:
         """Returns all scheduled CreateActorEvents"""
         return [
             CreateActorEvent(
-                self.get_time_from_traffic_distribution(), self.actor_constructor)
-            for _ in range(self.num_actors)
+                user.start_time, self.actor_constructor)
+            for user in users
         ]
 
     def create_accident_events(self) -> List[AccidentEvent]:
         return [
             # AccidentEvent(10.0, (3, 6), 0.2)
         ]
+    
+    def create_users(self):
+        users = []
+
+        for _ in range(self.input_config["users"]["num_users"]):
+            time = get_time_from_traffic_distribution(self.traffic_distribution)
+
+            personality = Personality(1, 1, 1, True)
+            user = User(personality, time)
+            users.append(user)
+
+        return users
