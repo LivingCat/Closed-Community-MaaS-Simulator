@@ -5,7 +5,7 @@ Class to represent an Actor, its information, decision-making process, and behav
 from abc import ABC
 from typing import List, Tuple
 from collections import defaultdict
-
+from user import User
 
 class AbstractActor(ABC):
 
@@ -22,7 +22,8 @@ class AbstractActor(ABC):
 
     static_model_id = 1
 
-    def __init__(self, route: List[int]):
+    def __init__(self, route: List[int], user: User):
+        self.user = user
         self.base_route = route
         self.route_travel_time = defaultdict(lambda: 0.0)
         self.total_travel_time = 0.0
@@ -79,31 +80,45 @@ class CarActor(AbstractActor):
 
     emission : float
     total_route_emissions : float
+    awareness: float
     
-    def __init__(self, route: List[int]):
-        
-        super().__init__(route)
+    def __init__(self, route: List[int], user: User):
+        super().__init__(route,user)
         self.emission = 0.0
         self.total_route_emissions = 0.0
+        self.awareness = 0.2
+    
+    @property
+    def cost(self):
+        return self.total_travel_time * 4
 
 class BusActor(AbstractActor):
 
     emission: float
     total_route_emissions: float
+    cost: float
+    awareness: float
 
-    def __init__(self, route: List[int]):
-        super().__init__(route)
+    def __init__(self, route: List[int], user: User):
+        super().__init__(route, user)
         self.emission = 0.0
         self.total_route_emissions = 0.0
+        self.cost = 2.0
+        self.awareness = 1
 
 
 class SharedCarActor(AbstractActor):
 
     emission: float
     total_route_emissions: float
+    awareness: float
 
-    def __init__(self, route: List[int]):
-        super().__init__(route)
+    def __init__(self, route: List[int], user: User):
+        super().__init__(route, user)
         self.emission = 0.0
         self.total_route_emissions = 0.0
+        self.awareness = 0.5
 
+    @property
+    def cost(self):
+        return self.total_travel_time * 3

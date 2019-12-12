@@ -71,7 +71,7 @@ def print_args(args):
     print()
 
 
-def actor_constructor(graph: RoadGraph, service: str):
+def actor_constructor(graph: RoadGraph, service: str, user: User):
     """Calculate possible routes and give each one a probability based on how little time it takes to transverse it"""
     possible_routes = graph.get_all_routes(service)
     routes_times = [graph.get_optimal_route_travel_time(r)
@@ -83,16 +83,16 @@ def actor_constructor(graph: RoadGraph, service: str):
 
     if(service == 'CarActor'):
          return CarActor(
-             possible_routes[idx])
+             possible_routes[idx], user)
     elif(service == 'BusActor'):
          return BusActor(
-             possible_routes[idx])
+             possible_routes[idx], user)
     elif(service == 'SharedCarActor'):
         return SharedCarActor(
-            possible_routes[idx])
+            possible_routes[idx], user)
     else: #Default Car Actor
          return CarActor(
-             possible_routes[idx])
+             possible_routes[idx], user)
 
 
 

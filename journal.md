@@ -24,7 +24,9 @@ python src/main.py -r 100 -js ex.json
 * [X] Make different actors - bus,car,shared car
 * [X] Make edges only let certain actors traverse them
 * [X] Create routes for actors according to the edges specifications
+* [X] Added Users
 * [ ] Utility function
+* [ ] Reinforcement Learning
 
 
 # Might have
@@ -44,3 +46,9 @@ python src/main.py -r 100 -js ex.json
 # 11-12-2019
 
 * Graph is created based on a json file (no longer hardcoded)
+
+# 12-12-2019
+
+* Added Users
+* Users choose (randomly) a transportation method
+* Users have the "result" of the commute (time, cost, awareness)

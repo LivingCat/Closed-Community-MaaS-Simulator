@@ -7,7 +7,7 @@ from queue import PriorityQueue
 from event import CreateActorEvent, AccidentEvent
 from graph import RoadGraph
 from utils import MultimodalDistribution, get_time_from_traffic_distribution
-from user import User, Personality
+from user import User, Personality, CommuteOutput
 import networkx as nx
 import matplotlib.pyplot as plt
 
@@ -114,13 +114,27 @@ class Simulator:
             if not a.reached_dest():
                 a.total_travel_time = self.max_run_time
 
+        print("num actors: {}".format(len(self.actors)))
+
+        final_users = []
+
+        for actor in self.actors:
+            commute_out = CommuteOutput(actor.cost, actor.total_travel_time, actor.awareness, str(type(actor).__name__))
+            user_info = dict()
+            user_info["user"] = actor.user
+            user_info["commute_output"] = commute_out
+            user_info["utility"] = actor.user.calculate_utility_value(commute_out)
+            final_users.append(user_info)
+
+        print(final_users)
+
         # self.draw_graph()
 
     def create_actors_events(self,users: [User]) -> List[CreateActorEvent]:
         """Returns all scheduled CreateActorEvents"""
         return [
             CreateActorEvent(
-                user.start_time, self.actor_constructor)
+                user.start_time, self.actor_constructor, user)
             for user in users
         ]
 

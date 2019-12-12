@@ -6,6 +6,7 @@ E.g. create_actor, travel_route.
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import List, Tuple
+from user import User
 
 import random
 
@@ -42,19 +43,20 @@ class CreateActorEvent(Event):
     """Event associated to the creation of an actor.
     It will trigger an edge start event for the route first edge."""
 
-    def __init__(self, at_time: float, actor_constructor):
+    def __init__(self, at_time: float, actor_constructor, user: User):
         super().__init__(at_time)
         self.actor_constructor = actor_constructor
+        self.user = user
 
     def act(self, sim: simulator.Simulator):
 
         random_num = random.randint(0, 10)
         if(random_num < 3):
-            a = self.actor_constructor(sim.graph, 'CarActor')
+            a = self.actor_constructor(sim.graph, 'CarActor', self.user)
         elif(random_num < 9):
-            a = self.actor_constructor(sim.graph, 'BusActor')
+            a = self.actor_constructor(sim.graph, 'BusActor', self.user)
         else:
-            a = self.actor_constructor(sim.graph, 'SharedCarActor')
+            a = self.actor_constructor(sim.graph, 'SharedCarActor', self.user)
 
         sim.actors.append(a)
 
