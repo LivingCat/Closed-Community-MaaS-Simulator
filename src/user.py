@@ -20,6 +20,7 @@ class CommuteOutput:
 class User:
     """Represents a User of the system"""
     
+    mean_transportation: str
     def __init__(self, personality: Personality, start_time: float):
        self.personality = personality
        self.start_time = start_time

@@ -81,7 +81,6 @@ def actor_constructor(graph: RoadGraph, service: str, user: User):
     idx = np.random.choice(len(possible_routes), p=routes_probs)
 
     #Choose which Actor to create
-
     if(service == 'CarActor'):
          return CarActor(
              possible_routes[idx], user)
@@ -261,7 +260,7 @@ def main(args):
     for _ in trange(args.n_runs, leave=False):
         final_users = sim.run(agent)
         # current_state, action, reward, new_current_state, done
-
+        agent.update_epsilon()
         sim.stats.add_actors(sim.actors)
         all_stats.append(sim.stats)
 

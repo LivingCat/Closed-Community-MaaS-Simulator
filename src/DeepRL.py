@@ -256,6 +256,7 @@ class DQNAgent:
 
         # Used to count when to update target network with main network's weights
         self.target_update_counter = 0
+        self.epsilon = 1
 
     def create_model(self):
         model = Sequential()
@@ -277,8 +278,6 @@ class DQNAgent:
         # Start training only if certain number of samples is already saved
         if len(self.replay_memory) < MIN_REPLAY_MEMORY_SIZE:
             return
-        print("treinando")
-        print(len(self.replay_memory))
         # Get a minibatch of random samples from memory replay table
         minibatch = random.sample(self.replay_memory, MINIBATCH_SIZE)
 
@@ -332,6 +331,11 @@ class DQNAgent:
     # Queries main network for Q values given current observation space (environment state)
     def get_qs(self, state):
         return self.model.predict(np.array(state).reshape(-1, *state.shape)/255)[0]
+
+    def update_epsilon(self):
+        self.epsilon *= EPSILON_DECAY
+        self.epsilon = max(MIN_EPSILON, self.epsilon)
+
 
 
 # agent = DQNAgent()

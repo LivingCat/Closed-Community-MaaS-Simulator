@@ -12,7 +12,7 @@ from DeepRL import DQNAgent
 from actor import AbstractActor
 import networkx as nx
 import matplotlib.pyplot as plt
-
+import numpy as np
 import random
 
 
@@ -81,7 +81,7 @@ class Simulator:
     def run(self, agent: DQNAgent):
         # Empty actors list, in case of consecutive calls to this method
         self.actors = []
-        self.users = self.create_users()
+        self.users = self.create_users(agent)
 
         # Cleaning road graph
         self.graph = RoadGraph(self.input_config)
@@ -113,8 +113,6 @@ class Simulator:
         for a in self.actors:
             if not a.reached_dest():
                 a.total_travel_time = self.max_run_time
-
-        print("num actors: {}".format(len(self.actors)))
 
         final_users = []
 
@@ -148,7 +146,7 @@ class Simulator:
             # AccidentEvent(10.0, (3, 6), 0.2)
         ]
     
-    def create_users(self):
+    def create_users(self, agent: DQNAgent):
         users = []
 
         for _ in range(self.input_config["users"]["num_users"]):
@@ -156,6 +154,17 @@ class Simulator:
 
             personality = Personality(1, 1, 1, True)
             user = User(personality, time)
+
+            if np.random.random() > agent.epsilon:
+                # Get action from Q table
+                current_state = np.array(user.get_user_current_state())
+                action = np.argmax(agent.get_qs(current_state))
+            else:
+                # Get random action
+                action = np.random.randint(0, agent.output_dim)
+
+            mean_transportation = AbstractActor.convert_service.inverse[action][0]
+            user.mean_transportation = mean_transportation
             users.append(user)
 
         return users

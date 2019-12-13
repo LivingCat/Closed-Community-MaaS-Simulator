@@ -6,14 +6,14 @@ from abc import ABC
 from typing import List, Tuple
 from collections import defaultdict
 from user import User
-
+from utils import bidict
 class AbstractActor(ABC):
 
-    convert_service = {
+    convert_service = bidict({
         "CarActor": 0,
         "SharedCarActor": 1,
         "BusActor": 2
-    }
+    })
     
     TIME_INDEX = 0
     NODE_INDEX = 1
