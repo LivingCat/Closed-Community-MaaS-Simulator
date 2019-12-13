@@ -9,6 +9,12 @@ from user import User
 
 class AbstractActor(ABC):
 
+    convert_service = {
+        "CarActor": 0,
+        "SharedCarActor": 1,
+        "BusActor": 2
+    }
+    
     TIME_INDEX = 0
     NODE_INDEX = 1
 

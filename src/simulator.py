@@ -8,6 +8,8 @@ from event import CreateActorEvent, AccidentEvent
 from graph import RoadGraph
 from utils import MultimodalDistribution, get_time_from_traffic_distribution
 from user import User, Personality, CommuteOutput
+from DeepRL import DQNAgent
+from actor import AbstractActor
 import networkx as nx
 import matplotlib.pyplot as plt
 
@@ -76,9 +78,7 @@ class Simulator:
         plt.waitforbuttonpress(0)
         plt.clf()
 
-
-
-    def run(self):
+    def run(self, agent: DQNAgent):
         # Empty actors list, in case of consecutive calls to this method
         self.actors = []
         self.users = self.create_users()
@@ -126,7 +126,12 @@ class Simulator:
             user_info["utility"] = actor.user.calculate_utility_value(commute_out)
             final_users.append(user_info)
 
-        print(final_users)
+        for user_info in final_users:
+            current_state = user_info["user"].get_user_current_state()
+            agent.update_replay_memory(
+                (current_state, AbstractActor.convert_service[user_info["commute_output"].mean_transportation],
+                    user_info["utility"], 1, True))
+            agent.train(True, 1)
 
         # self.draw_graph()
 

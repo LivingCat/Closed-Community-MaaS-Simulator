@@ -1,6 +1,9 @@
 # How to run
 python src/main.py -r 100 -js ex.json
 
+# Resources
+* [Tutorial Deep Q-Learning](https://pythonprogramming.net/training-deep-q-learning-dqn-reinforcement-learning-python-tutorial/)
+* [Video tutorial Deep Q-Learning](https://www.youtube.com/watch?v=qfovbG84EBg&t=4s)
 
 # To Do
 * Add people that choose a mean of transport

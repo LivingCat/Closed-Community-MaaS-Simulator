@@ -19,9 +19,8 @@ class CommuteOutput:
 
 class User:
     """Represents a User of the system"""
-
     
-    def __init__(self, personality: Personality, start_time):
+    def __init__(self, personality: Personality, start_time: float):
        self.personality = personality
        self.start_time = start_time
 
@@ -38,5 +37,8 @@ class User:
     def calculate_utility_value(self, commute_out: CommuteOutput):
         return (1/self.cost_util(commute_out) * 1/self.time_util(commute_out) * self.social_util(commute_out))
 
+    def get_user_current_state(self):
+        personality = self.personality
+        return [self.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, int(personality.has_private)]
 
     

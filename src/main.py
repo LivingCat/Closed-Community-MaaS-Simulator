@@ -7,10 +7,11 @@ from actor import CarActor, BusActor, SharedCarActor
 from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs
 from simulator import Simulator
 from graph import RoadGraph
-from user import User,Personality
+from user import User, Personality
 from queue import PriorityQueue
 from utils import softmax_travel_times, compute_average_over_time, MultimodalDistribution, get_time_from_traffic_distribution
 from statistics import SimStats
+from DeepRL import DQNAgent
 from ipdb import set_trace
 from pprint import pprint
 from collections import defaultdict
@@ -224,6 +225,9 @@ def read_json_file(file: str):
     content = f.read()
     return json.loads(content)
 
+def get_user_current_state(user: User):
+    personality = user.personality
+    return [user.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, int(personality.has_private)]
 
 def main(args):
     if args.traffic_peaks is None:
@@ -245,11 +249,19 @@ def main(args):
                     stats_constructor=stats_constructor,
                     traffic_distribution=MultimodalDistribution(*args.traffic_peaks)
                     )
-
+    # user_info["user"] = actor.user
+    # user_info["commute_output"] = commute_out
+    # user_info["utility"] = actor.user.calculate_utility_value(
+        # commute_out)
+    n_inputs = 5
+    n_output = 3
+    agent = DQNAgent(n_inputs, n_output)
     # gather stats from all runs
     all_stats = []
     for _ in trange(args.n_runs, leave=False):
-        sim.run()
+        final_users = sim.run(agent)
+        # current_state, action, reward, new_current_state, done
+
         sim.stats.add_actors(sim.actors)
         all_stats.append(sim.stats)
 
@@ -259,7 +271,6 @@ def main(args):
     json.dump(json_object, open(args.save_path, "w+"))
 
     statistics_print(sim)
-
 
 if __name__ == '__main__':
     main(parse_args())
