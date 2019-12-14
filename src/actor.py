@@ -98,6 +98,10 @@ class CarActor(AbstractActor):
     def cost(self):
         return self.total_travel_time * 4
 
+    @property
+    def travel_time(self):
+        return self.total_travel_time
+
 class BusActor(AbstractActor):
 
     emission: float
@@ -111,6 +115,10 @@ class BusActor(AbstractActor):
         self.total_route_emissions = 0.0
         self.cost = 2.0
         self.awareness = 1
+
+    @property
+    def travel_time(self):
+        return self.total_travel_time + 2
 
 
 class SharedCarActor(AbstractActor):
@@ -128,3 +136,7 @@ class SharedCarActor(AbstractActor):
     @property
     def cost(self):
         return self.total_travel_time * 3
+
+    @property
+    def travel_time(self):
+        return self.total_travel_time

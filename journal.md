@@ -1,6 +1,8 @@
 # How to run
 python src/main.py -r 100 -js ex.json
 
+tensorboard --logdir logs/2x256-1576340031
+
 # Resources
 * [Tutorial Deep Q-Learning](https://pythonprogramming.net/training-deep-q-learning-dqn-reinforcement-learning-python-tutorial/)
 * [Video tutorial Deep Q-Learning](https://www.youtube.com/watch?v=qfovbG84EBg&t=4s)
@@ -30,10 +32,13 @@ python src/main.py -r 100 -js ex.json
 * [X] Added Users
 * [ ] Utility function
 * [ ] Reinforcement Learning
+* [ ] Users can only choose private car if they have a car
+* [ ] Utility function can't be divided by 0
 
 
 # Might have
 * Gif showing the occupation of the edges
+* Gif showing people learning
 
 # Probs not
 * Each service has one color

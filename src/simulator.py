@@ -99,6 +99,7 @@ class Simulator:
         
         # elements in form (time, event), to be ordered by first tuple member
 
+
         # Start Simulation
         while event_queue.qsize() > 0:
             _, event = event_queue.get_nowait()
@@ -117,12 +118,14 @@ class Simulator:
         final_users = []
 
         for actor in self.actors:
-            commute_out = CommuteOutput(actor.cost, actor.total_travel_time, actor.awareness, str(type(actor).__name__))
+            commute_out = CommuteOutput(actor.cost, actor.travel_time, actor.awareness, str(type(actor).__name__))
             user_info = dict()
             user_info["user"] = actor.user
             user_info["commute_output"] = commute_out
             user_info["utility"] = actor.user.calculate_utility_value(commute_out)
             final_users.append(user_info)
+
+            # print("mean: {}  utility: {} ".format(commute_out.mean_transportation, user_info["utility"]))
 
         for user_info in final_users:
             current_state = user_info["user"].get_user_current_state()
@@ -131,7 +134,9 @@ class Simulator:
                     user_info["utility"], 1, True))
             agent.train(True, 1)
 
+
         # self.draw_graph()
+        return final_users
 
     def create_actors_events(self,users: [User]) -> List[CreateActorEvent]:
         """Returns all scheduled CreateActorEvents"""
@@ -149,10 +154,12 @@ class Simulator:
     def create_users(self, agent: DQNAgent):
         users = []
 
+
         for _ in range(self.input_config["users"]["num_users"]):
+
             time = get_time_from_traffic_distribution(self.traffic_distribution)
 
-            personality = Personality(1, 1, 1, True)
+            personality = Personality(0.1, 1, 1, True)
             user = User(personality, time)
 
             if np.random.random() > agent.epsilon:

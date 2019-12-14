@@ -26,6 +26,7 @@ import os.path
 import networkx as nx
 import matplotlib.pyplot as plt
 import json
+import time
 
 
 def parse_args():
@@ -229,6 +230,14 @@ def get_user_current_state(user: User):
     return [user.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, int(personality.has_private)]
 
 def main(args):
+
+    ep_rewards = [0]
+
+    #  Stats settings
+    AGGREGATE_STATS_EVERY = 50  # episodes
+    MIN_REWARD=1
+    MODEL_NAME = 'Maas_simulator'
+
     if args.traffic_peaks is None:
         # Needed since "action=append" doesn't overwrite "default=X"
         args.traffic_peaks = [(8, 3), (18, 3)]
@@ -257,12 +266,44 @@ def main(args):
     agent = DQNAgent(n_inputs, n_output)
     # gather stats from all runs
     all_stats = []
-    for _ in trange(args.n_runs, leave=False):
+    for episode in trange(args.n_runs, leave=False):
+
+        # Update tensorboard step every episode
+        agent.tensorboard.step = episode
+
         final_users = sim.run(agent)
+
+        # Restarting episode - reset episode reward and step number
+        episode_reward = 0
+        step = 1
+           # Transform new continous state to new discrete state and count reward
+        for user_info in final_users:
+            episode_reward += user_info["utility"]
+
+
+        # Append episode reward to a list and log stats (every given number of episodes)
+        ep_rewards.append(episode_reward)
+
+
+        if not episode % AGGREGATE_STATS_EVERY or episode == 1:
+            average_reward = sum(
+                ep_rewards[-AGGREGATE_STATS_EVERY:])/len(ep_rewards[-AGGREGATE_STATS_EVERY:])
+            min_reward = min(ep_rewards[-AGGREGATE_STATS_EVERY:])
+            max_reward = max(ep_rewards[-AGGREGATE_STATS_EVERY:])
+            agent.tensorboard.update_stats(
+                reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=agent.epsilon)
+
+            # Save model, but only when min reward is greater or equal a set value
+            if min_reward >= MIN_REWARD:
+                agent.model.save(
+                    'models/{}__{}.model'.format(
+                        MODEL_NAME, int(time.time())
+                    ))
         # current_state, action, reward, new_current_state, done
         agent.update_epsilon()
         sim.stats.add_actors(sim.actors)
         all_stats.append(sim.stats)
+
 
     json_object = average_all_results(all_stats, args.plots)
     json_object['graph'] = nx.readwrite.jit_data(sim.graph.graph)

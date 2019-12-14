@@ -36,7 +36,7 @@ class User:
 
 
     def calculate_utility_value(self, commute_out: CommuteOutput):
-        return (1/self.cost_util(commute_out) * 1/self.time_util(commute_out) * self.social_util(commute_out))
+        return (1/self.cost_util(commute_out) + 1/self.time_util(commute_out) + self.social_util(commute_out))
 
     def get_user_current_state(self):
         personality = self.personality
