@@ -18,6 +18,7 @@ tensorboard --logdir logs/2x256-1576340031
 * Bus event 10 in 10 minutes? 
 * Incentives - think about how Cat can introduce them later in an easy breazy way
 * Utility factors- how to account for sociability? For now we are going to only have the awareness of the impact of the chosen service
+* Actor occupation chart uses only last few runs
 
 # Done
 * Make different actors - bus,car,shared car
@@ -31,7 +32,7 @@ tensorboard --logdir logs/2x256-1576340031
 * [X] Create routes for actors according to the edges specifications
 * [X] Added Users
 * [ ] Utility function
-* [ ] Reinforcement Learning
+* [X] Reinforcement Learning
 * [ ] Users can only choose private car if they have a car
 * [ ] Utility function can't be divided by 0
 
@@ -60,3 +61,12 @@ tensorboard --logdir logs/2x256-1576340031
 * Added Users
 * Users choose (randomly) a transportation method
 * Users have the "result" of the commute (time, cost, awareness)
+
+# 13-12-2019
+
+* Added Reinforcement learning
+
+# 14-12-2019
+
+* Tensorboard
+* Tried different personality types - need to work on that
