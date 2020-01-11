@@ -2,17 +2,17 @@
 Main project source file.
 """
 from typing import List, Tuple
-
-from actor import CarActor, BusActor, SharedCarActor
+from ipdb import set_trace
+from actor import Actor
 from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs
 from simulator import Simulator
+from provider import Provider, Personal, Friends, STCP
 from graph import RoadGraph
 from user import User, Personality
 from queue import PriorityQueue
 from utils import softmax_travel_times, compute_average_over_time, MultimodalDistribution, get_time_from_traffic_distribution
 from statistics import SimStats
 from DeepRL import DQNAgent
-from ipdb import set_trace
 from pprint import pprint
 from collections import defaultdict
 from tqdm import trange
@@ -73,27 +73,15 @@ def print_args(args):
     print()
 
 
-def actor_constructor(graph: RoadGraph, service: str, user: User):
+def actor_constructor(graph: RoadGraph, user: User):
     """Calculate possible routes and give each one a probability based on how little time it takes to transverse it"""
-    possible_routes = graph.get_all_routes(service)
+    possible_routes = graph.get_all_routes(user.mean_transportation)
     routes_times = [graph.get_optimal_route_travel_time(r)
                     for r in possible_routes]
     routes_probs = softmax_travel_times(routes_times)
     idx = np.random.choice(len(possible_routes), p=routes_probs)
 
-    #Choose which Actor to create
-    if(service == 'CarActor'):
-         return CarActor(
-             possible_routes[idx], user)
-    elif(service == 'BusActor'):
-         return BusActor(
-             possible_routes[idx], user)
-    elif(service == 'SharedCarActor'):
-        return SharedCarActor(
-            possible_routes[idx], user)
-    else: #Default Car Actor
-         return CarActor(
-             possible_routes[idx], user)
+    return Actor(possible_routes[idx], user, user.provider)
 
 
 
@@ -210,12 +198,32 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         # print("acc")
         # print(edge_flow_acc)
         results['edges_occupation'][e_key] = edge_flow_acc
+    emissions_dict={
+        "car":[0],
+        "bus":[0],
+        "sharedCar":[0],
+        "total":[0]
+    }
 
-
+    for run in all_s:
+        run_emissions_dict={
+            "car": 0,
+            "bus" :0,
+            "sharedCar": 0,
+            "total": 0
+        }
+        for actor in run.actors:
+            run_emissions_dict[actor.service] += actor.emissions
+            run_emissions_dict["total"] += actor.emissions
+        emissions_dict["car"].append(run_emissions_dict["car"])
+        emissions_dict["bus"].append(run_emissions_dict["bus"])
+        emissions_dict["sharedCar"].append(run_emissions_dict["sharedCar"])
+        emissions_dict["total"].append(run_emissions_dict["total"])
 
     if display_plots:
         plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
         plot_accumulated_edges_graphs(results['edges_occupation'], len(all_s))
+        plot_emissions_development(emissions_dict)
         
     plt.waitforbuttonpress(0)   
     return results
@@ -230,7 +238,6 @@ def get_user_current_state(user: User):
     return [user.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, int(personality.has_private)]
 
 def main(args):
-
     ep_rewards = [0]
 
     #  Stats settings
@@ -246,14 +253,12 @@ def main(args):
 
     input_config = read_json_file(args.json_file)
 
-    #Create users
-    # users = create_users(
-    #     input_config["users"]["num_users"], MultimodalDistribution(*args.traffic_peaks))
-
+    providers = [Personal(),Friends(),STCP()]
     sim = Simulator(config=args,
                     input_config = input_config,
                     actor_constructor=partial(
                         actor_constructor),
+                    providers=providers,
                     stats_constructor=stats_constructor,
                     traffic_distribution=MultimodalDistribution(*args.traffic_peaks)
                     )
@@ -262,12 +267,11 @@ def main(args):
     # user_info["utility"] = actor.user.calculate_utility_value(
         # commute_out)
     n_inputs = 5
-    n_output = 3
+    n_output = len(providers)
     agent = DQNAgent(n_inputs, n_output)
     # gather stats from all runs
     all_stats = []
     for episode in trange(args.n_runs, leave=False):
-
         # Update tensorboard step every episode
         agent.tensorboard.step = episode
 

@@ -43,8 +43,8 @@ class RoadGraph:
         possible_edges = []
 
         for edge in self.graph.edges:
-            allowed_actors = (self.get_edge_data(edge)['allowed_actors'])
-            if(actor in allowed_actors):
+            allowed_transports = (self.get_edge_data(edge)['allowed_transports'])
+            if(actor in allowed_transports):
                 possible_edges.append(edge)
         new_graph = nx.Graph(possible_edges)        
         return list(nx.all_simple_paths(new_graph, src_node, dest_node))
@@ -75,70 +75,6 @@ class RoadGraph:
         """Get the real actual time it takes to transverse the edge (congestion included)"""
         return self.get_edge_travel_time(edge, self.get_edge_data(edge)['volume'])
 
-    def hardcoded_graph_1(self):
-        """Hardcoded deliverable 2 example graph for now"""
-        self.graph = nx.DiGraph()
-        self.graph.add_nodes_from(range(0, 4))
-        self.nstart = 0
-        self.nend = 3
-        self.graph.add_edges_from(
-            [(0, 1), (0, 2), (2, 1), (1, 3), (2, 3)],
-            volume=0,
-            free_flow_travel_time=1,
-            capacity=20)
-
-    def hardcoded_graph_2(self):
-        """A different hardcoded graph, see Xavier's EcoBook"""
-        self.graph = nx.DiGraph()
-        self.graph.add_nodes_from([0, 1, 2, 3, 4, 5, 6, 7, 8])
-        self.nstart = 0
-        self.nend = 8
-
-        self.graph.add_edges_from(
-            [(0, 1), (1, 3), (3, 6), (6, 8)],
-            volume=0,
-            free_flow_travel_time=0.85,
-            capacity=50)    # fastest path
-
-        self.graph.add_edges_from(
-            [(0, 2), (2, 5), (5, 7), (7, 8)],
-            volume=0,
-            free_flow_travel_time=1.17,
-            capacity=50)    # shortest path
-
-        self.graph.add_edges_from(
-            [(1, 4), (2, 4), (4, 6), (4, 7)],
-            volume=0,
-            free_flow_travel_time=0.92,
-            capacity=50)  # other recommended path
-
-    def mass_hardcoded_graph(self):
-        """Hardcoded graph with one path for each MaaS service. The graph is origin -> destination with only one edge per service"""
-        self.graph = nx.DiGraph()
-        self.graph.add_nodes_from(range(0,5))
-        self.nstart = 0
-        self.nend = 4
-        self.graph.add_edges_from(
-            [(0, 1), (1, 4)], color='red',
-            allowed_actors = ['SharedCarActor'],
-            volume=0,
-            free_flow_travel_time=1,
-            capacity=50)
-
-        self.graph.add_edges_from(
-            [(0, 2), (2, 4)], color='blue',
-            allowed_actors=['CarActor'],
-            volume=0,
-            free_flow_travel_time=1,
-            capacity=50)
-
-        self.graph.add_edges_from(
-            [(0, 3), (3, 4)], color='green',
-            allowed_actors=['BusActor'],
-            volume=0,
-            free_flow_travel_time=1,
-            capacity=70)
-
     def create_graph(self, input_config):
         """Creates a graph from from input file configuration"""
         self.graph = nx.DiGraph()
@@ -150,7 +86,7 @@ class RoadGraph:
             self.graph.add_edges_from(
                 [(int(key.split(',')[0]), int(key.split(',')[1]))], 
                 color=edges_list[key]["color"],
-                allowed_actors=edges_list[key]["allowed_actors"],
+                allowed_transports=edges_list[key]["allowed_transports"],
                 volume=edges_list[key]["volume"],
                 free_flow_travel_time=edges_list[key]["free_flow_travel_time"],
                 capacity=edges_list[key]["capacity"]

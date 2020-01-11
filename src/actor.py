@@ -1,19 +1,12 @@
 """
 Class to represent an Actor, its information, decision-making process, and behaviour.
 """
-
-from abc import ABC
 from typing import List, Tuple
 from collections import defaultdict
 from user import User
-from utils import bidict
-class AbstractActor(ABC):
+from provider import Provider
 
-    convert_service = bidict({
-        "CarActor": 0,
-        "SharedCarActor": 1,
-        "BusActor": 2
-    })
+class Actor():
     
     TIME_INDEX = 0
     NODE_INDEX = 1
@@ -28,15 +21,17 @@ class AbstractActor(ABC):
 
     static_model_id = 1
 
-    def __init__(self, route: List[int], user: User):
+    def __init__(self, route: List[int], user: User, provider: Provider):
         self.user = user
         self.base_route = route
+        self.provider = provider
+        self.service = self.provider.service
         self.route_travel_time = defaultdict(lambda: 0.0)
         self.total_travel_time = 0.0
         self.start_time = 0.0
         """"Initializer for the ID of all actor models"""
-        self.actor_id = AbstractActor.static_model_id
-        AbstractActor.static_model_id += 1
+        self.actor_id = Actor.static_model_id
+        Actor.static_model_id += 1
 
     def __repr__(self):
         return "A%d :: TI %.4f :: TTT %.4f" % (self.actor_id, round(self.start_time, 4), round(self.total_travel_time, 4))
@@ -82,61 +77,22 @@ class AbstractActor(ABC):
                    self.traveled_nodes[i][self.TIME_INDEX]
                    - self.traveled_nodes[i-1][self.TIME_INDEX]))
 
-class CarActor(AbstractActor):
-
-    emission : float
-    total_route_emissions : float
-    awareness: float
-    
-    def __init__(self, route: List[int], user: User):
-        super().__init__(route,user)
-        self.emission = 0.0
-        self.total_route_emissions = 0.0
-        self.awareness = 0.2
-    
     @property
     def cost(self):
-        return self.total_travel_time * 4
+        return self.provider.get_cost(self.total_travel_time)
 
     @property
     def travel_time(self):
-        return self.total_travel_time
-
-class BusActor(AbstractActor):
-
-    emission: float
-    total_route_emissions: float
-    cost: float
-    awareness: float
-
-    def __init__(self, route: List[int], user: User):
-        super().__init__(route, user)
-        self.emission = 0.0
-        self.total_route_emissions = 0.0
-        self.cost = 2.0
-        self.awareness = 1
+        return self.provider.get_time(self.total_travel_time)
+    
+    @property
+    def awareness(self):
+        return self.provider.get_awareness()
 
     @property
-    def travel_time(self):
-        return self.total_travel_time + 2
-
-
-class SharedCarActor(AbstractActor):
-
-    emission: float
-    total_route_emissions: float
-    awareness: float
-
-    def __init__(self, route: List[int], user: User):
-        super().__init__(route, user)
-        self.emission = 0.0
-        self.total_route_emissions = 0.0
-        self.awareness = 0.5
+    def comfort(self):
+        return self.provider.get_comfort()
 
     @property
-    def cost(self):
-        return self.total_travel_time * 3
-
-    @property
-    def travel_time(self):
-        return self.total_travel_time
+    def emissions(self):
+        return self.provider.get_emissions(len(traveled_nodes)-1)

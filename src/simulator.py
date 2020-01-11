@@ -8,8 +8,9 @@ from event import CreateActorEvent, AccidentEvent
 from graph import RoadGraph
 from utils import MultimodalDistribution, get_time_from_traffic_distribution
 from user import User, Personality, CommuteOutput
+from provider import Provider, STCP, Personal, Friends
 from DeepRL import DQNAgent
-from actor import AbstractActor
+from actor import Actor
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,6 +24,7 @@ class Simulator:
                  config,
                  input_config,
                  actor_constructor,
+                 providers,
                  stats_constructor,
                  traffic_distribution=MultimodalDistribution.default(),
                  seed=42):
@@ -36,6 +38,7 @@ class Simulator:
         self.max_run_time = config.max_run_time
         self.stats = None
         self.actors = None
+        self.providers = providers
 
         random.seed(seed)
         # plt.ion()
@@ -129,8 +132,13 @@ class Simulator:
 
         for user_info in final_users:
             current_state = user_info["user"].get_user_current_state()
+            provider_index = -1
+            for i in range(len(self.providers)):
+                if type(self.providers[i]) is type(user_info["user"].provider):
+                    provider_index = i
+
             agent.update_replay_memory(
-                (current_state, AbstractActor.convert_service[user_info["commute_output"].mean_transportation],
+                (current_state, provider_index,
                     user_info["utility"], 1, True))
             agent.train(True, 1)
 
@@ -170,8 +178,9 @@ class Simulator:
                 # Get random action
                 action = np.random.randint(0, agent.output_dim)
 
-            mean_transportation = AbstractActor.convert_service.inverse[action][0]
-            user.mean_transportation = mean_transportation
+            provider = self.providers[action]
+            user.mean_transportation = provider.service
+            user.provider = provider
             users.append(user)
 
         return users

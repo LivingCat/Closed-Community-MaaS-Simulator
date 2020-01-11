@@ -51,7 +51,7 @@ class CreateActorEvent(Event):
     def act(self, sim: simulator.Simulator):
 
         a = self.actor_constructor(
-            sim.graph, self.user.mean_transportation, self.user)
+            sim.graph, self.user)
 
         sim.actors.append(a)
 
@@ -73,7 +73,7 @@ class EdgeStartEvent(Event):
     Represents point in time in which an Actor starts travelling along an Edge.
     """
 
-    def __init__(self, at_time: float, a: actor.AbstractActor, edge: Tuple[int, int]):
+    def __init__(self, at_time: float, a: actor.Actor, edge: Tuple[int, int]):
         super().__init__(at_time)
         self.actor = a
         self.edge = edge
@@ -98,7 +98,7 @@ class EdgeEndEvent(Event):
     Represents point in time in which an Actor terminates travelling along an Edge.
     """
 
-    def __init__(self, at_time: float, a: actor.AbstractActor, edge: Tuple[int, int]):
+    def __init__(self, at_time: float, a: actor.Actor, edge: Tuple[int, int]):
         super().__init__(at_time)
         self.actor = a
         self.edge = edge

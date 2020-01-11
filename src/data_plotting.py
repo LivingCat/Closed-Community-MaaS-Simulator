@@ -67,3 +67,19 @@ def plot_accumulated_edges_graphs(edges_accumulated: Dict[str,Dict[str, List[Lis
         plt.xlim(right=28)
 
     plt.show()
+
+
+def plot_emissions_development(emissions_dict: Dict[str,List[float]]):
+    fig = plt.figure()
+
+    ax1 = fig.add_subplot(111)
+
+    for key in emissions_dict:
+        ax1.plot(emissions_dict[key], label=key, alpha=0.4)
+
+    plt.xlabel("runs")
+    plt.ylabel("emissions CO2")
+    plt.legend(loc='upper right')
+    plt.xlim(right=30)
+    plt.show()
+

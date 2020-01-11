@@ -1,3 +1,4 @@
+from provider import Provider
 class Personality:
     """Represents the user's preferences of the system"""
 
@@ -19,7 +20,7 @@ class CommuteOutput:
 
 class User:
     """Represents a User of the system"""
-    
+    provider: Provider
     mean_transportation: str
     def __init__(self, personality: Personality, start_time: float):
        self.personality = personality
