@@ -4,7 +4,7 @@ Main project source file.
 from typing import List, Tuple
 from ipdb import set_trace
 from actor import Actor
-from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs
+from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs, plot_emissions_development
 from simulator import Simulator
 from provider import Provider, Personal, Friends, STCP
 from graph import RoadGraph
@@ -199,10 +199,10 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         # print(edge_flow_acc)
         results['edges_occupation'][e_key] = edge_flow_acc
     emissions_dict={
-        "car":[0],
-        "bus":[0],
-        "sharedCar":[0],
-        "total":[0]
+        "car":[],
+        "bus":[],
+        "sharedCar":[],
+        "total":[]
     }
 
     for run in all_s:

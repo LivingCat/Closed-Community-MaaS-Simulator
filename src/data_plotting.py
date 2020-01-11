@@ -80,6 +80,5 @@ def plot_emissions_development(emissions_dict: Dict[str,List[float]]):
     plt.xlabel("runs")
     plt.ylabel("emissions CO2")
     plt.legend(loc='upper right')
-    plt.xlim(right=30)
     plt.show()
 
