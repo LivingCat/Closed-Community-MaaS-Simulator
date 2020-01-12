@@ -57,20 +57,19 @@
 		"num_users": 100,
 		"personality_params":{
 			"willingness_to_pay":{
-				"med":0.5,
+				"mean":0.5,
 				"stand_div":0.15
 			},
 			"willingness_to_wait": {
-				"med": 0.5,
+				"mean": 0.5,
 				"stand_div": 0.15
 			},
 			"awareness": {
-				"med": 0.5,
+				"mean": 0.5,
 				"stand_div": 0.15
 			},
 			"has_private": {
-				"med": 0.5,
-				"stand_div": 0.15
+				"ratio": 0.7
 			}
 		}
 	}

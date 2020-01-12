@@ -166,10 +166,18 @@ class Simulator:
         for _ in range(self.input_config["users"]["num_users"]):
 
             time = get_time_from_traffic_distribution(self.traffic_distribution)
+            personality_params = self.input_config["users"]["personality_params"]
+            willingness_to_pay = np.random.normal(personality_params["willingness_to_pay"]["mean"])
+            willingness_to_wait = np.random.normal(personality_params["willingness_to_wait"]["mean"])
+            awareness = np.random.normal(personality_params["willingness_to_pay"]["mean"])
+            has_private = 1 if np.random.uniform() < personality_params["has_private"]["ratio"] else 0
+            willingness_to_pay = min(max([0.0001,willingness_to_pay]),1)
+            willingness_to_wait = min(max([0.0001,willingness_to_wait]),1)
+            awareness = min(max([0.000, awareness]), 1)
 
-            personality = Personality(0.1, 1, 1, True)
+            personality = Personality(willingness_to_pay, willingness_to_wait, awareness, bool(has_private))
             user = User(personality, time)
-
+            
             if np.random.random() > agent.epsilon:
                 # Get action from Q table
                 current_state = np.array(user.get_user_current_state())
