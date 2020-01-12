@@ -121,7 +121,7 @@ class Simulator:
         final_users = []
 
         for actor in self.actors:
-            commute_out = CommuteOutput(actor.cost, actor.travel_time, actor.awareness, str(type(actor).__name__))
+            commute_out = CommuteOutput(actor.cost, actor.travel_time, actor.awareness, actor.comfort, str(type(actor).__name__))
             user_info = dict()
             user_info["user"] = actor.user
             user_info["commute_output"] = commute_out
@@ -167,26 +167,52 @@ class Simulator:
 
             time = get_time_from_traffic_distribution(self.traffic_distribution)
             personality_params = self.input_config["users"]["personality_params"]
-            willingness_to_pay = np.random.normal(personality_params["willingness_to_pay"]["mean"])
-            willingness_to_wait = np.random.normal(personality_params["willingness_to_wait"]["mean"])
-            awareness = np.random.normal(personality_params["willingness_to_pay"]["mean"])
+
+            willingness_to_pay = np.random.normal(
+                personality_params["willingness_to_pay"]["mean"],
+                personality_params["willingness_to_pay"]["stand_div"]
+                )
+
+            willingness_to_wait = np.random.normal(
+                personality_params["willingness_to_wait"]["mean"],
+                personality_params["willingness_to_wait"]["stand_div"]
+                )
+
+            awareness = np.random.normal(
+                personality_params["willingness_to_pay"]["mean"],
+                personality_params["willingness_to_pay"]["stand_div"]
+                )
+
+            comfort_preference = np.random.normal(
+                personality_params["comfort_preference"]["mean"],
+                personality_params["comfort_preference"]["stand_div"]
+                )
+
             has_private = 1 if np.random.uniform() < personality_params["has_private"]["ratio"] else 0
             willingness_to_pay = min(max([0.0001,willingness_to_pay]),1)
             willingness_to_wait = min(max([0.0001,willingness_to_wait]),1)
+            comfort_preference = min(max([0.0001,comfort_preference]),1)
             awareness = min(max([0.000, awareness]), 1)
 
-            personality = Personality(willingness_to_pay, willingness_to_wait, awareness, bool(has_private))
+            personality = Personality(willingness_to_pay, willingness_to_wait, awareness, comfort_preference, bool(has_private))
             user = User(personality, time)
-            
-            if np.random.random() > agent.epsilon:
-                # Get action from Q table
-                current_state = np.array(user.get_user_current_state())
-                action = np.argmax(agent.get_qs(current_state))
-            else:
-                # Get random action
-                action = np.random.randint(0, agent.output_dim)
+            while True:
+                if np.random.random() > agent.epsilon:
+                    # Get action from Q table
+                    current_state = np.array(user.get_user_current_state())
+                    action = np.argmax(agent.get_qs(current_state))
+                else:
+                    # Get random action
+                    action = np.random.randint(0, agent.output_dim)
 
-            provider = self.providers[action]
+                provider = self.providers[action]
+                if((not user.personality.has_private) and provider.name == "Personal"):
+                    agent.update_replay_memory(
+                    (user.get_user_current_state(), action,
+                        self.input_config["users"]["personality_params"]["punishment_doesnt_have_car"], 1, True))
+                    agent.train(True, 1)
+                else:
+                    break
             user.mean_transportation = provider.service
             user.provider = provider
             users.append(user)

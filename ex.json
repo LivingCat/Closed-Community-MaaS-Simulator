@@ -58,19 +58,24 @@
 		"personality_params":{
 			"willingness_to_pay":{
 				"mean":0.5,
-				"stand_div":0.15
+				"stand_div":0.3
 			},
 			"willingness_to_wait": {
 				"mean": 0.5,
-				"stand_div": 0.15
+				"stand_div": 0.3
 			},
 			"awareness": {
 				"mean": 0.5,
-				"stand_div": 0.15
+				"stand_div": 0.3
+			},
+			"comfort_preference": {
+				"mean": 0.5,
+				"stand_div": 0.3
 			},
 			"has_private": {
-				"ratio": 0.7
-			}
+				"ratio": 0.8
+			},
+			"punishment_doesnt_have_car":-100
 		}
 	}
 }

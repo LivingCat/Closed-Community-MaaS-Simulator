@@ -27,6 +27,9 @@ class Personal(Provider):
     def get_time(self, time):
         return time
 
+    def get_comfort(self):
+        return 0.8
+
     def get_emissions(self, distance):
         return Bus.emissions(distance)
 
@@ -46,6 +49,9 @@ class Friends(Provider):
     def get_time(self, time):
         return time
 
+    def get_comfort(self):
+        return 0.6
+
     def get_emissions(self, distance):
         return Car.emissions(distance)/3
 
@@ -64,6 +70,9 @@ class STCP(Provider):
     
     def get_time(self, time):
         return time + 2
+
+    def get_comfort(self):
+        return 0.4
 
     def get_emissions(self, distance):
         return Bus.emissions(distance)

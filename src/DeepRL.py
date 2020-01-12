@@ -288,15 +288,12 @@ class DQNAgent:
 
         # Get future states from minibatch, then query NN model for Q values
         # When using target network, query it, otherwise main network should be queried
-        new_current_states = np.array(
-            [transition[3] for transition in minibatch])/255
-        # future_qs_list = self.target_model.predict(new_current_states)
 
         X = []
         y = []
 
         # Now we need to enumerate our batches
-        for index, (current_state, action, reward, new_current_state, done) in enumerate(minibatch):
+        for index, (current_state, action, reward, _, done) in enumerate(minibatch):
 
             # If not a terminal state, get new q from future states, otherwise set it to 0
             # almost like with Q Learning, but we use just part of equation here

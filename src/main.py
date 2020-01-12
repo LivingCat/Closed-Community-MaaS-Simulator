@@ -4,7 +4,7 @@ Main project source file.
 from typing import List, Tuple
 from ipdb import set_trace
 from actor import Actor
-from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs, plot_emissions_development
+from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs, plot_emissions_development, plot_number_users_development
 from simulator import Simulator
 from provider import Provider, Personal, Friends, STCP
 from graph import RoadGraph
@@ -205,6 +205,12 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         "total":[]
     }
 
+    number_users_dict = {
+        "car": [],
+        "bus": [],
+        "sharedCar": []
+    }
+
     for run in all_s:
         run_emissions_dict={
             "car": 0,
@@ -212,18 +218,30 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
             "sharedCar": 0,
             "total": 0
         }
+        run_number_users_dict = {
+            "car": 0,
+            "bus" :0,
+            "sharedCar": 0
+        }
         for actor in run.actors:
             run_emissions_dict[actor.service] += actor.emissions
+            run_number_users_dict[actor.service] += 1
             run_emissions_dict["total"] += actor.emissions
+
         emissions_dict["car"].append(run_emissions_dict["car"])
         emissions_dict["bus"].append(run_emissions_dict["bus"])
         emissions_dict["sharedCar"].append(run_emissions_dict["sharedCar"])
         emissions_dict["total"].append(run_emissions_dict["total"])
 
+        number_users_dict["car"].append(run_number_users_dict["car"])
+        number_users_dict["bus"].append(run_number_users_dict["bus"])
+        number_users_dict["sharedCar"].append(run_number_users_dict["sharedCar"])
+
     if display_plots:
         plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
         plot_accumulated_edges_graphs(results['edges_occupation'], len(all_s))
         plot_emissions_development(emissions_dict)
+        plot_number_users_development(number_users_dict)
         
     plt.waitforbuttonpress(0)   
     return results
@@ -262,11 +280,7 @@ def main(args):
                     stats_constructor=stats_constructor,
                     traffic_distribution=MultimodalDistribution(*args.traffic_peaks)
                     )
-    # user_info["user"] = actor.user
-    # user_info["commute_output"] = commute_out
-    # user_info["utility"] = actor.user.calculate_utility_value(
-        # commute_out)
-    n_inputs = 5
+    n_inputs = 6
     n_output = len(providers)
     agent = DQNAgent(n_inputs, n_output)
     # gather stats from all runs

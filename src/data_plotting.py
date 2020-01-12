@@ -78,7 +78,19 @@ def plot_emissions_development(emissions_dict: Dict[str,List[float]]):
         ax1.plot(emissions_dict[key], label=key, alpha=0.4)
 
     plt.xlabel("runs")
-    plt.ylabel("emissions CO2")
+    plt.ylabel("emissions CO2 (g)")
     plt.legend(loc='upper right')
     plt.show()
 
+def plot_number_users_development(number_users_dict: Dict[str,List[float]]):
+    fig = plt.figure()
+
+    ax1 = fig.add_subplot(111)
+
+    for key in number_users_dict:
+        ax1.plot(number_users_dict[key], label=key, alpha=0.4)
+
+    plt.xlabel("runs")
+    plt.ylabel("number of users")
+    plt.legend(loc='upper right')
+    plt.show()
