@@ -7,6 +7,41 @@ tensorboard --logdir logs/2x256-1576340031
 * [Tutorial Deep Q-Learning](https://pythonprogramming.net/training-deep-q-learning-dqn-reinforcement-learning-python-tutorial/)
 * [Video tutorial Deep Q-Learning](https://www.youtube.com/watch?v=qfovbG84EBg&t=4s)
 
+# Runs
+* muda numero de pessoas para ver traffic:
+  * 100
+  * 300
+  * 500
+* muda os custos
+  * menos para autocarro
+  * mais para carro(portagem)
+* mudar o tempo
+  * autocarro
+* mudar conforto
+  * autocarro
+
+
+3000 episodes
+* run 1
+  * 100 pessoas
+  * tudo igual
+* run 2
+  * 300 pessoas
+  * tudo igual
+* run 3
+  * 500 pessoas
+  * tudo igual
+
+* run 4
+  * 1 custo autocarro
+* run 5
+  * custo carro + 2 custo shared + 2/3
+* run 6
+  * mudar tempo do autocarro + ou - dependendo se pessoas gostam do autocarro
+* run 7
+  * mudar conforto do autocarro + ou - dependendo se pessoas gostam do autocarro
+
+
 # To Do
 * Add people that choose a mean of transport
 * Write stats to a file
