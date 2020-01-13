@@ -7,6 +7,7 @@ providers = bidict({
     "STCP": 2
 })
 
+
 class Provider:
     """Represents an provider/operator - one of the stakeholders of the system"""
     def __init__(self,name,service):
@@ -44,7 +45,7 @@ class Friends(Provider):
         return Actor(route,user,self)
     
     def get_cost(self,time):
-        return time*3
+        return (time*4)/3
     
     def get_time(self, time):
         return time

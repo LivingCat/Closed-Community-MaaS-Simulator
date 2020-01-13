@@ -27,7 +27,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import json
 import time
-run_name = "reduce_cost_bus"
+run_name = "normal_500"
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -237,6 +237,9 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         number_users_dict["bus"].append(run_number_users_dict["bus"])
         number_users_dict["sharedCar"].append(run_number_users_dict["sharedCar"])
 
+    np.save("{}_emissions".format(run_name),np.array(emissions_dict))
+    np.save("{}_number".format(run_name), np.array(number_users_dict))
+
     if display_plots:
         plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
         plot_accumulated_edges_graphs(results['edges_occupation'], len(all_s))
@@ -244,8 +247,6 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         plot_number_users_development(number_users_dict)
     plt.waitforbuttonpress(0)  
 
-    np.save("{}_emissions".format(run_name),np.array(emissions_dict))
-    np.save("{}_number".format(run_name), np.array(number_users_dict))
 
     return results
 
