@@ -1,6 +1,6 @@
 {
-    "graph": {
-        "num_nodes": 5,
+	"graph": {
+		"num_nodes": 5,
 		"start_node":0,
 		"end_node":4,
 		"edges_list": {
@@ -9,50 +9,50 @@
 				"volume":0,
 				"free_flow_travel_time":1,
 				"capacity":50,
-                "allowed_transports": ["sharedCar"]
-                },
+				"allowed_transports": ["sharedCar"]
+			},
 				
 			"1,4": {
 				"color":"red",
 				"volume":0,
 				"free_flow_travel_time":1,
 				"capacity":50,
-                "allowed_transports": ["sharedCar"]
-                },
+				"allowed_transports": ["sharedCar"]
+			},
 				
 			"0,2": {
 				"color":"blue",
 				"volume":0,
 				"free_flow_travel_time":1,
 				"capacity":50,
-                "allowed_transports": ["car"]
-                },
+				"allowed_transports": ["car"]
+			},
 				
 			"2,4": {
 				"color":"blue",
 				"volume":0,
 				"free_flow_travel_time":1,
 				"capacity":50,
-                "allowed_transports": ["car"]
-                },
+				"allowed_transports": ["car"]
+			},
 				
 			"0,3": {
 				"color":"green",
 				"volume":0,
 				"free_flow_travel_time":1,
-				"capacity":70,
-                "allowed_transports": ["bus"]
-                },
+				"capacity":140,
+				"allowed_transports": ["bus"]
+			},
 				
 			"3,4": {
 				"color":"green",
 				"volume":0,
 				"free_flow_travel_time":1,
-				"capacity":70,
-                "allowed_transports": ["bus"]
-                }			
-            }
-		},
+				"capacity":140,
+				"allowed_transports": ["bus"]
+			}			
+		}
+	},
 	"users":{
 		"num_users": 100,
 		"personality_params":{

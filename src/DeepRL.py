@@ -27,7 +27,7 @@ EPISODES = 20000
 
 # Exploration settings
 epsilon = 1  # not a constant, going to be decayed
-EPSILON_DECAY = 0.99975
+EPSILON_DECAY = 0.999
 MIN_EPSILON = 0.001
 
 #  Stats settings
