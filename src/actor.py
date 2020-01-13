@@ -95,4 +95,4 @@ class Actor():
 
     @property
     def emissions(self):
-        return self.provider.get_emissions(len(self.traveled_nodes)-1)
+        return self.provider.get_emissions(self.total_travel_time)
