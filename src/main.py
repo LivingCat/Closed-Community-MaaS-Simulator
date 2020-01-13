@@ -27,7 +27,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import json
 import time
-run_name = "normal_500"
+run_name = "normal_300"
 
 def parse_args():
     parser = argparse.ArgumentParser(

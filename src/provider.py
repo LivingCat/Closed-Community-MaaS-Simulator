@@ -31,13 +31,15 @@ class Personal(Provider):
     def get_comfort(self):
         return 0.8
 
-    def get_emissions(self, distance):
-        return Bus.emissions(distance)
+    def get_emissions(self, time):
+        return Car.emissions(time)
 
     def get_awareness(self):
-        return Bus.awareness()
+        return Car.awareness()
 
 class Friends(Provider):
+
+    n_passengers = 3
     def __init__(self):
         super().__init__("Friends", "sharedCar")
     
@@ -45,7 +47,7 @@ class Friends(Provider):
         return Actor(route,user,self)
     
     def get_cost(self,time):
-        return (time*4)/3
+        return (time*4)/self.n_passengers
     
     def get_time(self, time):
         return time
@@ -53,8 +55,8 @@ class Friends(Provider):
     def get_comfort(self):
         return 0.6
 
-    def get_emissions(self, distance):
-        return Car.emissions(distance)/3
+    def get_emissions(self, time):
+        return Car.emissions(time)/self.n_passengers
 
     def get_awareness(self):
         return 0.5
@@ -75,8 +77,8 @@ class STCP(Provider):
     def get_comfort(self):
         return 0.4
 
-    def get_emissions(self, distance):
-        return Bus.emissions(distance)
+    def get_emissions(self, time):
+        return Bus.emissions(time)
 
     def get_awareness(self):
         return Bus.awareness()

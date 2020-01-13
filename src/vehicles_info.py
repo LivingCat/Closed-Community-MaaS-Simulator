@@ -1,7 +1,7 @@
 class Car:
 	@staticmethod
-	def	emissions(distance):
-		return distance * 139
+	def	emissions(time):
+		return time * 139
 
 	@staticmethod
 	def awareness():
@@ -9,8 +9,8 @@ class Car:
 
 class Bus:
 	@staticmethod
-	def emissions(distance):
-		return distance * 81.63
+	def emissions(time):
+		return time * 81.63
 	
 	@staticmethod
 	def awareness():
