@@ -27,7 +27,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import json
 import time
-run_name = "normal_300"
+run_name = "cheaper_bus_100"
 
 def parse_args():
     parser = argparse.ArgumentParser(

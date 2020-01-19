@@ -14,4 +14,4 @@ class Bus:
 	
 	@staticmethod
 	def awareness():
-		return 1
+		return 0.9

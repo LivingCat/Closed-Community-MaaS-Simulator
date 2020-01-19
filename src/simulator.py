@@ -121,7 +121,7 @@ class Simulator:
         final_users = []
 
         for actor in self.actors:
-            commute_out = CommuteOutput(actor.cost, actor.travel_time, actor.awareness, actor.comfort, str(type(actor).__name__))
+            commute_out = CommuteOutput(actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
             user_info = dict()
             user_info["user"] = actor.user
             user_info["commute_output"] = commute_out
@@ -193,7 +193,7 @@ class Simulator:
             willingness_to_wait = min(max([0.0001,willingness_to_wait]),1)
             comfort_preference = min(max([0.0001,comfort_preference]),1)
             awareness = min(max([0.000, awareness]), 1)
-
+        
             personality = Personality(willingness_to_pay, willingness_to_wait, awareness, comfort_preference, bool(has_private))
             user = User(personality, time)
             while True:

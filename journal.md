@@ -19,6 +19,7 @@ tensorboard --logdir logs/2x256-1576340031
   * autocarro
 * mudar conforto
   * autocarro
+* mais pessoas a partilhar
 
 
 3000 episodes
