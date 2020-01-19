@@ -9,8 +9,8 @@ tensorboard --logdir logs/2x256-1576340031
 
 # Runs
 * muda numero de pessoas para ver traffic:
-  * 100
-  * 300
+  * 100 check
+  * 300 check
   * 500
 * muda os custos
   * menos para autocarro
