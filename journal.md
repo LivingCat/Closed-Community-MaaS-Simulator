@@ -11,10 +11,10 @@ tensorboard --logdir logs/2x256-1576340031
 * muda numero de pessoas para ver traffic:
   * 100 check
   * 300 check
-  * 500
+  * 500 check
 * muda os custos
   * menos para autocarro
-  * mais para carro(portagem)
+  * mais para carro(portagem) +1 check
 * mudar o tempo
   * autocarro
 * mudar conforto
