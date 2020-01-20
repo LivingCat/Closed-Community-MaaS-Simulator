@@ -13,12 +13,12 @@ tensorboard --logdir logs/2x256-1576340031
   * 300 check
   * 500 check
 * muda os custos
-  * menos para autocarro
+  * menos para autocarro check
   * mais para carro(portagem) +1 check
 * mudar o tempo
-  * autocarro
+  * autocarro check
 * mudar conforto
-  * autocarro
+  * autocarro check
 * mais pessoas a partilhar
 
 
