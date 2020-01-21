@@ -22,9 +22,6 @@ class Personal(Provider):
     def __init__(self):
         super().__init__("Personal", "car")
     
-    def actor_factory():
-        return Actor(route, user, self)
-    
     def get_cost(self,time):
         return time*fuel_cost + fixed_added_cost
     
@@ -46,8 +43,6 @@ class Friends(Provider):
     def __init__(self):
         super().__init__("Friends", "sharedCar")
     
-    def actor_factory():
-        return Actor(route,user,self)
     
     def get_cost(self,time):
         return (time*fuel_cost + fixed_added_cost)/self.n_passengers
@@ -67,9 +62,6 @@ class Friends(Provider):
 class STCP(Provider):
     def __init__(self):
         super().__init__("STCP", "bus")
-    
-    def actor_factory():
-        return Actor(route, user, self)
     
     def get_cost(self,time):
         return 2

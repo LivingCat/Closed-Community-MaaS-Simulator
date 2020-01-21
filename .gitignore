@@ -1,5 +1,9 @@
 /models
 /logs
+/*_gif
+
+*.veg
+*.bak
 
 # PyCharm specific stuff
 .idea

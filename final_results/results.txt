@@ -1,0 +1,99 @@
+normal 100
+  number:
+  bus final: 44.86 (44.86%)
+  car final: 35.79 (35.79%)
+  sharedCar final: 19.35 (19.35%)
+
+  emissions:
+  bus final: 7323.844058552637 (36.68684055890216%)
+  car final: 9949.641269034963 (49.84007031513657%)
+  sharedCar final: 2689.6511730710404 (13.473089125961248%)
+  total final: 19963.136500658627 (99.99999999999993%)
+
+normal 300
+  number:
+  bus final: 121.58 (40.526666666666664%)
+  car final: 97.295 (32.431666666666665%)
+  sharedCar final: 81.125 (27.041666666666668%)
+
+  emissions:
+  bus final: 19849.18279694453 (34.11954585875047%)
+  car final: 27049.515286866863 (46.49648233524729%)
+  sharedCar final: 11276.703426856455 (19.383971806002236%)
+  total final: 58175.401510667965 (100.0000000000002%)
+
+normal 500
+  number:
+  bus final: 202.99 (40.598%)
+  car final: 165.57 (33.114%)
+  sharedCar final: 131.44 (26.288%)
+
+  emissions:
+  bus final: 33140.49480333436 (34.00577126888389%)
+  car final: 46042.3604950068 (47.244496165916225%)
+  sharedCar final: 18272.64583201761 (18.74973256519987%)
+  total final: 97455.50113035885 (100.00000000000007%)
+
+cheaper bus
+  number:
+  bus final: 79.045 (79.045%)
+  car final: 18.69 (18.69%)
+  sharedCar final: 2.265 (2.265%)
+
+  emissions:
+  bus final: 12904.891278774612 (70.07606358910898%)
+  car final: 5195.82193614768 (28.214321262359807%)
+  sharedCar final: 314.8350020016 (1.7096151485312099%)
+  total final: 18415.548216923886 (99.99999999999996%)
+
+
+added cost 1
+  number:
+  bus final: 56.33 (56.33%)
+  car final: 34.82 (34.82%)
+  sharedCar final: 8.85 (8.85%)
+
+  emissions:
+  bus final: 9196.436896488984 (45.73847164827926%)
+  car final: 9679.980960454961 (48.1433776688757%)
+  sharedCar final: 1230.1501263676798 (6.118150682845027%)
+  total final: 20106.567983311612 (99.99999999999993%)
+
+
+minus 1 bus time
+  number:
+  bus final: 51.135 (51.135%)
+  car final: 34.24 (34.24%)
+  sharedCar final: 14.625 (14.625%)
+
+  emissions:
+  bus final: 8348.300886750243 (41.95144140497163%)
+  car final: 9518.737881894083 (47.83305967509387%)
+  sharedCar final: 2032.87553027388 (10.215498919934497%)
+  total final: 19899.914298918193 (99.99999999999993%)
+
+
+comfort bus
+  number:
+  bus final: 80.325 (80.325%)
+  car final: 17.15 (17.15%)
+  sharedCar final: 2.525 (2.525%)
+
+  emissions:
+  bus final: 13113.86449937172 (71.92559625341342%)
+  car final: 4767.7024319106395 (26.14941157813939%)
+  sharedCar final: 350.97500437016004 (1.9249921684471862%)
+  total final: 18232.541935652516 (99.99999999999997%)
+
+
+more people sharing
+  number:
+  bus final: 2.4 (2.4%)
+  car final: 12.92 (12.92%)
+  sharedCar final: 84.68 (84.68%)
+
+  emissions:
+  bus final: 391.8240000213552 (3.970249492543956%)
+  car final: 3591.76063937776 (36.3943654677909%)
+  sharedCar final: 5885.417315193216 (59.63538503966515%)
+  total final: 9869.001954592335 (100.00000000000003%)
