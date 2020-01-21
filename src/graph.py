@@ -35,7 +35,7 @@ class RoadGraph:
         self.graph.edges[edge[0], edge[1]]['volume'] -= 1
 
     def get_edge_data(self, edge: Tuple[int, int]) -> dict:
-        """Get edge related data. ATIS data endpoint"""
+        """Get edge related data."""
         return self.graph.edges[edge[0], edge[1]]
 
     def get_possible_routes(self, src_node: int, dest_node: int, actor: str):

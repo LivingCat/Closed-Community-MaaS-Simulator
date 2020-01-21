@@ -86,22 +86,16 @@ def actor_constructor(graph: RoadGraph, user: User):
 
 
 def stats_constructor(graph: RoadGraph):
-    # print("Created STATS")
     return SimStats(graph)
 
 
 def statistics_print(sim: Simulator):
-    """Print of simulation statistics regarding ATIS and non ATIS users"""
+    """Print of simulation statistics regarding non ATIS users"""
     print()
     atis_no = []
     for a in sim.actors:
-        # if a.atis is not None:
-        #     atis_yes.append(a.total_travel_time)
-        # else:
         atis_no.append(a.total_travel_time)
 
-    # print("ATIS YES: mean: %f || std: %f" %
-    #       (np.mean(atis_yes), np.std(atis_yes)))
     print("ATIS NO: mean: %f || std: %f" % (np.mean(atis_no), np.std(atis_no)))
 
 
@@ -168,10 +162,6 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
             for service in edges[key]:
                 results['edges_occupation'][str(
                     key)][service].append(edges[key][service])
-    
-
-    # pretty(results['edges_atis_natis'])
-    # print(results['edges_atis_natis'])
 
     for e_key in results['edges_occupation'].keys():
         edge_flow = defaultdict(lambda: [(0.0, 0)])
