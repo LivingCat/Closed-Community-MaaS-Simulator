@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
 
-filename = "results/normal_100_number.npy"
+filename = "results/normal_100_emissions.npy"
 
 results_dict = np.load(
     filename, allow_pickle=True)
@@ -11,7 +11,7 @@ results_dict = results_dict.item()
 # print(results_dict["bus"][-1])
 # print(results_dict["car"][-1])
 # print(results_dict["sharedCar"][-1])
-
+del results_dict["total"]
 mean_total = 0
 for key in results_dict:
     if key != "total":
@@ -30,11 +30,11 @@ for i in range(len(results_dict["car"])):
     current = []
     for key in results_dict:
         current.append(results_dict[key][i])
-    plt.ylim((15, 50))
-    plt.ylabel("number of users")
+    plt.ylim((2000, 12500))
+    plt.ylabel("emissions CO2 (g)")
     plt.bar(x,current)
     plt.xticks(x, ('car', 'bus', 'shared car'))
-    plt.savefig("100_users_gif/frame{}".format(i))
+    plt.savefig("100_emissions_gif/frame{}".format(i))
     plt.clf()
     print(i)
 
