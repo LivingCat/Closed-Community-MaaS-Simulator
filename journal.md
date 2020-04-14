@@ -1,7 +1,7 @@
 # How to run
 python src/main.py -r 100 -js ex.json
 
-tensorboard --logdir logs/2x256-1576340031
+tensorboard --logdir logs/2x256-1579515056
 
 # Resources
 * [Tutorial Deep Q-Learning](https://pythonprogramming.net/training-deep-q-learning-dqn-reinforcement-learning-python-tutorial/)
@@ -106,3 +106,9 @@ tensorboard --logdir logs/2x256-1576340031
 
 * Tensorboard
 * Tried different personality types - need to work on that
+
+# 14-04-2020
+
+* Finaly made a commit with all the changes as of yet
+* Users have more information from clusters, factors, courses and grades
+* Writing user info to a file at the end of the main (need to think about a new place)

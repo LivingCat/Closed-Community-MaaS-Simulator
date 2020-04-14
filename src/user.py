@@ -2,13 +2,20 @@ from provider import Provider
 class Personality:
     """Represents the user's preferences of the system"""
 
-    def __init__(self, willingness_to_pay, willingness_to_wait, awareness, comfort_preference, has_private, mean_transportation=""):
+    def __init__(self, willingness_to_pay, willingness_to_wait, awareness, comfort_preference, has_private, friendliness, suscetible, transport, urban, willing, mean_transportation=""):
         self.willingness_to_pay = willingness_to_pay
         self.willingness_to_wait = willingness_to_wait
         self.awareness = awareness
         self.comfort_preference = comfort_preference
         self.has_private = has_private
         self.mean_transportation = mean_transportation
+
+        #Factors
+        self.friendliness = friendliness
+        self.suscetible = suscetible
+        self.transport = transport
+        self.urban = urban
+        self.willing = willing
 
 
 class CommuteOutput:
@@ -24,9 +31,15 @@ class User:
     """Represents a User of the system"""
     provider: Provider
     mean_transportation: str
-    def __init__(self, personality: Personality, start_time: float):
+    cluster: str
+    course: str
+    grade: str
+    def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str):
        self.personality = personality
        self.start_time = start_time
+       self.cluster = cluster
+       self.course = course
+       self.grade = grade
 
     def cost_util(self, commute_out: CommuteOutput):
         return 1/(commute_out.cost) * self.personality.willingness_to_pay
@@ -46,5 +59,21 @@ class User:
     def get_user_current_state(self):
         personality = self.personality
         return [self.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference, int(personality.has_private)]
-
     
+    def pprint(self):
+        personality = self.personality
+        print("cluster: {} \n". format(self.cluster))
+        print("course: {} \n". format(self.course))
+        print("grade: {} \n". format(self.grade))
+        # print("willingness to pay: {} \n". format(personality.willingness_to_pay))
+        # print("willingness to wait: {} \n". format(personality.willingness_to_wait))
+        # print("awareness: {} \n". format(personality.awareness))
+        # print("comfort preference: {} \n". format(personality.comfort_preference))
+        print("has private: {} \n". format(personality.has_private))
+        print("friendliness: {} \n". format(personality.friendliness))
+        print("suscetible: {} \n". format(personality.suscetible))
+        print("transport: {} \n". format(personality.transport))
+        print("urban: {} \n". format(personality.urban))
+        print("willing: {} \n". format(personality.willing))
+        return True
+

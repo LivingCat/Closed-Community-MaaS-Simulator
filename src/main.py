@@ -27,6 +27,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import json
 import time
+
+import csv
+
 run_name = "normal_100"
 
 def parse_args():
@@ -249,6 +252,30 @@ def get_user_current_state(user: User):
     personality = user.personality
     return [user.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, int(personality.has_private)]
 
+
+def write_user_info(actors: List[Actor], file:str):
+    fields = ["Course", "Grade", "Cluster", "Willingness to pay", "Willingness to wait", "Awareness", "Comfort preference",
+        "has private", "Friendliness", "Suscetible", "Transport", "Urban", "Willing", "Transportation"]
+
+    # writing to csv file
+    with open(file, 'a+', newline='') as csvfile:
+        # creating a csv writer object
+        csvwriter = csv.writer(csvfile)
+        # writing the fields
+        csvwriter.writerow(fields)
+
+        for act in actors:
+            us = act.user
+            personality = us.personality
+            info = [us.course, us.grade, us.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
+                personality.has_private, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
+                us.provider.service]
+            csvwriter.writerow(info)
+
+
+
+
+
 def main(args):
     ep_rewards = [0]
 
@@ -287,7 +314,7 @@ def main(args):
 
         # Restarting episode - reset episode reward and step number
         episode_reward = 0
-        step = 1
+        # step = 1
            # Transform new continous state to new discrete state and count reward
         for user_info in final_users:
             episode_reward += user_info["utility"]
@@ -322,7 +349,19 @@ def main(args):
 
     json.dump(json_object, open(args.save_path, "w+"))
 
+    # print("all stats")
+    # for i in all_stats:
+    #     print("hi")
+    #     print(i.actors)
+    #     for ac in i.actors:
+    #         print(ac.provider)
+
     statistics_print(sim)
+
+    save_actor_file = "actors_info.csv"
+    write_user_info(all_stats[0].actors, save_actor_file)
+    
+
 
 if __name__ == '__main__':
     main(parse_args())

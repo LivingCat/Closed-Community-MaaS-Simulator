@@ -54,7 +54,372 @@
 		}
 	},
 	"users":{
-		"num_users": 100,
+		"num_users": 20,
+		"num_clusters":5,
+		"clusters_distribution":{
+			"cluster_0":0.267,
+			"cluster_1":0.426,
+			"cluster_2":0.494,
+			"cluster_3":0.842,
+			"cluster_4":1
+		},
+		"clusters":{
+			"cluster_0": {
+				"friendliness": {
+					"distrib": "gengamma",
+					"mean": 1.5432040168659067,
+					"stand_div": 2.3151282280713437,
+					"shape": {
+						"a": 0.6928552183107004,
+						"b": 3.6613927765900067
+					},
+					"min_value": -1.396,
+					"max_value": 1.641
+				},
+				"suscetible": {
+					"distrib": "weibull_min",
+					"mean": -5.122851569831785,
+					"stand_div": 5.327933218836145,
+					"shape": {
+						"a": 7.138366223998646
+					},
+					"min_value": -2.686,
+					"max_value": 1.601
+				},
+				"transport": {
+					"distrib": "triang",
+					"mean": -0.09679459183917238,
+					"stand_div": 2.1831710610864796,
+					"shape": {
+						"a": 0.5140643728255668
+					},
+					"min_value": -0.015,
+					"max_value": 2.025
+				},
+				"urban": {
+					"distrib": "beta",
+					"mean": -0.9997480000000001,
+					"stand_div": 2.528318637053086,
+					"shape": {
+						"a": 0.9561492846633622,
+						"b": 2.491250466337461
+					},
+					"min_value": -1.000,
+					"max_value": 1.366
+				},
+				"willing": {
+					"distrib": "gengamma",
+					"mean": -0.742553648755933,
+					"stand_div": 0.9015099620142999,
+					"shape": {
+						"a": 0.5127596968579664,
+						"b": 3.5557489293498983
+					},
+					"min_value": -0.709,
+					"max_value": 0.610
+				},
+				"has_private": {
+					"ratio": 0.993
+				}
+			},
+			"cluster_1": {
+				"friendliness": {
+					"distrib": "weibull_max",
+					"mean": -0.25975129990840984,
+					"stand_div": 1.369692988221527,
+					"shape": {
+						"a": 2.004853039653698
+					},
+					"min_value": -2.742,
+					"max_value": -0.412
+				},
+				"suscetible": {
+					"distrib": "triang",
+					"mean": -2.8284580034048323,
+					"stand_div": 4.7725331496201555,
+					"shape": {
+						"a": 0.4940829194942201
+					},
+					"min_value": -2.513,
+					"max_value": 1.800
+				},
+				"transport": {
+					"distrib": "gengamma",
+					"mean": -1.3660450000000004,
+					"stand_div": 2.5511757279755045,
+					"shape": {
+						"a": 0.1292241905346318,
+						"b": 7.105924718031742
+					},
+					"min_value": -1.366,
+					"max_value": 1.483
+				},
+				"urban": {
+					"distrib": "weibull_min",
+					"mean": -0.8461670000000001,
+					"stand_div": 0.64867688744728,
+					"shape": {
+						"a": 0.9882528966641682
+					},
+					"min_value": -0.846,
+					"max_value": 1.822
+				},
+				"willing": {
+					"distrib": "weibull_min",
+					"mean": -0.967231482647817,
+					"stand_div": 0.8577854888777148,
+					"shape": {
+						"a": 2.5693318152898854
+					},
+					"min_value": -0.840,
+					"max_value": 0.693
+				},
+				"has_private": {
+					"ratio": 0.429
+				}
+			},
+			"cluster_2": {
+				"friendliness": {
+					"distrib": "weibull_max",
+					"mean": 1.574516157174364,
+					"stand_div": 1.5946611829055584,
+					"shape": {
+						"a": 1.522425442919979
+					},
+					"min_value": -1.659,
+					"max_value": 1.513
+				},
+				"suscetible": {
+					"distrib": "beta",
+					"mean": -4.145772254798786,
+					"stand_div": 5.49096613378113,
+					"shape": {
+						"a": 3.5762389507590147,
+						"b": 1.313937959673507
+					},
+					"min_value": -2.850,
+					"max_value": 1.321
+				},
+				"transport": {
+					"distrib": "triang",
+					"mean": -1.3717188597379162,
+					"stand_div": 3.1658059752004846,
+					"shape": {
+						"a": 0.12268360077004306
+					},
+					"min_value": -1.259,
+					"max_value": 1.337
+				},
+				"urban": {
+					"distrib": "invweibull",
+					"mean": -1.9812696853618874,
+					"stand_div": 1.3954856203013712,
+					"shape": {
+						"a": 3.0074035339719227
+					},
+					"min_value": -1.046,
+					"max_value": 1.897
+				},
+				"willing": {
+					"distrib": "logistic",
+					"mean": 2.3196523259452366,
+					"stand_div": 0.13627722628591127,
+					"shape": {},
+					"min_value": 1.723,
+					"max_value": 2.799
+				},
+				"has_private": {
+					"ratio": 0.472
+				}
+			},
+			"cluster_3": {
+				"friendliness": {
+					"distrib": "beta",
+					"mean": -0.9528419095150711,
+					"stand_div": 2.3345319095150714,
+					"shape": {
+						"a": 1.237970937733364,
+						"b": 0.9650560084245892
+					},
+					"min_value": -0.946,
+					"max_value": 1.382
+				},
+				"suscetible": {
+					"distrib": "weibull_min",
+					"mean": -6.131944362532556,
+					"stand_div": 6.689739035036585,
+					"shape": {
+						"a": 10.882058005177342
+					},
+					"min_value": -1.925,
+					"max_value": 1.475
+				},
+				"transport": {
+					"distrib": "logistic",
+					"mean": -0.653550490706639,
+					"stand_div": 0.14099643336266,
+					"shape": {},
+					"min_value": -1.582,
+					"max_value": 0.317
+				},
+				"urban": {
+					"distrib": "gamma",
+					"mean": -0.9556439644904786,
+					"stand_div": 0.25499417923674605,
+					"shape": {
+						"a": 1.9897582864818202
+					},
+					"min_value": -0.946,
+					"max_value": 0.612
+				},
+				"willing": {
+					"distrib": "loglaplace",
+					"mean": -12600634.167682536,
+					"stand_div": 12600633.939721473,
+					"shape": {
+						"a": 58070935.35606929
+					},
+					"min_value": -1.032,
+					"max_value": 0.498
+				},
+				"has_private": {
+					"ratio": 0.016
+				}
+			},
+			"cluster_4": {
+				"friendliness": {
+					"distrib": "loggamma",
+					"mean": 0.7383501903264711,
+					"stand_div": 0.598959612376802,
+					"shape": {
+						"a": 0.8386588744699348
+					},
+					"min_value": -2.569,
+					"max_value": 1.521
+				},
+				"suscetible": {
+					"distrib": "beta",
+					"mean": -5.923407356873221,
+					"stand_div": 8.043636472808346,
+					"shape": {
+						"a": 14.887152404379645,
+						"b": 4.637075438248276
+					},
+					"min_value": -1.975,
+					"max_value": 1.733
+				},
+				"transport": {
+					"distrib": "weibull_min",
+					"mean": -1.4852104128484742,
+					"stand_div": 1.6604595030660974,
+					"shape": {
+						"a": 1.5033057778365704
+					},
+					"min_value": -1.457,
+					"max_value": 1.940
+				},
+				"urban": {
+					"distrib": "weibull_min",
+					"mean": 0.5592957033127424,
+					"stand_div": 1.355236086760907,
+					"shape": {
+						"a": 1.9100120069318405
+					},
+					"min_value": 0.609,
+					"max_value": 3.927
+				},
+				"willing": {
+					"distrib": "loglaplace",
+					"mean": -1.5286414511898005,
+					"stand_div": 1.4182744495807915,
+					"shape": {
+						"a": 5.659661061164488
+					},
+					"min_value": -0.882,
+					"max_value": 2.185
+				},
+				"has_private": {
+					"ratio": 0.506
+				}
+			}
+		},
+		"num_courses": 9,
+		"courses_distribution":{
+			"course_0": 0.076,
+			"course_1": 0.219,
+			"course_2": 0.254,
+			"course_3": 0.338,
+			"course_4": 0.554,
+			"course_5": 0.711,
+			"course_6": 0.901,
+			"course_7": 0.928,
+			"course_8": 1
+		},
+		"courses":{
+			"course_0":{
+				"year_0":0.181,
+				"year_1":0.377,
+				"year_2":0.565,
+				"year_3":0.773,
+				"year_4": 1
+			},
+			"course_1": {
+				"year_0": 0.208,
+				"year_1": 0.406,
+				"year_2": 0.590,
+				"year_3": 0.779,
+				"year_4":1
+			},
+			"course_2": {
+				"year_0": 0.218,
+				"year_1": 0.388,
+				"year_2": 0.543,
+				"year_3": 0.697,
+				"year_4": 1
+			},
+			"course_3": {
+				"year_0": 0.187,
+				"year_1": 0.380,
+				"year_2": 0.591,
+				"year_3": 0.782,
+				"year_4": 1
+			},
+			"course_4": {
+				"year_0": 0.193,
+				"year_1": 0.393,
+				"year_2": 0.559,
+				"year_3": 0.746,
+				"year_4":1
+			},
+			"course_5": {
+				"year_0": 0.188,
+				"year_1": 0.394,
+				"year_2": 0.599,
+				"year_3": 0.772,
+				"year_4":1
+			},
+			"course_6": {
+				"year_0": 0.183,
+				"year_1": 0.353,
+				"year_2": 0.545,
+				"year_3": 0.730,
+				"year_4":1
+			},
+			"course_7": {
+				"year_0": 0.178,
+				"year_1": 0.397,
+				"year_2": 0.575,
+				"year_3": 0.788,
+				"year_4":1
+			},
+			"course_8": {
+				"year_0": 0.197,
+				"year_1": 0.377,
+				"year_2": 0.546,
+				"year_3": 0.749,
+				"year_4":1
+			}
+		},
 		"personality_params":{
 			"willingness_to_pay":{
 				"mean":0.5,
@@ -74,9 +439,9 @@
 			},
 			"has_private": {
 				"ratio": 0.8
-			},
-			"punishment_doesnt_have_car":-100
-		}
+			}
+		},
+		"punishment_doesnt_have_car": -100
 	}
 }
 
