@@ -112,3 +112,8 @@ tensorboard --logdir logs/2x256-1579515056
 * Finaly made a commit with all the changes as of yet
 * Users have more information from clusters, factors, courses and grades
 * Writing user info to a file at the end of the main (need to think about a new place)
+
+# 18-02-2020
+
+* Users now have salary and budget
+* Fixed willingness to pay so that it now has to do with the salary of the user

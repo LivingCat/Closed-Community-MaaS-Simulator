@@ -171,8 +171,6 @@ class Simulator:
     def create_users(self, agent: DQNAgent):
         users = []
 
-        print("estou no create users")
-
         for _ in range(self.input_config["users"]["num_users"]):
 
             time = get_time_from_traffic_distribution(self.traffic_distribution)
@@ -183,10 +181,31 @@ class Simulator:
             #####################################################################################################
             ###   WORK IN PROGRESS   ###########################
 
-            willingness_to_pay = np.random.normal(
-                personality_params["willingness_to_pay"]["mean"],
-                personality_params["willingness_to_pay"]["stand_div"]
-                )
+            #Salary distribution
+            salary_params = self.input_config["users"]["salary_distribution"]
+
+            dist = getattr(scipy.stats, salary_params["distrib"])
+
+            shape_list = list(
+                salary_params["shape"].values())
+
+            # random_num = dist.rvs(a=*shape_list, scale=salary_params["scale_param"])
+
+            salary = dist.rvs(
+                *shape_list, scale=salary_params["scale_param"])
+            min_salary = salary_params["min_salary"]
+            max_salary = salary_params["max_salary"]
+
+            if(salary < min_salary):
+                salary = min_salary
+            else:
+                if(salary > max_salary):
+                    salary = max_salary
+
+            budget = salary * (salary_params["budget_percent"]/100)
+
+            #Willingness to pay is derived from the Budget
+            willingness_to_pay = (salary -  min_salary)/(max_salary - min_salary)
 
             willingness_to_wait = np.random.normal(
                 personality_params["willingness_to_wait"]["mean"],
@@ -194,8 +213,8 @@ class Simulator:
                 )
 
             awareness = np.random.normal(
-                personality_params["willingness_to_pay"]["mean"],
-                personality_params["willingness_to_pay"]["stand_div"]
+                personality_params["awareness"]["mean"],
+                personality_params["awareness"]["stand_div"]
                 )
 
             comfort_preference = np.random.normal(
@@ -262,13 +281,10 @@ class Simulator:
                 shape_list = list(
                     chosen_cluster_info[factor]["shape"].values())
               
-                print("shape list")
-                print(shape_list)
                 random_num = dist.rvs(
                         *shape_list, loc=chosen_cluster_info[factor]["mean"], scale=chosen_cluster_info[factor]["stand_div"])
 
                 user_factors_values[factor] = random_num
-                print(user_factors_values)
                 #Get distribution information for that factor
 
 
@@ -280,7 +296,7 @@ class Simulator:
 
             personality = Personality(willingness_to_pay, willingness_to_wait, awareness, comfort_preference, bool(has_private), 
                             user_factors_values["friendliness"], user_factors_values["suscetible"], user_factors_values["transport"], user_factors_values["urban"], user_factors_values["willing"])
-            user = User(personality, time, chosen_cluster, chosen_course, chosen_grade)
+            user = User(personality, time, chosen_cluster, chosen_course, chosen_grade, salary, budget)
 
          
             # se estiverem entao proximo passo é adicionar tambem informaçao de ano e curso!

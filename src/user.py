@@ -34,12 +34,16 @@ class User:
     cluster: str
     course: str
     grade: str
-    def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str):
+    salary: float
+    budget: float
+    def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float):
        self.personality = personality
        self.start_time = start_time
        self.cluster = cluster
        self.course = course
        self.grade = grade
+       self.salary = salary
+       self.budget = budget
 
     def cost_util(self, commute_out: CommuteOutput):
         return 1/(commute_out.cost) * self.personality.willingness_to_pay
@@ -65,15 +69,17 @@ class User:
         print("cluster: {} \n". format(self.cluster))
         print("course: {} \n". format(self.course))
         print("grade: {} \n". format(self.grade))
-        # print("willingness to pay: {} \n". format(personality.willingness_to_pay))
+        print("salary: {} \n". format(self.salary))
+        print("budget: {} \n". format(self.budget))
+        print("willingness to pay: {} \n". format(personality.willingness_to_pay))
         # print("willingness to wait: {} \n". format(personality.willingness_to_wait))
         # print("awareness: {} \n". format(personality.awareness))
         # print("comfort preference: {} \n". format(personality.comfort_preference))
-        print("has private: {} \n". format(personality.has_private))
-        print("friendliness: {} \n". format(personality.friendliness))
-        print("suscetible: {} \n". format(personality.suscetible))
-        print("transport: {} \n". format(personality.transport))
-        print("urban: {} \n". format(personality.urban))
-        print("willing: {} \n". format(personality.willing))
+        # print("has private: {} \n". format(personality.has_private))
+        # print("friendliness: {} \n". format(personality.friendliness))
+        # print("suscetible: {} \n". format(personality.suscetible))
+        # print("transport: {} \n". format(personality.transport))
+        # print("urban: {} \n". format(personality.urban))
+        # print("willing: {} \n". format(personality.willing))
         return True
 
