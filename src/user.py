@@ -1,4 +1,5 @@
 from provider import Provider
+from typing import List
 class Personality:
     """Represents the user's preferences of the system"""
 
@@ -36,6 +37,8 @@ class User:
     grade: str
     salary: float
     budget: float
+    friends: List['User']
+
     def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float):
        self.personality = personality
        self.start_time = start_time
@@ -44,6 +47,9 @@ class User:
        self.grade = grade
        self.salary = salary
        self.budget = budget
+
+    def add_friends(self,friends: List['User']):
+        self.friends = friends
 
     def cost_util(self, commute_out: CommuteOutput):
         return 1/(commute_out.cost) * self.personality.willingness_to_pay

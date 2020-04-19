@@ -84,14 +84,28 @@ class Simulator:
         plt.waitforbuttonpress(0)
         plt.clf()
 
+
+    def create_friends(self):
+        print("im create friends")
+        friend_distrib_info = self.input_config["users"]["friends_distribution"]
+        friends_gen_type = self.input_config["users"]["friends_type"]
+
+        dist = getattr(scipy.stats, friend_distrib_info["distrib"])
+
+        num_friend = int(dist.rvs(loc=friend_distrib_info["mean"], scale=friend_distrib_info["stand_div"]))
+        print(num_friend)
+
+        return True
+
     def run(self, agent: DQNAgent):
         # Empty actors list, in case of consecutive calls to this method
         self.actors = []
         self.users = self.create_users(agent)
+        self.create_friends()
 
         # for user in self.users:
         #     user.pprint()
-        # exit()
+        exit()
         #############################################################################################################
         #######################################################################################
 
