@@ -1,69 +1,88 @@
 {
 	"graph": {
 		"num_nodes": 5,
-		"start_node":0,
-		"end_node":4,
+		"start_node": 0,
+		"end_node": 4,
 		"edges_list": {
 			"0,1": {
-				"color":"red",
-				"volume":0,
-				"free_flow_travel_time":1,
-				"capacity":50,
-				"allowed_transports": ["sharedCar"]
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar"
+				]
 			},
-				
 			"1,4": {
-				"color":"red",
-				"volume":0,
-				"free_flow_travel_time":1,
-				"capacity":50,
-				"allowed_transports": ["sharedCar"]
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar"
+				]
 			},
-				
 			"0,2": {
-				"color":"blue",
-				"volume":0,
-				"free_flow_travel_time":1,
-				"capacity":50,
-				"allowed_transports": ["car"]
+				"color": "blue",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"car"
+				]
 			},
-				
 			"2,4": {
-				"color":"blue",
-				"volume":0,
-				"free_flow_travel_time":1,
-				"capacity":50,
-				"allowed_transports": ["car"]
+				"color": "blue",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"car"
+				]
 			},
-				
 			"0,3": {
-				"color":"green",
-				"volume":0,
-				"free_flow_travel_time":1,
-				"capacity":140,
-				"allowed_transports": ["bus"]
+				"color": "green",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 140,
+				"allowed_transports": [
+					"bus"
+				]
 			},
-				
 			"3,4": {
-				"color":"green",
-				"volume":0,
-				"free_flow_travel_time":1,
-				"capacity":140,
-				"allowed_transports": ["bus"]
-			}			
+				"color": "green",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 140,
+				"allowed_transports": [
+					"bus"
+				]
+			}
 		}
 	},
-	"users":{
-		"num_users": 20,
-		"num_clusters":5,
-		"clusters_distribution":{
-			"cluster_0":0.267,
-			"cluster_1":0.426,
-			"cluster_2":0.494,
-			"cluster_3":0.842,
-			"cluster_4":1
+	"users": {
+		"num_users": 300,
+		"num_clusters": 5,
+		"salary_distribution": {
+			"distrib": "gamma",
+			"mean": 970.4,
+			"stand_div": 599.1,
+			"shape": {
+				"a": 2.623632104251631
+			},
+			"scale_param": 369.868930338005,
+			"min_salary": 300,
+			"max_salary": 3000,
+			"budget_percent": 13.4
 		},
-		"clusters":{
+		"clusters_distribution": {
+			"cluster_0": 0.267,
+			"cluster_1": 0.426,
+			"cluster_2": 0.494,
+			"cluster_3": 0.842,
+			"cluster_4": 1
+		},
+		"clusters": {
 			"cluster_0": {
 				"friendliness": {
 					"distrib": "gengamma",
@@ -344,7 +363,7 @@
 			}
 		},
 		"num_courses": 9,
-		"courses_distribution":{
+		"courses_distribution": {
 			"course_0": 0.076,
 			"course_1": 0.219,
 			"course_2": 0.254,
@@ -355,12 +374,12 @@
 			"course_7": 0.928,
 			"course_8": 1
 		},
-		"courses":{
-			"course_0":{
-				"year_0":0.181,
-				"year_1":0.377,
-				"year_2":0.565,
-				"year_3":0.773,
+		"courses": {
+			"course_0": {
+				"year_0": 0.181,
+				"year_1": 0.377,
+				"year_2": 0.565,
+				"year_3": 0.773,
 				"year_4": 1
 			},
 			"course_1": {
@@ -368,7 +387,7 @@
 				"year_1": 0.406,
 				"year_2": 0.590,
 				"year_3": 0.779,
-				"year_4":1
+				"year_4": 1
 			},
 			"course_2": {
 				"year_0": 0.218,
@@ -389,42 +408,38 @@
 				"year_1": 0.393,
 				"year_2": 0.559,
 				"year_3": 0.746,
-				"year_4":1
+				"year_4": 1
 			},
 			"course_5": {
 				"year_0": 0.188,
 				"year_1": 0.394,
 				"year_2": 0.599,
 				"year_3": 0.772,
-				"year_4":1
+				"year_4": 1
 			},
 			"course_6": {
 				"year_0": 0.183,
 				"year_1": 0.353,
 				"year_2": 0.545,
 				"year_3": 0.730,
-				"year_4":1
+				"year_4": 1
 			},
 			"course_7": {
 				"year_0": 0.178,
 				"year_1": 0.397,
 				"year_2": 0.575,
 				"year_3": 0.788,
-				"year_4":1
+				"year_4": 1
 			},
 			"course_8": {
 				"year_0": 0.197,
 				"year_1": 0.377,
 				"year_2": 0.546,
 				"year_3": 0.749,
-				"year_4":1
+				"year_4": 1
 			}
 		},
-		"personality_params":{
-			"willingness_to_pay":{
-				"mean":0.5,
-				"stand_div":0.3
-			},
+		"personality_params": {
 			"willingness_to_wait": {
 				"mean": 0.5,
 				"stand_div": 0.3
@@ -444,4 +459,3 @@
 		"punishment_doesnt_have_car": -100
 	}
 }
-

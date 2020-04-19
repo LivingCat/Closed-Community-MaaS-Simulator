@@ -20,6 +20,7 @@ import scipy
 DEFAULT_VALUE_NUM = -100.0
 DEFAULT_VALUE_STRING = ""
 
+
 class Simulator:
     """Runs a simulation from a given set of parameters"""
 
@@ -48,7 +49,6 @@ class Simulator:
 
     def draw_graph(self):
 
-        
         #Trying to display graph
         # plt.ion()
         display_graph = self.graph.graph
@@ -108,9 +108,8 @@ class Simulator:
 
         for ae in create_actor_events:
             event_queue.put_nowait(ae.get_priorized())
-        
-        # elements in form (time, event), to be ordered by first tuple member
 
+        # elements in form (time, event), to be ordered by first tuple member
 
         # Start Simulation
         while event_queue.qsize() > 0:
@@ -130,11 +129,13 @@ class Simulator:
         final_users = []
 
         for actor in self.actors:
-            commute_out = CommuteOutput(actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+            commute_out = CommuteOutput(
+                actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
             user_info = dict()
             user_info["user"] = actor.user
             user_info["commute_output"] = commute_out
-            user_info["utility"] = actor.user.calculate_utility_value(commute_out)
+            user_info["utility"] = actor.user.calculate_utility_value(
+                commute_out)
             final_users.append(user_info)
 
             # print("mean: {}  utility: {} ".format(commute_out.mean_transportation, user_info["utility"]))
@@ -151,11 +152,10 @@ class Simulator:
                     user_info["utility"], 1, True))
             agent.train(True, 1)
 
-
         # self.draw_graph()
         return final_users
 
-    def create_actors_events(self,users: [User]) -> List[CreateActorEvent]:
+    def create_actors_events(self, users: [User]) -> List[CreateActorEvent]:
         """Returns all scheduled CreateActorEvents"""
         return [
             CreateActorEvent(
@@ -167,13 +167,14 @@ class Simulator:
         return [
             # AccidentEvent(10.0, (3, 6), 0.2)
         ]
-    
+
     def create_users(self, agent: DQNAgent):
         users = []
 
         for _ in range(self.input_config["users"]["num_users"]):
 
-            time = get_time_from_traffic_distribution(self.traffic_distribution)
+            time = get_time_from_traffic_distribution(
+                self.traffic_distribution)
 
             #personality params we had previously defined, namely, willingness_to_wait/pay, comfort preference and also has_private
             personality_params = self.input_config["users"]["personality_params"]
@@ -205,27 +206,29 @@ class Simulator:
             budget = salary * (salary_params["budget_percent"]/100)
 
             #Willingness to pay is derived from the Budget
-            willingness_to_pay = (salary -  min_salary)/(max_salary - min_salary)
+            willingness_to_pay = (salary - min_salary) / \
+                (max_salary - min_salary)
 
             willingness_to_wait = np.random.normal(
                 personality_params["willingness_to_wait"]["mean"],
                 personality_params["willingness_to_wait"]["stand_div"]
-                )
+            )
 
             awareness = np.random.normal(
                 personality_params["awareness"]["mean"],
                 personality_params["awareness"]["stand_div"]
-                )
+            )
 
             comfort_preference = np.random.normal(
                 personality_params["comfort_preference"]["mean"],
                 personality_params["comfort_preference"]["stand_div"]
-                )
+            )
 
-            has_private = 1 if np.random.uniform() < personality_params["has_private"]["ratio"] else 0
-            willingness_to_pay = min(max([0.0001,willingness_to_pay]),1)
-            willingness_to_wait = min(max([0.0001,willingness_to_wait]),1)
-            comfort_preference = min(max([0.0001,comfort_preference]),1)
+            has_private = 1 if np.random.uniform(
+            ) < personality_params["has_private"]["ratio"] else 0
+            willingness_to_pay = min(max([0.0001, willingness_to_pay]), 1)
+            willingness_to_wait = min(max([0.0001, willingness_to_wait]), 1)
+            comfort_preference = min(max([0.0001, comfort_preference]), 1)
             awareness = min(max([0.000, awareness]), 1)
 
             ###################################################################################################################
@@ -265,45 +268,46 @@ class Simulator:
             #get random values for the factors according to the distributions (change these to the beggining so that it's clearer which factors exist)
 
             chosen_cluster_info = self.input_config["users"]["clusters"][chosen_cluster]
-            user_factors = ["friendliness", "suscetible", "transport", "willing", "urban"]
+            user_factors = ["friendliness", "suscetible",
+                            "transport", "willing", "urban"]
             user_factors_values = {
-                "friendliness":DEFAULT_VALUE_NUM,
+                "friendliness": DEFAULT_VALUE_NUM,
                 "suscetible": DEFAULT_VALUE_NUM,
-                "transport":DEFAULT_VALUE_NUM,
+                "transport": DEFAULT_VALUE_NUM,
                 "willing": DEFAULT_VALUE_NUM,
                 "urban": DEFAULT_VALUE_NUM
             }
 
             for factor in user_factors:
-             
-                dist = getattr(scipy.stats, chosen_cluster_info[factor]["distrib"])
-                 #Get shape params
+
+                dist = getattr(
+                    scipy.stats, chosen_cluster_info[factor]["distrib"])
+                #Get shape params
                 shape_list = list(
                     chosen_cluster_info[factor]["shape"].values())
-              
+
                 random_num = dist.rvs(
-                        *shape_list, loc=chosen_cluster_info[factor]["mean"], scale=chosen_cluster_info[factor]["stand_div"])
+                    *shape_list, loc=chosen_cluster_info[factor]["mean"], scale=chosen_cluster_info[factor]["stand_div"])
 
                 user_factors_values[factor] = random_num
                 #Get distribution information for that factor
 
-
-            # 
+            #
             # Check if values are within the limits
-            # 
-            # Add factors to the personality of the users(?) 
+            #
+            # Add factors to the personality of the users(?)
             # add cluster info to the users(?)
 
-            personality = Personality(willingness_to_pay, willingness_to_wait, awareness, comfort_preference, bool(has_private), 
-                            user_factors_values["friendliness"], user_factors_values["suscetible"], user_factors_values["transport"], user_factors_values["urban"], user_factors_values["willing"])
-            user = User(personality, time, chosen_cluster, chosen_course, chosen_grade, salary, budget)
+            personality = Personality(willingness_to_pay, willingness_to_wait, awareness, comfort_preference, bool(has_private),
+                                      user_factors_values["friendliness"], user_factors_values["suscetible"], user_factors_values["transport"], user_factors_values["urban"], user_factors_values["willing"])
+            user = User(personality, time, chosen_cluster,
+                        chosen_course, chosen_grade, salary, budget)
 
-         
             # se estiverem entao proximo passo é adicionar tambem informaçao de ano e curso!
 
             #Users chooses action to take (ask Tiago why this is here and where is the learning part)
             while True:
-                if random.random() > agent.epsilon: #dizia np.random.random
+                if random.random() > agent.epsilon:  # dizia np.random.random
                     # Get action from Q table
                     current_state = np.array(user.get_user_current_state())
                     action = np.argmax(agent.get_qs(current_state))
@@ -314,8 +318,8 @@ class Simulator:
                 provider = self.providers[action]
                 if((not user.personality.has_private) and provider.name == "Personal"):
                     agent.update_replay_memory(
-                    (user.get_user_current_state(), action,
-                        self.input_config["users"]["punishment_doesnt_have_car"], 1, True))
+                        (user.get_user_current_state(), action,
+                         self.input_config["users"]["punishment_doesnt_have_car"], 1, True))
                     agent.train(True, 1)
                 else:
                     break
