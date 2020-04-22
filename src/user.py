@@ -38,6 +38,7 @@ class User:
     salary: float
     budget: float
     friends: List['User']
+    num_friends: int
 
     def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float):
        self.personality = personality
@@ -47,6 +48,8 @@ class User:
        self.grade = grade
        self.salary = salary
        self.budget = budget
+       self.friends = list()
+       self.num_friends = 0
 
     def add_friends(self,friends: List['User']):
         self.friends = friends

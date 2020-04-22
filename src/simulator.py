@@ -88,12 +88,75 @@ class Simulator:
     def create_friends(self):
         print("im create friends")
         friend_distrib_info = self.input_config["users"]["friends_distribution"]
-        friends_gen_type = self.input_config["users"]["friends_type"]
 
         dist = getattr(scipy.stats, friend_distrib_info["distrib"])
 
-        num_friend = int(dist.rvs(loc=friend_distrib_info["mean"], scale=friend_distrib_info["stand_div"]))
-        print(num_friend)
+        #Go through all the users of the system and input num_friends for each of them following the distribution
+        for user in self.users:
+            num_friend = int(dist.rvs(loc=friend_distrib_info["mean"], scale=friend_distrib_info["stand_div"]))
+            user.num_friends = num_friend
+
+        for user in self.users:
+            #use probabilities to select "friend category"
+            #find users that fit that category
+            #if no users fit into that category OR have remaining friends space than skip
+
+            #friends categories are:
+            # 0 - friends from same course and grade (50%)
+            # 1 - friends from same course but different grades (+1 or -1) (20%)
+            # 2 - friends from same grade but different courses (20%)
+            # 3 - friends from different courses and grades (10%)
+            friend_categories = [0,1,2,3]
+            friend_categories_probs = [0.5,0.2,0.2,0.1]
+
+            cats = random.choices(friend_categories,weights = friend_categories_probs, k = user.num_friends)
+            print("user")
+            print(user.course)
+            print(user.grade)
+            print(cats)
+            for cat in cats:
+                if(cat == 0):
+                    for poss_friend in self.users:
+                       if(poss_friend != user and user.course == poss_friend.course and user.grade == poss_friend.grade and poss_friend.num_friends > 0 and (poss_friend not in user.friends) ):
+                           user.friends.append(poss_friend)
+                           user.num_friends -= 1
+                           poss_friend.friends.append(user)
+                           poss_friend.num_friends -= 1
+                           break
+                elif(cat == 1):
+                    for poss_friend in self.users:
+                        grade_num = int(user.grade[(user.grade.index("_") + 1)])
+                        prev_grade_num = grade_num - 1
+                        next_grade_num = grade_num + 1
+                        prev_grade = "year_" + str(prev_grade_num)
+                        next_grade = "year_" + str(next_grade_num)
+                        if(poss_friend != user and user.course == poss_friend.course and (poss_friend.grade == prev_grade or poss_friend.grade == next_grade) and poss_friend.num_friends > 0 and (poss_friend not in user.friends)):
+                            user.friends.append(poss_friend)
+                            user.num_friends -= 1
+                            poss_friend.friends.append(user)
+                            poss_friend.num_friends -= 1
+                            break
+                elif(cat == 2):
+                    for poss_friend in self.users:
+                        if(poss_friend != user and user.course != poss_friend.course and poss_friend.grade == user.grade and poss_friend.num_friends > 0 and (poss_friend not in user.friends)):
+                            user.friends.append(poss_friend)
+                            user.num_friends -= 1
+                            poss_friend.friends.append(user)
+                            poss_friend.num_friends -= 1
+                            break
+                else:
+                    for poss_friend in self.users:
+                        if(poss_friend != user and user.course != poss_friend.course and poss_friend.grade != user.grade and poss_friend.num_friends > 0 and (poss_friend not in user.friends)):
+                            user.friends.append(poss_friend)
+                            user.num_friends -= 1
+                            poss_friend.friends.append(user)
+                            poss_friend.num_friends -= 1
+                            break              
+
+        for user in self.users:
+            print("user")
+            print(user.friends)
+            print(user.num_friends)
 
         return True
 
