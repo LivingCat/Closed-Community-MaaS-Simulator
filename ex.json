@@ -61,8 +61,13 @@
 		}
 	},
 	"users": {
-		"num_users": 300,
+		"num_users": 5,
 		"num_clusters": 5,
+		"friends_distribution":{
+			"distrib": "norm",
+			"mean":5,
+			"stand_div":2
+		},
 		"salary_distribution": {
 			"distrib": "gamma",
 			"mean": 970.4,
@@ -451,9 +456,6 @@
 			"comfort_preference": {
 				"mean": 0.5,
 				"stand_div": 0.3
-			},
-			"has_private": {
-				"ratio": 0.8
 			}
 		},
 		"punishment_doesnt_have_car": -100

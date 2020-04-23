@@ -110,10 +110,10 @@ class Simulator:
             friend_categories_probs = [0.5,0.2,0.2,0.1]
 
             cats = random.choices(friend_categories,weights = friend_categories_probs, k = user.num_friends)
-            print("user")
-            print(user.course)
-            print(user.grade)
-            print(cats)
+            # print("user")
+            # print(user.course)
+            # print(user.grade)
+            # print(cats)
             for cat in cats:
                 if(cat == 0):
                     for poss_friend in self.users:
@@ -153,10 +153,10 @@ class Simulator:
                             poss_friend.num_friends -= 1
                             break              
 
-        for user in self.users:
-            print("user")
-            print(user.friends)
-            print(user.num_friends)
+        # for user in self.users:
+        #     print("user")
+        #     print(user.friends)
+        #     print(user.num_friends)
 
         return True
 
@@ -301,8 +301,6 @@ class Simulator:
                 personality_params["comfort_preference"]["stand_div"]
             )
 
-            has_private = 1 if np.random.uniform(
-            ) < personality_params["has_private"]["ratio"] else 0
             willingness_to_pay = min(max([0.0001, willingness_to_pay]), 1)
             willingness_to_wait = min(max([0.0001, willingness_to_wait]), 1)
             comfort_preference = min(max([0.0001, comfort_preference]), 1)
@@ -320,6 +318,10 @@ class Simulator:
                 if(random_value_cluster <= cluster_d):
                     chosen_cluster = cluster
                     break
+
+            #Choose if the user has a private vehicle or not according to cluster ratio
+            has_private = 1 if np.random.uniform(
+            ) < self.input_config["users"]["clusters"][chosen_cluster]["has_private"]["ratio"] else 0
 
             #Allocate users to grades and courses
             courses_distribs = self.input_config["users"]["courses_distribution"]
