@@ -160,15 +160,39 @@ class Simulator:
 
         return True
 
+    def choose_mode(self, agent: DQNAgent):
+        for user in self.users:
+            #Users chooses action to take (ask Tiago why this is here and where is the learning part)
+            while True:
+                if random.random() > agent.epsilon:  # dizia np.random.random
+                    # Get action from Q table
+                    current_state = np.array(user.get_user_current_state())
+                    action = np.argmax(agent.get_qs(current_state))
+                else:
+                    # Get random action
+                    action = np.random.randint(0, agent.output_dim)
+
+                provider = self.providers[action]
+                if((not user.personality.has_private) and provider.name == "Personal"):
+                    agent.update_replay_memory(
+                        (user.get_user_current_state(), action,
+                            self.input_config["users"]["punishment_doesnt_have_car"], 1, True))
+                    agent.train(True, 1)
+                else:
+                    break
+            user.mean_transportation = provider.service
+            user.provider = provider
+
     def run(self, agent: DQNAgent):
         # Empty actors list, in case of consecutive calls to this method
         self.actors = []
-        self.users = self.create_users(agent)
+        self.users = self.create_users()
         self.create_friends()
+        self.choose_mode(agent)
 
-        for user in self.users:
-            user.pprint()
-        exit()
+        # for user in self.users:
+        #     user.pprint()
+        # exit()
         #############################################################################################################
         #######################################################################################
 
@@ -245,7 +269,7 @@ class Simulator:
             # AccidentEvent(10.0, (3, 6), 0.2)
         ]
 
-    def create_users(self, agent: DQNAgent):
+    def create_users(self):
         users = []
 
         for _ in range(self.input_config["users"]["num_users"]):
@@ -396,27 +420,6 @@ class Simulator:
                         chosen_course, chosen_grade, salary, budget, available_seats)
 
             # se estiverem entao proximo passo é adicionar tambem informaçao de ano e curso!
-
-            #Users chooses action to take (ask Tiago why this is here and where is the learning part)
-            while True:
-                if random.random() > agent.epsilon:  # dizia np.random.random
-                    # Get action from Q table
-                    current_state = np.array(user.get_user_current_state())
-                    action = np.argmax(agent.get_qs(current_state))
-                else:
-                    # Get random action
-                    action = np.random.randint(0, agent.output_dim)
-
-                provider = self.providers[action]
-                if((not user.personality.has_private) and provider.name == "Personal"):
-                    agent.update_replay_memory(
-                        (user.get_user_current_state(), action,
-                         self.input_config["users"]["punishment_doesnt_have_car"], 1, True))
-                    agent.train(True, 1)
-                else:
-                    break
-            user.mean_transportation = provider.service
-            user.provider = provider
             users.append(user)
 
         return users
