@@ -166,8 +166,8 @@ class Simulator:
         self.users = self.create_users(agent)
         self.create_friends()
 
-        # for user in self.users:
-        #     user.pprint()
+        for user in self.users:
+            user.pprint()
         exit()
         #############################################################################################################
         #######################################################################################
@@ -323,6 +323,19 @@ class Simulator:
             has_private = 1 if np.random.uniform(
             ) < self.input_config["users"]["clusters"][chosen_cluster]["has_private"]["ratio"] else 0
 
+            #Assign the available seats in the private vehicle for each user who has a private vehicle according to the cluster
+            if(has_private):
+                seats_num = list((self.input_config["users"]["clusters"][chosen_cluster]["seat_probs"]).keys())
+                seats_percentages = (self.input_config["users"]["clusters"][chosen_cluster]["seat_probs"]).values()
+                # print(seats_num)
+                # print(seats_percentages)
+
+                available_seats = random.choices(
+                    seats_num, weights=seats_percentages, k=1)
+            else:
+                available_seats = 0
+
+
             #Allocate users to grades and courses
             courses_distribs = self.input_config["users"]["courses_distribution"]
 
@@ -380,7 +393,7 @@ class Simulator:
             personality = Personality(willingness_to_pay, willingness_to_wait, awareness, comfort_preference, bool(has_private),
                                       user_factors_values["friendliness"], user_factors_values["suscetible"], user_factors_values["transport"], user_factors_values["urban"], user_factors_values["willing"])
             user = User(personality, time, chosen_cluster,
-                        chosen_course, chosen_grade, salary, budget)
+                        chosen_course, chosen_grade, salary, budget, available_seats)
 
             # se estiverem entao proximo passo é adicionar tambem informaçao de ano e curso!
 

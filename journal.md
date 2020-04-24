@@ -117,3 +117,13 @@ tensorboard --logdir logs/2x256-1579515056
 
 * Users now have salary and budget
 * Fixed willingness to pay so that it now has to do with the salary of the user
+
+# 23-04-2020
+
+* Added hasPrivate ratio according to the clusters
+* Tried to know the percentages of available seats in private vehicle within each cluster (excel) but it took more time than alocated because files did not match
+
+# 24-04-2020
+
+* Users now have available seats - 0 if they dont have a private vehicle
+* Added percentages of available seats in private vehicle within each cluster

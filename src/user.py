@@ -39,8 +39,9 @@ class User:
     budget: float
     friends: List['User']
     num_friends: int
+    available_seats: int
 
-    def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float):
+    def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int):
        self.personality = personality
        self.start_time = start_time
        self.cluster = cluster
@@ -49,6 +50,7 @@ class User:
        self.salary = salary
        self.budget = budget
        self.friends = list()
+       self.available_seats = available_seats
        self.num_friends = 0
 
     def add_friends(self,friends: List['User']):
@@ -84,11 +86,13 @@ class User:
         # print("willingness to wait: {} \n". format(personality.willingness_to_wait))
         # print("awareness: {} \n". format(personality.awareness))
         # print("comfort preference: {} \n". format(personality.comfort_preference))
-        # print("has private: {} \n". format(personality.has_private))
         # print("friendliness: {} \n". format(personality.friendliness))
         # print("suscetible: {} \n". format(personality.suscetible))
         # print("transport: {} \n". format(personality.transport))
         # print("urban: {} \n". format(personality.urban))
         # print("willing: {} \n". format(personality.willing))
+        print("friends: {} \n".format(self.friends))
+        print("has private: {} \n". format(personality.has_private))
+        print("available seats: {} \n".format(self.available_seats))
         return True
 
