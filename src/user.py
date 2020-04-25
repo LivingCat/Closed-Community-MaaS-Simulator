@@ -40,8 +40,9 @@ class User:
     friends: List['User']
     num_friends: int
     available_seats: int
+    distance_from_destination: float
 
-    def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int):
+    def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int, distance_from_destination: float):
        self.personality = personality
        self.start_time = start_time
        self.cluster = cluster
@@ -51,6 +52,7 @@ class User:
        self.budget = budget
        self.friends = list()
        self.available_seats = available_seats
+       self.distance_from_destination = distance_from_destination
        self.num_friends = 0
 
     def add_friends(self,friends: List['User']):
@@ -78,11 +80,11 @@ class User:
     def pprint(self):
         personality = self.personality
         print("cluster: {} \n". format(self.cluster))
-        print("course: {} \n". format(self.course))
-        print("grade: {} \n". format(self.grade))
-        print("salary: {} \n". format(self.salary))
-        print("budget: {} \n". format(self.budget))
-        print("willingness to pay: {} \n". format(personality.willingness_to_pay))
+        # print("course: {} \n". format(self.course))
+        # print("grade: {} \n". format(self.grade))
+        # print("salary: {} \n". format(self.salary))
+        # print("budget: {} \n". format(self.budget))
+        # print("willingness to pay: {} \n". format(personality.willingness_to_pay))
         # print("willingness to wait: {} \n". format(personality.willingness_to_wait))
         # print("awareness: {} \n". format(personality.awareness))
         # print("comfort preference: {} \n". format(personality.comfort_preference))
@@ -91,8 +93,9 @@ class User:
         # print("transport: {} \n". format(personality.transport))
         # print("urban: {} \n". format(personality.urban))
         # print("willing: {} \n". format(personality.willing))
-        print("friends: {} \n".format(self.friends))
-        print("has private: {} \n". format(personality.has_private))
-        print("available seats: {} \n".format(self.available_seats))
+        # print("friends: {} \n".format(self.friends))
+        # print("has private: {} \n". format(personality.has_private))
+        # print("available seats: {} \n".format(self.available_seats))
+        print("distance: {} \n".format(self.distance_from_destination))
         return True
 

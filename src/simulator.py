@@ -194,9 +194,9 @@ class Simulator:
             self.create_friends()
         self.choose_mode(agent)
 
-        # for user in self.users:
-        #     user.pprint()
-        # exit()
+        for user in self.users:
+            user.pprint()
+        exit()
         #############################################################################################################
         #######################################################################################
 
@@ -365,6 +365,20 @@ class Simulator:
             else:
                 available_seats = 0
 
+            #Get distance from the users' home to the destination, according to cluster distribution
+            distance_from_destination_info = self.input_config[
+                "users"]["clusters"][chosen_cluster]["distance"]
+
+            dist = getattr(
+                scipy.stats, distance_from_destination_info["distrib"])
+            #Get shape params
+            shape_list = list(
+                distance_from_destination_info["shape"].values())
+
+            random_num = dist.rvs(
+                *shape_list, loc=distance_from_destination_info["mean"], scale=distance_from_destination_info["stand_div"])
+
+            distance_from_destination = random_num
 
             #Allocate users to grades and courses
             courses_distribs = self.input_config["users"]["courses_distribution"]
@@ -423,7 +437,7 @@ class Simulator:
             personality = Personality(willingness_to_pay, willingness_to_wait, awareness, comfort_preference, bool(has_private),
                                       user_factors_values["friendliness"], user_factors_values["suscetible"], user_factors_values["transport"], user_factors_values["urban"], user_factors_values["willing"])
             user = User(personality, time, chosen_cluster,
-                        chosen_course, chosen_grade, salary, budget, available_seats)
+                        chosen_course, chosen_grade, salary, budget, available_seats, distance_from_destination)
 
             # se estiverem entao proximo passo é adicionar tambem informaçao de ano e curso!
             users.append(user)
