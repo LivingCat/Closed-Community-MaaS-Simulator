@@ -45,7 +45,8 @@ class Friends(Provider):
     
     
     def get_cost(self,time):
-        return (time*fuel_cost + fixed_added_cost)/self.n_passengers
+        # - creditos/min_creditos_para_desconto
+        return (time*fuel_cost + fixed_added_cost)/self.n_passengers 
     
     def get_time(self, time):
         return time + 1

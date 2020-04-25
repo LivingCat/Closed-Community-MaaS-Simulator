@@ -43,6 +43,7 @@ class Simulator:
         self.stats = None
         self.actors = None
         self.providers = providers
+        self.first_run = False
 
         random.seed(seed)
         # plt.ion()
@@ -186,8 +187,11 @@ class Simulator:
     def run(self, agent: DQNAgent):
         # Empty actors list, in case of consecutive calls to this method
         self.actors = []
-        self.users = self.create_users()
-        self.create_friends()
+
+        if(self.first_run):
+            print("first run")
+            self.users = self.create_users()
+            self.create_friends()
         self.choose_mode(agent)
 
         # for user in self.users:
@@ -230,6 +234,7 @@ class Simulator:
         final_users = []
 
         for actor in self.actors:
+            #actor.cost e actor.spent_credits
             commute_out = CommuteOutput(
                 actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
             user_info = dict()
@@ -237,6 +242,7 @@ class Simulator:
             user_info["commute_output"] = commute_out
             user_info["utility"] = actor.user.calculate_utility_value(
                 commute_out)
+            #update dos creditos do user
             final_users.append(user_info)
 
             # print("mean: {}  utility: {} ".format(commute_out.mean_transportation, user_info["utility"]))

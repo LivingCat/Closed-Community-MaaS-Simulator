@@ -309,7 +309,11 @@ def main(args):
     for episode in trange(args.n_runs, leave=False):
         # Update tensorboard step every episode
         agent.tensorboard.step = episode
-
+        if(episode == 0):
+            sim.first_run = True
+        else:
+            sim.first_run = False
+        #runs the simulation
         final_users = sim.run(agent)
 
         # Restarting episode - reset episode reward and step number
