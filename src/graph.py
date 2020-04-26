@@ -46,8 +46,15 @@ class RoadGraph:
             allowed_transports = (self.get_edge_data(edge)['allowed_transports'])
             if(actor in allowed_transports):
                 possible_edges.append(edge)
-        new_graph = nx.Graph(possible_edges)        
-        return list(nx.all_simple_paths(new_graph, src_node, dest_node))
+        new_graph = nx.DiGraph(possible_edges)
+        a = nx.all_simple_paths(new_graph, src_node, dest_node)
+        # i=0
+        # for path in a:
+        #     print(path)
+        #     print(i)
+        #     i +=1
+        a = list(a)
+        return a
 
     def get_all_routes(self, actor: str) -> List[List[int]]:
         # results in [[0, 1, 3], [0, 2, 1, 3], [0, 2, 3]]

@@ -1,8 +1,8 @@
 {
 	"graph": {
-		"num_nodes": 5,
+		"num_nodes": 97,
 		"start_node": 0,
-		"end_node": 4,
+		"end_node": 24,
 		"edges_list": {
 			"0,1": {
 				"color": "red",
@@ -10,58 +10,1456 @@
 				"free_flow_travel_time": 1,
 				"capacity": 50,
 				"allowed_transports": [
-					"sharedCar"
+					"sharedCar",
+					"car",
+					"bus"
 				]
 			},
-			"1,4": {
+			"0,7": {
 				"color": "red",
 				"volume": 0,
 				"free_flow_travel_time": 1,
 				"capacity": 50,
 				"allowed_transports": [
-					"sharedCar"
-				]
-			},
-			"0,2": {
-				"color": "blue",
-				"volume": 0,
-				"free_flow_travel_time": 1,
-				"capacity": 50,
-				"allowed_transports": [
-					"car"
-				]
-			},
-			"2,4": {
-				"color": "blue",
-				"volume": 0,
-				"free_flow_travel_time": 1,
-				"capacity": 50,
-				"allowed_transports": [
-					"car"
-				]
-			},
-			"0,3": {
-				"color": "green",
-				"volume": 0,
-				"free_flow_travel_time": 1,
-				"capacity": 140,
-				"allowed_transports": [
+					"sharedCar",
+					"car",
 					"bus"
 				]
 			},
-			"3,4": {
-				"color": "green",
+			"1,2": {
+				"color": "red",
 				"volume": 0,
 				"free_flow_travel_time": 1,
-				"capacity": 140,
+				"capacity": 50,
 				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"1,8": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"2,3": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"2,9": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"4,3": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"3,10": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"5,4": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"4,11": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"6,5": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"5,12": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"54,6": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"6,13": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"7,8": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"7,14": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"8,9": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"8,15": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"9,10": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"9,16": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"11,10": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"10,17": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"12,11": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"11,18": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"13,12": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"12,19": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"13,20": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"14,15": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"14,21": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"15,16": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"15,22": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"16,17": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"16,23": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"18,17": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"17,24": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"19,18": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"18,25": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"20,19": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"19,26": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"20,27": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"21,22": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"28,21": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"22,23": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"29,22": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"23,24": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"30,23": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"25,24": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"31,24": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"26,25": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"32,25": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"27,26": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"33,26": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"34,27": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"28,29": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"35,28": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"29,30": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"36,29": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"30,31": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"37,30": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"32,31": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"38,31": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"33,32": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"39,32": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"34,33": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"40,33": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"41,34": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"35,36": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"42,35": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"36,37": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"43,36": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"37,38": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"44,37": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"39,38": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"45,38": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"40,39": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"46,39": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"41,40": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"47,40": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"48,41": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"42,43": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"49,42": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"43,44": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"44,45": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"46,45": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"47,46": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"48,47": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"50,49": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"51,50": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"52,51": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"53,52": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"54,53": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"55,54": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"56,55": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"57,56": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"58,57": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"59,58": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"60,59": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"61,60": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"62,61": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"63,62": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"64,63": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"65,64": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"66,65": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"67,66": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"68,67": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"69,68": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"70,69": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"71,70": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"72,71": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"74,73": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"75,74": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"76,75": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"77,76": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"78,77": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"79,78": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"79,80": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"80,81": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"82,81": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"83,82": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"84,83": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"85,84": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"86,85": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"87,86": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"88,87": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"89,88": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"90,89": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"91,90": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"92,91": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"93,92": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"94,93": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"95,94": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
+			"96,95": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
 					"bus"
 				]
 			}
 		}
 	},
 	"users": {
-		"num_users": 5,
+		"num_users": 100,
 		"num_clusters": 5,
 		"friends_distribution":{
 			"distrib": "norm",

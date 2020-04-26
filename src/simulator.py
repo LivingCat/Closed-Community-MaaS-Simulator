@@ -194,9 +194,9 @@ class Simulator:
             self.create_friends()
         self.choose_mode(agent)
 
-        for user in self.users:
-            user.pprint()
-        exit()
+        # for user in self.users:
+        #     user.pprint()
+        # exit()
         #############################################################################################################
         #######################################################################################
 
