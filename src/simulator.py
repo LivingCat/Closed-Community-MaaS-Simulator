@@ -19,6 +19,7 @@ import scipy
 
 DEFAULT_VALUE_NUM = -100.0
 DEFAULT_VALUE_STRING = ""
+MIN_HOUSE_DISTANCE = 1
 
 
 class Simulator:
@@ -377,6 +378,9 @@ class Simulator:
 
             random_num = dist.rvs(
                 *shape_list, loc=distance_from_destination_info["mean"], scale=distance_from_destination_info["stand_div"])
+
+            if (random_num < MIN_HOUSE_DISTANCE):
+                random_num = MIN_HOUSE_DISTANCE
 
             distance_from_destination = random_num
 
