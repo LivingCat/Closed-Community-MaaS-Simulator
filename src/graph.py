@@ -56,9 +56,9 @@ class RoadGraph:
         a = list(a)
         return a
 
-    def get_all_routes(self, actor: str) -> List[List[int]]:
+    def get_all_routes(self, start_node:int, actor: str) -> List[List[int]]:
         # results in [[0, 1, 3], [0, 2, 1, 3], [0, 2, 3]]
-        return self.get_possible_routes(self.nstart, self.nend, actor)
+        return self.get_possible_routes(start_node, self.nend, actor)
         # this below doesn't work bc it forces to go through all nodes
         # return nx.all_topological_sorts(self.graph)
 

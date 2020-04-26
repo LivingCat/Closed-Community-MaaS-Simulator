@@ -40,9 +40,10 @@ class User:
     friends: List['User']
     num_friends: int
     available_seats: int
-    distance_from_destination: float
+    distance_from_destination: int
+    house_node = int
 
-    def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int, distance_from_destination: float):
+    def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int, distance_from_destination: int):
        self.personality = personality
        self.start_time = start_time
        self.cluster = cluster
@@ -57,6 +58,9 @@ class User:
 
     def add_friends(self,friends: List['User']):
         self.friends = friends
+
+    def add_house_node(self, house_node: int):
+        self.house_node = house_node
 
     def cost_util(self, commute_out: CommuteOutput):
         return 1/(commute_out.cost) * self.personality.willingness_to_pay
@@ -79,7 +83,7 @@ class User:
     
     def pprint(self):
         personality = self.personality
-        print("cluster: {} \n". format(self.cluster))
+        # print("cluster: {} \n". format(self.cluster))
         # print("course: {} \n". format(self.course))
         # print("grade: {} \n". format(self.grade))
         # print("salary: {} \n". format(self.salary))
@@ -97,5 +101,6 @@ class User:
         # print("has private: {} \n". format(personality.has_private))
         # print("available seats: {} \n".format(self.available_seats))
         print("distance: {} \n".format(self.distance_from_destination))
+        print("house node: {} \n".format(self.house_node))
         return True
 

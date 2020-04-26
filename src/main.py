@@ -78,7 +78,7 @@ def print_args(args):
 
 def actor_constructor(graph: RoadGraph, user: User):
     """Calculate possible routes and give each one a probability based on how little time it takes to transverse it"""
-    possible_routes = graph.get_all_routes(user.mean_transportation)
+    possible_routes = graph.get_all_routes(user.house_node,user.mean_transportation)
     routes_times = [graph.get_optimal_route_travel_time(r)
                     for r in possible_routes]
     routes_probs = softmax_travel_times(routes_times)

@@ -20,6 +20,7 @@ import scipy
 DEFAULT_VALUE_NUM = -100.0
 DEFAULT_VALUE_STRING = ""
 MIN_HOUSE_DISTANCE = 1
+MAX_HOUSE_DISTANCE = 49
 
 
 class Simulator:
@@ -86,6 +87,12 @@ class Simulator:
         plt.waitforbuttonpress(0)
         plt.clf()
 
+    def calculate_distance_nodes_destination(self):
+        distance = []
+        for node in range(0, int(self.input_config["graph"]["num_nodes"])):
+            dist = nx.shortest_path_length(self.graph.graph,source = node, target=self.graph.nend)
+            distance.append(dist)
+        return distance
 
     def create_friends(self):
         print("im create friends")
@@ -185,6 +192,14 @@ class Simulator:
             user.mean_transportation = provider.service
             user.provider = provider
 
+    def add_house_nodes(self):
+        distances = self.calculate_distance_nodes_destination()
+        for user in self.users:
+            res_list = [i for i, value in enumerate(distances) if value == user.distance_from_destination]
+            node = random.choice(res_list)
+            user.add_house_node(node)   
+
+            
     def run(self, agent: DQNAgent):
         # Empty actors list, in case of consecutive calls to this method
         self.actors = []
@@ -203,6 +218,10 @@ class Simulator:
 
         # Cleaning road graph
         self.graph = RoadGraph(self.input_config)
+
+        #Assign house nodes to each user according to graph structure
+        if(self.first_run):
+            self.add_house_nodes()
 
         # Create the Statistics module
         self.stats = self.stats_constructor(self.graph)
@@ -379,8 +398,11 @@ class Simulator:
             random_num = dist.rvs(
                 *shape_list, loc=distance_from_destination_info["mean"], scale=distance_from_destination_info["stand_div"])
 
+            random_num = int(round(random_num))
             if (random_num < MIN_HOUSE_DISTANCE):
                 random_num = MIN_HOUSE_DISTANCE
+            elif(random_num > MAX_HOUSE_DISTANCE):
+                random_num = MAX_HOUSE_DISTANCE
 
             distance_from_destination = random_num
 
