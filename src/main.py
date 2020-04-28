@@ -31,6 +31,7 @@ import time
 import csv
 
 run_name = "normal_100"
+CARBON_TAX = 180.0
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -204,6 +205,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         "sharedCar": []
     }
 
+    tax_list = []
+
     for run in all_s:
         run_emissions_dict={
             "car": 0,
@@ -226,12 +229,31 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         emissions_dict["sharedCar"].append(run_emissions_dict["sharedCar"])
         emissions_dict["total"].append(run_emissions_dict["total"])
 
+        tax_list.append(calculate_carbon_tax(run_emissions_dict["total"]))
+
         number_users_dict["car"].append(run_number_users_dict["car"])
         number_users_dict["bus"].append(run_number_users_dict["bus"])
         number_users_dict["sharedCar"].append(run_number_users_dict["sharedCar"])
 
-    np.save("{}_emissions".format(run_name),np.array(emissions_dict))
-    np.save("{}_number".format(run_name), np.array(number_users_dict))
+    # print("emission dict")
+    # print(emissions_dict)
+    # print("number user dict")
+    # print(number_users_dict)
+
+    #Calculate Emissions Tax - total and per run
+    total_value_tax = sum(tax_list)
+
+    with open("{}_results.txt".format(run_name), 'w+') as f:
+        print("Number of users per mode: \n", file=f)
+        print(number_users_dict, file=f)
+        print("\n", file=f)
+        print("Emissions: \n",file=f)
+        print(emissions_dict, file=f)
+        print("\n", file=f)
+        print("Carbon Tax: \n", file=f)
+        print(tax_list,file=f)
+        print("Total Carbon Tax: \n", file=f)
+        print(total_value_tax,file=f)
 
     if display_plots:
         plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
@@ -242,6 +264,9 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
 
 
     return results
+
+def calculate_carbon_tax(emissions: float):
+    return (emissions / 1000000) * CARBON_TAX
 
 def read_json_file(file: str):
     f = open(file, "r")
@@ -255,10 +280,10 @@ def get_user_current_state(user: User):
 
 def write_user_info(actors: List[Actor], file:str):
     fields = ["Course", "Grade", "Cluster", "Willingness to pay", "Willingness to wait", "Awareness", "Comfort preference",
-        "has private", "Friendliness", "Suscetible", "Transport", "Urban", "Willing", "Transportation"]
+        "has private", "Friendliness", "Suscetible", "Transport", "Urban", "Willing", "Transportation", "Distance from Destination"]
 
     # writing to csv file
-    with open(file, 'a+', newline='') as csvfile:
+    with open(file, 'w+', newline='') as csvfile:
         # creating a csv writer object
         csvwriter = csv.writer(csvfile)
         # writing the fields
@@ -269,11 +294,8 @@ def write_user_info(actors: List[Actor], file:str):
             personality = us.personality
             info = [us.course, us.grade, us.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
                 personality.has_private, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
-                us.provider.service]
+                us.provider.service, us.distance_from_destination]
             csvwriter.writerow(info)
-
-
-
 
 
 def main(args):

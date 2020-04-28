@@ -127,3 +127,14 @@ tensorboard --logdir logs/2x256-1579515056
 
 * Users now have available seats - 0 if they dont have a private vehicle
 * Added percentages of available seats in private vehicle within each cluster
+
+# 25-04-2020
+
+* Only one population for the entirety of the runs
+* Users now have distance from their house to the destination according to cluster distribution
+
+# 26-04-2020
+
+* Updated the graph - much bigger from 5 to 97 nodes.
+* The 3 modes of transport share all edges
+* Users have a house node which differs according to the distance

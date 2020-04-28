@@ -53,9 +53,9 @@ def plot_accumulated_edges_graphs(edges_accumulated: Dict[str,Dict[str, List[Lis
             y = y / n_runs
 
             ax = fig.add_subplot(
-                4,
+                5,
                 int((n_edges / 4 + 0.5)),
-                i + 1
+                i+1
             )
             ax.text(.2, .9, str(e_key),
                     horizontalalignment='right',
