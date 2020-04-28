@@ -138,3 +138,11 @@ tensorboard --logdir logs/2x256-1579515056
 * Updated the graph - much bigger from 5 to 97 nodes.
 * The 3 modes of transport share all edges
 * Users have a house node which differs according to the distance
+
+# 28-04-2020
+
+* Carbon tax is calculated
+* Carbon tax, Number of users per mode and emissions are written to a results file: {run_name}_results.txt
+* Added info written about users in the actors_info.csv file
+* Ran scenary 1
+* Thought about ride sharing and public transport

@@ -21,6 +21,8 @@ class Actor():
 
     static_model_id = 1
 
+    users_represent: List['User']
+
     def __init__(self, route: List[int], user: User, provider: Provider):
         self.user = user
         self.base_route = route
@@ -79,7 +81,11 @@ class Actor():
 
     @property
     def cost(self):
-        return self.provider.get_cost(self.total_travel_time)
+        #incorporate transport subsidy
+        # transport subsidy depends on the mode of transport used:
+        # 0.36€/km for private transport
+        # 0.11€/km for public transport
+        return self.provider.get_cost(self.total_travel_time) - self.calculate_transporte_subsidy()
 
     @property
     def travel_time(self):
@@ -96,3 +102,13 @@ class Actor():
     @property
     def emissions(self):
         return self.provider.get_emissions(self.total_travel_time)
+
+    def calculate_transporte_subsidy(self):
+        # traveled nodes has all the nodes the actor travelled through, minus 1 gives us the number of edges he used and consequently the km travelled
+        if(self.service == "car"):
+            return 0.36 * (len(self.traveled_nodes)-1)
+        elif(self.service == "bus"):
+            return 0.11 * (len(self.traveled_nodes)-1)
+        #need to change the value for shared car
+        elif(self.service == "sharedCar"):
+            return 0.36 * (len(self.traveled_nodes)-1)

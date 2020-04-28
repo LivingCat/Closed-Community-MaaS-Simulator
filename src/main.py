@@ -30,7 +30,7 @@ import time
 
 import csv
 
-run_name = "normal_100"
+run_name = "cenario_1_100_pessoas_3000_runs"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -241,19 +241,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
     # print(number_users_dict)
 
     #Calculate Emissions Tax - total and per run
-    total_value_tax = sum(tax_list)
-
-    with open("{}_results.txt".format(run_name), 'w+') as f:
-        print("Number of users per mode: \n", file=f)
-        print(number_users_dict, file=f)
-        print("\n", file=f)
-        print("Emissions: \n",file=f)
-        print(emissions_dict, file=f)
-        print("\n", file=f)
-        print("Carbon Tax: \n", file=f)
-        print(tax_list,file=f)
-        print("Total Carbon Tax: \n", file=f)
-        print(total_value_tax,file=f)
+    average_total_value_tax = sum(tax_list)/len(tax_list)
 
     if display_plots:
         plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
@@ -261,6 +249,63 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         plot_emissions_development(emissions_dict)
         plot_number_users_development(number_users_dict)
     plt.waitforbuttonpress(0)  
+
+    transport_subsidy_dict={
+        "car": [],
+        "bus": [],
+        "sharedCar": [],
+        "total": []
+    }
+  
+    for run in all_s:
+        run_transport_subsidy_dict = {
+            "car": 0,
+            "bus": 0,
+            "sharedCar": 0,
+            "total":0
+        }
+        for ac in run.actors:
+            actor_transp_subsidy = ac.calculate_transporte_subsidy()
+            run_transport_subsidy_dict[ac.service] += actor_transp_subsidy
+            run_transport_subsidy_dict["total"] += actor_transp_subsidy
+
+        transport_subsidy_dict["car"].append(run_transport_subsidy_dict["car"])
+        transport_subsidy_dict["bus"].append(run_transport_subsidy_dict["bus"])
+        transport_subsidy_dict["sharedCar"].append(
+            run_transport_subsidy_dict["sharedCar"])
+        transport_subsidy_dict["total"].append(
+            run_transport_subsidy_dict["total"])
+
+    #get average travel times for all runs in the simulation
+    average_ttt_all_runs = []
+    for stats in all_s:
+        run_ttt = 0
+        for a in stats.actors:
+            run_ttt += a.total_travel_time
+        average_ttt_all_runs.append(run_ttt/len(stats.actors))
+
+    with open("{}_results.txt".format(run_name), 'w+') as f:
+        print("Number of users per mode: \n", file=f)
+        print(number_users_dict, file=f)
+        print("\n", file=f)
+        print("Emissions: \n", file=f)
+        print(emissions_dict, file=f)
+        print("\n", file=f)
+        print("Carbon Tax: \n", file=f)
+        print(tax_list, file=f)
+        print("\n",file=f)
+        print("Total Carbon Tax: \n", file=f)
+        print(average_total_value_tax, file=f)
+        print("\n", file=f)
+        print("Transport subsidy: \n", file=f)
+        print(transport_subsidy_dict, file=f)
+        print("\n",file=f)
+        print("Average and STD Total Travel Time: {} - {} \n".format(results["time_atis_no"][0], results["time_atis_no"][1]), file=f)
+        print("Average Total Travel Time By Run: \n", file=f)
+        print(average_ttt_all_runs, file=f)
+
+
+
 
 
     return results
@@ -314,7 +359,9 @@ def main(args):
 
     input_config = read_json_file(args.json_file)
 
-    providers = [Personal(),Friends(),STCP()]
+    # providers = [Personal(),Friends(),STCP()]
+    providers = [Personal()]
+    # providers = [Personal(), STCP()]
     sim = Simulator(config=args,
                     input_config = input_config,
                     actor_constructor=partial(
