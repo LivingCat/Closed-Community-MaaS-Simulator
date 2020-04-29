@@ -13,6 +13,7 @@ def plot_accumulated_actor_graph(actors_flow_acc: Dict[str, List[List[float]]], 
 
     fig = plt.figure()
 
+    print("tou no plot_accumulated_actor_graph")
 
     ax1 = fig.add_subplot(111)
 
@@ -38,6 +39,9 @@ def plot_accumulated_actor_graph(actors_flow_acc: Dict[str, List[List[float]]], 
 
 def plot_accumulated_edges_graphs(edges_accumulated: Dict[str,Dict[str, List[List[float]]]], n_runs):
     """Plot the actors occupation of all edges during the simulation"""
+
+    print("tou no plot_accumulated_edges_graph")
+
     fig = plt.figure()
     n_edges = len(edges_accumulated.keys())
     edge_list = sorted(list(edges_accumulated.keys()))
@@ -72,6 +76,8 @@ def plot_accumulated_edges_graphs(edges_accumulated: Dict[str,Dict[str, List[Lis
 def plot_emissions_development(emissions_dict: Dict[str,List[float]]):
     fig = plt.figure()
 
+    print("tou no plot_emissions_development")
+
     ax1 = fig.add_subplot(111)
 
     for key in emissions_dict:
@@ -84,6 +90,8 @@ def plot_emissions_development(emissions_dict: Dict[str,List[float]]):
 
 def plot_number_users_development(number_users_dict: Dict[str,List[float]]):
     fig = plt.figure()
+
+    print("tou no plot_number_users_development")
 
     ax1 = fig.add_subplot(111)
 

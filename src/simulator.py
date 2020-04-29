@@ -20,7 +20,8 @@ import scipy
 DEFAULT_VALUE_NUM = -100.0
 DEFAULT_VALUE_STRING = ""
 MIN_HOUSE_DISTANCE = 1
-MAX_HOUSE_DISTANCE = 49
+MAX_HOUSE_DISTANCE = 30
+MAX_WAITING_TIME = 0.10
 
 
 class Simulator:
@@ -52,34 +53,36 @@ class Simulator:
 
     def draw_graph(self):
 
-        #Trying to display graph
-        # plt.ion()
-        display_graph = self.graph.graph
+        # #Trying to display graph
+        # # plt.ion()
+        # display_graph = self.graph.graph
 
-        colors = [display_graph[u][v]['color'] for u, v in display_graph.edges]
+        # colors = [display_graph[u][v]['color'] for u, v in display_graph.edges]
 
-        # weights = [display_graph[u][v]['weight']
-        #            for u, v in display_graph.edges]
+        # # weights = [display_graph[u][v]['weight']
+        # #            for u, v in display_graph.edges]
 
-        print(display_graph.number_of_edges())
+        # print(display_graph.number_of_edges())
 
-        pos = nx.spring_layout(display_graph)
-        elarge = display_graph.edges(data=True)
+        # pos = nx.spring_layout(display_graph)
+        # elarge = display_graph.edges(data=True)
 
-        # nodes
-        nx.draw_networkx_nodes(display_graph, pos, node_size=700)
+        # # nodes
+        # nx.draw_networkx_nodes(display_graph, pos, node_size=700)
 
-        # edges
-        nx.draw_networkx_edges(display_graph, pos, edgelist=elarge,
-                               width=6, edge_color=colors)
+        # # edges
+        # nx.draw_networkx_edges(display_graph, pos, edgelist=elarge,
+        #                        width=6, edge_color=colors)
 
-        # labels
-        nx.draw_networkx_labels(display_graph, pos, edgelist=elarge,
-                                width=6)
-        print("vou desenhar o graph espero eu")
-        plt.axis('off')
+        # # labels
+        # nx.draw_networkx_labels(display_graph, pos, edgelist=elarge,
+        #                         width=6)
+        # print("vou desenhar o graph espero eu")
+        # plt.axis('off')
 
-        display_graph.clear()
+        nx.draw(self.graph.graph, pos=nx.planar_layout(self.graph.graph))
+
+        # display_graph.clear()
         plt.title("graph!!!")
         plt.draw()
         # plt.ioff()
@@ -199,7 +202,108 @@ class Simulator:
             node = random.choice(res_list)
             user.add_house_node(node)   
 
-            
+    def sort_drivers_fun(self,driver: User):
+        return driver.available_seats
+
+    def matching(self,users: List['User']):
+        users_want_ride_sharing = users
+        possible_drivers = [user for user in users if user.personality.has_private]
+        possible_drivers.sort(reverse= True, key=self.sort_drivers_fun)
+
+        while(len(possible_drivers) > 0):
+            driver = possible_drivers[0]
+            if(driver.available_seats == 0):
+                possible_drivers.remove(driver)
+                continue
+            pickup = []
+            possible_pickup = []
+            poss_routes = self.graph.get_all_routes(
+                driver.house_node, driver.mean_transportation)
+            all_nodes = [node for route in poss_routes for node in route]
+
+            for rider in users_want_ride_sharing:
+                # and (rider.start_time - driver.start_time) <= MAX_WAITING_TIME
+                if(rider.house_node in all_nodes and rider != driver):
+                    possible_pickup.append(rider)
+            #pick random rider
+            # while available seats or possible_pickup != vazio
+
+            #There doesn't exist a user that the driver can pick up
+            if(len(possible_pickup) == 0):
+                possible_drivers.remove(driver)
+                continue
+
+            chosen_rider = random.choice(possible_pickup)
+            pickup.append(chosen_rider)
+
+            #remove chosen rider from list of users who want to ride share
+            users_want_ride_sharing.remove(chosen_rider)
+
+            #remove pickups which belong to the possible drivers
+            if(chosen_rider in possible_drivers):
+                possible_drivers.remove(chosen_rider)
+
+            possible_pickup.remove(chosen_rider)
+            driver.available_seats -= 1
+
+            while (driver.available_seats > 0 and len(possible_pickup) > 0 ):
+                #moves to the next node
+                #checks the users it can pickup from the new node
+
+                #start a new list for the possible riders
+                possible_pickup = []
+                new_node = pickup[-1].house_node
+                poss_routes = self.graph.get_all_routes(new_node, pickup[-1].mean_transportation)
+                all_nodes = [node for route in poss_routes for node in route]
+
+                for rider in users_want_ride_sharing:
+                    # and (rider.start_time - driver.start_time) <= MAX_WAITING_TIME
+                    if(rider.house_node in all_nodes and rider != driver):
+                        possible_pickup.append(rider)
+                #pick random rider
+                # while available seats or possible_pickup != vazio
+
+                #There doesn't exist any other user that the driver can pick up
+                if(len(possible_pickup) == 0):
+                    break
+                    
+                chosen_rider = random.choice(possible_pickup)
+                pickup.append(chosen_rider)
+
+                #remove chosen rider from list of users who want to ride share
+                users_want_ride_sharing.remove(chosen_rider)
+
+                #remove pickups which belonged to the possible drivers
+                if(chosen_rider in possible_drivers):
+                    possible_drivers.remove(chosen_rider)
+
+                possible_pickup.remove(chosen_rider)
+                driver.available_seats -= 1
+            driver.users_to_pick_up = pickup
+            #remove driver from possible drivers, since the matching for him has ended
+            possible_drivers.remove(driver)
+            #remove driver from users that want ride sharing, since he has been chosen to be the driver and has been matched
+            users_want_ride_sharing.remove(driver)
+
+    #depois ver porque se
+    # users nao tem ninguem para pickup entao nao podem ir de ride sharing
+    # se users nao fazem parte dos to-pick-up de outros users entao tb nao podem ir de ride sharing
+    # se esses users tiverem carro podem ir sozinhos mas se nao tiverem idk
+
+    #mudar como é que os atores fazem a rota
+
+        # for user in self.users:
+        #     print("its me user : {} \n", user)
+        #     print("escolhi : {} \n ", user.mean_transportation)
+        #     print("tenho carro? : {} \n", user.personality.has_private)
+        #     print("vivo aqui: {} \n", user.house_node)
+        #     print("vou buscar: {} \n", user.users_to_pick_up)
+
+
+
+
+
+
     def run(self, agent: DQNAgent):
         # Empty actors list, in case of consecutive calls to this method
         self.actors = []
@@ -210,9 +314,12 @@ class Simulator:
             self.create_friends()
         self.choose_mode(agent)
 
-        # for user in self.users:
-        #     user.pprint()
-        # exit()
+        #Take care of the ride sharing option - matching
+        users_ride_sharing = []
+        for user in self.users:
+            if (user.mean_transportation == "sharedCar"):
+                users_ride_sharing.append(user)
+
         #############################################################################################################
         #######################################################################################
 
@@ -226,9 +333,38 @@ class Simulator:
         # Create the Statistics module
         self.stats = self.stats_constructor(self.graph)
 
+        # for user in users_ride_sharing:
+        #     print("its me user : \n", user)
+        #     print("escolhi : \n ", user.mean_transportation)
+        #     print("tenho carro? : \n", user.personality.has_private)
+        #     print("vivo aqui: \n", user.house_node)
+        #     print("available seats: \n", user.available_seats)
+
+        self.matching(users_ride_sharing)
+
+        # for user in self.users:
+        #     user.pprint()
+
         # Create the Simulation Actors
         event_queue = PriorityQueue()
-        create_actor_events = self.create_actors_events(self.users)
+
+        #Create list of users that will be "turned into" actor
+        # Users that chose their private vehicle will be actors
+        # Users which are the Drivers of their ride sharing group will also be actors
+        # Users which are riders, will not be actors
+        # Users that weren't matched up are TBD (To Be Determined) what happens to them
+        # Users that chose public transport are TBI (To Be Implemented)
+
+        users_turn_actors = []
+        for user in self.users:
+            if(user.mean_transportation == "Car"):
+                users_turn_actors.append(user)
+            elif(user.mean_transportation == "sharedCar"):
+                if(len(user.users_to_pick_up) > 0):
+                    users_turn_actors.append(user)
+
+        create_actor_events = self.create_actors_events(users_turn_actors)
+
         # print("users {}".format(len(self.users)))
 
         for ae in create_actor_events:
@@ -252,6 +388,14 @@ class Simulator:
                 a.total_travel_time = self.max_run_time
 
         final_users = []
+
+        # print("olaaa")
+        # for ac in self.actors:
+        #     print("eu represento este user: \n", ac.user)
+        #     print("esta é a minha rota: \n", ac.base_route)
+        #     print("vou buscar: \n", ac.user.users_to_pick_up)
+
+        # exit()
 
         for actor in self.actors:
             #actor.cost e actor.spent_credits
@@ -382,6 +526,8 @@ class Simulator:
 
                 available_seats = random.choices(
                     seats_num, weights=seats_percentages, k=1)
+                for s in available_seats:
+                    available_seats = int(s)
             else:
                 available_seats = 0
 

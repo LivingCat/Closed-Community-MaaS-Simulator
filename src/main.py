@@ -30,7 +30,7 @@ import time
 
 import csv
 
-run_name = "cenario_1_100_pessoas_3000_runs"
+run_name = "cenario_1_300_pessoas_3000_runs"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -79,13 +79,26 @@ def print_args(args):
 
 def actor_constructor(graph: RoadGraph, user: User):
     """Calculate possible routes and give each one a probability based on how little time it takes to transverse it"""
+    #When ride sharing, limiting the possible routes for the ones that pass through the house nodes of the riders
     possible_routes = graph.get_all_routes(user.house_node,user.mean_transportation)
+      
+    actual_poss_routes = [] 
+    
+    if(len(user.users_to_pick_up) > 0):
+        for route in possible_routes:
+            all_in= True
+            for rider in user.users_to_pick_up:
+                if(rider.house_node not in route):
+                    all_in = False
+                    break
+            if(all_in):
+                actual_poss_routes.append(route)
     routes_times = [graph.get_optimal_route_travel_time(r)
-                    for r in possible_routes]
+                    for r in actual_poss_routes]
     routes_probs = softmax_travel_times(routes_times)
-    idx = np.random.choice(len(possible_routes), p=routes_probs)
+    idx = np.random.choice(len(actual_poss_routes), p=routes_probs)
 
-    return Actor(possible_routes[idx], user, user.provider)
+    return Actor(actual_poss_routes[idx], user, user.provider)
 
 
 
@@ -245,7 +258,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
 
     if display_plots:
         plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
-        plot_accumulated_edges_graphs(results['edges_occupation'], len(all_s))
+        # plot_accumulated_edges_graphs(results['edges_occupation'], len(all_s))
         plot_emissions_development(emissions_dict)
         plot_number_users_development(number_users_dict)
     plt.waitforbuttonpress(0)  
@@ -360,8 +373,9 @@ def main(args):
     input_config = read_json_file(args.json_file)
 
     # providers = [Personal(),Friends(),STCP()]
-    providers = [Personal()]
+    # providers = [Personal()]
     # providers = [Personal(), STCP()]
+    providers = [ Friends()]
     sim = Simulator(config=args,
                     input_config = input_config,
                     actor_constructor=partial(
@@ -431,7 +445,7 @@ def main(args):
 
     statistics_print(sim)
 
-    save_actor_file = "actors_info.csv"
+    save_actor_file = run_name + "actors_info.csv"
     write_user_info(all_stats[0].actors, save_actor_file)
     
 
