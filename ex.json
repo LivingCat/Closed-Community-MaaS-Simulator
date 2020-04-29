@@ -136,17 +136,6 @@
 					"bus"
 				]
 			},
-			"54,6": {
-				"color": "red",
-				"volume": 0,
-				"free_flow_travel_time": 1,
-				"capacity": 50,
-				"allowed_transports": [
-					"sharedCar",
-					"car",
-					"bus"
-				]
-			},
 			"6,13": {
 				"color": "red",
 				"volume": 0,
@@ -1203,6 +1192,17 @@
 					"bus"
 				]
 			},
+			"73,6": {
+				"color": "red",
+				"volume": 0,
+				"free_flow_travel_time": 1,
+				"capacity": 50,
+				"allowed_transports": [
+					"sharedCar",
+					"car",
+					"bus"
+				]
+			},
 			"74,73": {
 				"color": "red",
 				"volume": 0,
@@ -1269,7 +1269,7 @@
 					"bus"
 				]
 			},
-			"79,80": {
+			"80,79": {
 				"color": "red",
 				"volume": 0,
 				"free_flow_travel_time": 1,
@@ -1280,7 +1280,7 @@
 					"bus"
 				]
 			},
-			"80,81": {
+			"81,80": {
 				"color": "red",
 				"volume": 0,
 				"free_flow_travel_time": 1,
@@ -1459,7 +1459,7 @@
 		}
 	},
 	"users": {
-		"num_users": 100,
+		"num_users": 5,
 		"num_clusters": 5,
 		"friends_distribution":{
 			"distrib": "norm",
@@ -1541,7 +1541,7 @@
 					"max_value": 0.610
 				},
 				"has_private": {
-					"ratio": 0.993
+					"ratio": 1
 				},
 				"seat_probs":{
 					"0": 0.007 ,
@@ -1617,7 +1617,7 @@
 					"max_value": 0.693
 				},
 				"has_private": {
-					"ratio": 0.429
+					"ratio": 1
 				},
 				"seat_probs": {
 					"0": 0 ,
@@ -1691,7 +1691,7 @@
 					"max_value": 2.799
 				},
 				"has_private": {
-					"ratio": 0.472
+					"ratio": 1
 				},
 				"seat_probs": {
 					"0": 0.056,
@@ -1762,7 +1762,7 @@
 					"max_value": 0.498
 				},
 				"has_private": {
-					"ratio": 0.016
+					"ratio": 1
 				},
 				"seat_probs": {
 					"0": 0.375,
@@ -1837,7 +1837,7 @@
 					"max_value": 2.185
 				},
 				"has_private": {
-					"ratio": 0.506
+					"ratio": 1
 				},
 				"seat_probs": {
 					"0": 0,
