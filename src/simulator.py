@@ -6,7 +6,7 @@ from typing import List
 from queue import PriorityQueue
 from event import CreateActorEvent, AccidentEvent
 from graph import RoadGraph
-from utils import MultimodalDistribution, get_time_from_traffic_distribution
+from utils import MultimodalDistribution, get_time_from_traffic_distribution, get_traffic_peaks
 from user import User, Personality, CommuteOutput
 from provider import Provider, STCP, Personal, Friends
 from DeepRL import DQNAgent
@@ -299,6 +299,51 @@ class Simulator:
         #     print("vivo aqui: {} \n", user.house_node)
         #     print("vou buscar: {} \n", user.users_to_pick_up)
 
+    def create_buses(self):
+        print("tou no create buses \n")
+        peaks = get_traffic_peaks(self.traffic_distribution)
+        bus_times = []
+        value = 0.0
+        peak_time = False
+
+        #Get routes from input file
+        existing_routes = self.input_config["buses"]
+
+        while value < 24:
+            bus_times.append(value)
+
+            #check if the time is between any of peaks +- standard deviation
+            for peak,std in peaks:
+                if( (peak - std) <= value < (peak + std) ):
+                    #If in peak time the bus comes every 15 minutes
+                    value += 0.25
+                    peak_time = True
+            #If not in peak time the bus comes every 30 minutes
+            if(peak_time == False):
+                value += 0.5
+            #reset the flag
+            peak_time = False
+ 
+        bus_users = []
+        #for all the bus_times
+        # for all bus routes
+        # create a default user with the route and the time
+        for time in bus_times:
+            for route in existing_routes:
+                us = User.default()
+                #inser the right provider - Bus provider
+                us.provider = STCP()
+                #insert start time
+                us.start_time = time
+                #insert route str
+                us.route_name = route
+                #insert route list[int] which is a list of nodes
+                us.route = existing_routes[route]
+                #available seats
+                us.available_seats = 50
+
+                bus_users.append(us)
+        return bus_users
 
 
 
@@ -312,7 +357,10 @@ class Simulator:
             print("first run")
             self.users = self.create_users()
             self.create_friends()
+            bus_users = self.create_buses()
+            exit()
         self.choose_mode(agent)
+
 
         #Take care of the ride sharing option - matching
         users_ride_sharing = []
@@ -355,9 +403,10 @@ class Simulator:
         # Users that weren't matched up are TBD (To Be Determined) what happens to them
         # Users that chose public transport are TBI (To Be Implemented)
 
+
         users_turn_actors = []
         for user in self.users:
-            if(user.mean_transportation == "Car"):
+            if(user.mean_transportation == "car"):
                 users_turn_actors.append(user)
             elif(user.mean_transportation == "sharedCar"):
                 if(len(user.users_to_pick_up) > 0):

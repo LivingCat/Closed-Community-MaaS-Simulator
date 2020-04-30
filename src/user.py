@@ -43,6 +43,9 @@ class User:
     distance_from_destination: int
     house_node: int
     users_to_pick_up: List['User']
+    route_name: str
+    route: List[int]
+
 
     def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int, distance_from_destination: int):
        self.personality = personality
@@ -57,6 +60,16 @@ class User:
        self.distance_from_destination = distance_from_destination
        self.num_friends = 0
        self.users_to_pick_up = []
+
+    @staticmethod
+    def default():
+        return User(Personality(0,0,0,0,0,0,0,0,0,0), 0.0, "","","",0.0,0.0,0,0)
+
+    def set_route_name(self,route_name: str):
+        self.route_name = route_name
+
+    def set_route(self, route: List[int]):
+        self.route = route
 
     def add_friends(self,friends: List['User']):
         self.friends = friends

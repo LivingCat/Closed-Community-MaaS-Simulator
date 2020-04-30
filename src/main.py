@@ -80,6 +80,11 @@ def print_args(args):
 def actor_constructor(graph: RoadGraph, user: User):
     """Calculate possible routes and give each one a probability based on how little time it takes to transverse it"""
     #When ride sharing, limiting the possible routes for the ones that pass through the house nodes of the riders
+
+    #if we are in the presence of the default bus user
+    if(user.provider.service == "bus"):
+        return Actor(user.route, user, user.provider)
+
     possible_routes = graph.get_all_routes(user.house_node,user.mean_transportation)
       
     actual_poss_routes = [] 
@@ -93,6 +98,8 @@ def actor_constructor(graph: RoadGraph, user: User):
                     break
             if(all_in):
                 actual_poss_routes.append(route)
+    else:
+        actual_poss_routes = possible_routes
     routes_times = [graph.get_optimal_route_travel_time(r)
                     for r in actual_poss_routes]
     routes_probs = softmax_travel_times(routes_times)
@@ -373,9 +380,9 @@ def main(args):
     input_config = read_json_file(args.json_file)
 
     # providers = [Personal(),Friends(),STCP()]
-    # providers = [Personal()]
+    providers = [Personal()]
     # providers = [Personal(), STCP()]
-    providers = [ Friends()]
+    # providers = [ Friends()]
     sim = Simulator(config=args,
                     input_config = input_config,
                     actor_constructor=partial(

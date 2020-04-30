@@ -146,3 +146,12 @@ tensorboard --logdir logs/2x256-1579515056
 * Added info written about users in the actors_info.csv file
 * Ran scenary 1
 * Thought about ride sharing and public transport
+
+# 29-04-2020
+
+* Implemented version 1.0 of ride sharing
+
+# 30-04-2020
+
+* Created a default user to represent the bus drivers 
+* Created bus users with a certain route and start time

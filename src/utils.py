@@ -81,6 +81,12 @@ def get_time_from_traffic_distribution(distribution) -> float:
         result = distribution()
     return result
 
+def get_traffic_peaks(distribution):
+    peaks = []
+    for peak,std in distribution.stats:
+        peaks.append([peak,std])
+    return peaks
+
 
 class bidict(dict):
     def __init__(self, *args, **kwargs):
@@ -100,3 +106,4 @@ class bidict(dict):
         if self[key] in self.inverse and not self.inverse[self[key]]:
             del self.inverse[self[key]]
         super(bidict, self).__delitem__(key)
+
