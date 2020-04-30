@@ -205,7 +205,10 @@ class Simulator:
     def sort_drivers_fun(self,driver: User):
         return driver.available_seats
 
-    def matching(self,users: List['User']):
+    def sort_bus_func(self,bus_driver: User):
+        return len(bus_driver.route)
+
+    def ride_sharing_matching(self,users: List['User']):
         users_want_ride_sharing = users
         possible_drivers = [user for user in users if user.personality.has_private]
         possible_drivers.sort(reverse= True, key=self.sort_drivers_fun)
@@ -285,6 +288,36 @@ class Simulator:
             #remove driver from users that want ride sharing, since he has been chosen to be the driver and has been matched
             users_want_ride_sharing.remove(driver)
 
+    def in_time_slot(self,rider:User, driver: User):
+        wait_time = MAX_WAITING_TIME * rider.willingness_to_wait
+        return (abs(driver.start_time - rider.start_time) <= wait_time)
+
+
+    def public_transport_matching(self, users: List['User'], bus_users: List['User']):
+        users_want_public_transport = users
+        bus_drivers = bus_users
+        
+        bus_drivers.sort(key=self.sort_bus_func)
+        for driver in bus_drivers:
+            # if(driver.available_seats == 0):
+            #     continue
+            #find users which the house node belongs to the bus route
+            pickup = []
+            possible_pickup = []
+            for user in users_want_public_transport:
+                # and in_time_slot(user, driver)
+                if(user.house_node in driver.route): 
+                    possible_pickup.append(user)
+
+            for user in possible_pickup:
+                if(driver.available_seats > 0):
+                    pickup.append(user)
+                    driver.available_seats -= 1
+                    
+            driver.users_to_pick_up = pickup
+            users_want_public_transport = list(set(users_want_public_transport) - set(pickup))
+
+
     #depois ver porque se
     # users nao tem ninguem para pickup entao nao podem ir de ride sharing
     # se users nao fazem parte dos to-pick-up de outros users entao tb nao podem ir de ride sharing
@@ -346,9 +379,6 @@ class Simulator:
         return bus_users
 
 
-
-
-
     def run(self, agent: DQNAgent):
         # Empty actors list, in case of consecutive calls to this method
         self.actors = []
@@ -358,8 +388,14 @@ class Simulator:
             self.users = self.create_users()
             self.create_friends()
             bus_users = self.create_buses()
-            exit()
+            # exit()
         self.choose_mode(agent)
+
+        #Take care of the public transport option - match users to buses
+        users_public_transport = []
+        for user in self.users:
+            if (user.mean_transportation == "bus"):
+                users_public_transport.append(user)
 
 
         #Take care of the ride sharing option - matching
@@ -388,7 +424,8 @@ class Simulator:
         #     print("vivo aqui: \n", user.house_node)
         #     print("available seats: \n", user.available_seats)
 
-        self.matching(users_ride_sharing)
+        self.ride_sharing_matching(users_ride_sharing)
+        self.public_transport_matching(users_public_transport, bus_users)
 
         # for user in self.users:
         #     user.pprint()
@@ -411,6 +448,9 @@ class Simulator:
             elif(user.mean_transportation == "sharedCar"):
                 if(len(user.users_to_pick_up) > 0):
                     users_turn_actors.append(user)
+
+        #add bus drivers to the users who will become actors
+        # users_turn_actors = users_turn_actors + bus_users
 
         create_actor_events = self.create_actors_events(users_turn_actors)
 
@@ -446,8 +486,28 @@ class Simulator:
 
         # exit()
 
+        # actors_co = self.actors
+        # with open("teste.txt", 'w+') as f:
+        #     for actor in actors_co:
+        #         print("sou uma ator de: ", actor.service, "\n", file=f)
+        #         print("represento este user: ", actor.user, "\n", file=f)
+        #         print("fui buscar estes users: ", actor.user.users_to_pick_up, "\n", file=f)
+        #         for user in actor.user.users_to_pick_up:
+        #             print("ele foi-me buscar e eu vivia aqui: ", user.house_node, "\n", file=f)
+        #         print("esta foi a minha rota: ", actor.base_route, "\n", file=f)
+
+        #     exit()
+
         for actor in self.actors:
             #actor.cost e actor.spent_credits
+            #TODO
+            #diferenciar entre transporte privado e os outros
+            #transporte privado é como está agora (nao esquecer que o actor.cost deixou de ter o subsidio)
+            #transport coletivo:
+            #for pelos user_to_pick_up
+            # descobrir quando é que o actor chegou ao house_node do user (atraves dos actor.travelled_nodes), pegar no tempo, ver a diferença entre o tempo total e as horas a que ele chegou ao house node
+            # mudar assim o actor. travel time e o actor.cost (actor.provider.get_cost(real time))
+            # nao esquecer tb do subsidio
             commute_out = CommuteOutput(
                 actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
             user_info = dict()

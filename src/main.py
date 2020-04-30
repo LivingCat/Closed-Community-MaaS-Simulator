@@ -383,6 +383,7 @@ def main(args):
     providers = [Personal()]
     # providers = [Personal(), STCP()]
     # providers = [ Friends()]
+    # providers = [STCP()]
     sim = Simulator(config=args,
                     input_config = input_config,
                     actor_constructor=partial(

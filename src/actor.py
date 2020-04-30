@@ -81,11 +81,11 @@ class Actor():
 
     @property
     def cost(self):
-        #incorporate transport subsidy
+        #incorporate transport subsidy for each of the users that this actor represents (in simulator, commute output)
         # transport subsidy depends on the mode of transport used:
         # 0.36€/km for private transport
         # 0.11€/km for public transport
-        return self.provider.get_cost(self.total_travel_time) - self.calculate_transporte_subsidy()
+        return self.provider.get_cost(self.total_travel_time)
 
     @property
     def travel_time(self):
@@ -103,12 +103,12 @@ class Actor():
     def emissions(self):
         return self.provider.get_emissions(self.total_travel_time)
 
-    def calculate_transporte_subsidy(self):
+    def calculate_transporte_subsidy(self, num_travelled_nodes: int):
         # traveled nodes has all the nodes the actor travelled through, minus 1 gives us the number of edges he used and consequently the km travelled
         if(self.service == "car"):
-            return 0.36 * (len(self.traveled_nodes)-1)
+            return 0.36 * num_travelled_nodes
         elif(self.service == "bus"):
-            return 0.11 * (len(self.traveled_nodes)-1)
+            return 0.11 * num_travelled_nodes
         #need to change the value for shared car
         elif(self.service == "sharedCar"):
-            return 0.36 * (len(self.traveled_nodes)-1)
+            return 0.36 * num_travelled_nodes

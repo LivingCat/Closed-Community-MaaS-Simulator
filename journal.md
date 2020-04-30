@@ -155,3 +155,10 @@ tensorboard --logdir logs/2x256-1579515056
 
 * Created a default user to represent the bus drivers 
 * Created bus users with a certain route and start time
+* matching for public transport
+* Public transport works!!
+
+# TODO
+* Change utility calculation to adjust to both ride sharing and public transport
+* Check how the results file is being written (if with run actors we need to change it to take into consideration the values for the users of ride sharing and public transport)
+* Check if something about the users or anything has to be erased from run to run
