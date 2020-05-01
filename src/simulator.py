@@ -388,7 +388,6 @@ class Simulator:
             self.users = self.create_users()
             self.create_friends()
             bus_users = self.create_buses()
-            # exit()
         self.choose_mode(agent)
 
         #Take care of the public transport option - match users to buses
@@ -449,8 +448,18 @@ class Simulator:
                 if(len(user.users_to_pick_up) > 0):
                     users_turn_actors.append(user)
 
-        #add bus drivers to the users who will become actors
-        # users_turn_actors = users_turn_actors + bus_users
+        # print("antes de ver se temos stcp ", len(users_turn_actors))
+
+        services = []
+        for provider in self.providers:
+            services.append(provider.service)
+
+        for service in services:
+            if(service == "bus"):
+                # add bus drivers to the users who will become actors
+                users_turn_actors = users_turn_actors + bus_users
+
+        # print("depois de ver se temos stcp ", len(users_turn_actors))
 
         create_actor_events = self.create_actors_events(users_turn_actors)
 
@@ -484,41 +493,90 @@ class Simulator:
         #     print("esta é a minha rota: \n", ac.base_route)
         #     print("vou buscar: \n", ac.user.users_to_pick_up)
 
-        # exit()
-
-        # actors_co = self.actors
-        # with open("teste.txt", 'w+') as f:
-        #     for actor in actors_co:
-        #         print("sou uma ator de: ", actor.service, "\n", file=f)
-        #         print("represento este user: ", actor.user, "\n", file=f)
-        #         print("fui buscar estes users: ", actor.user.users_to_pick_up, "\n", file=f)
-        #         for user in actor.user.users_to_pick_up:
-        #             print("ele foi-me buscar e eu vivia aqui: ", user.house_node, "\n", file=f)
-        #         print("esta foi a minha rota: ", actor.base_route, "\n", file=f)
-
-        #     exit()
 
         for actor in self.actors:
             #actor.cost e actor.spent_credits
             #TODO
             #diferenciar entre transporte privado e os outros
-            #transporte privado é como está agora (nao esquecer que o actor.cost deixou de ter o subsidio)
+            #transporte privado é como está agora
             #transport coletivo:
             #for pelos user_to_pick_up
             # descobrir quando é que o actor chegou ao house_node do user (atraves dos actor.travelled_nodes), pegar no tempo, ver a diferença entre o tempo total e as horas a que ele chegou ao house node
             # mudar assim o actor. travel time e o actor.cost (actor.provider.get_cost(real time))
             # nao esquecer tb do subsidio
-            commute_out = CommuteOutput(
-                actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
-            user_info = dict()
-            user_info["user"] = actor.user
-            user_info["commute_output"] = commute_out
-            user_info["utility"] = actor.user.calculate_utility_value(
-                commute_out)
-            #update dos creditos do user
-            final_users.append(user_info)
+            # Ride Sharing:
+            # igual ao transport coletivo
+
+            if(actor.service == "car"):
+                commute_out = CommuteOutput(
+                    actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                user_info = dict()
+                user_info["user"] = actor.user
+                user_info["commute_output"] = commute_out
+                user_info["utility"] = actor.user.calculate_utility_value(
+                    commute_out)
+                #update dos creditos do user
+                final_users.append(user_info)
+            elif(actor.service == "sharedCar"):
+                #create commute output for the driver
+                commute_out = CommuteOutput(
+                    actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                user_info = dict()
+                user_info["user"] = actor.user
+                user_info["commute_output"] = commute_out
+                user_info["utility"] = actor.user.calculate_utility_value(
+                    commute_out)
+                #update dos creditos do user
+                final_users.append(user_info)
+
+                #go through each user this actor represents
+                for rider in actor.user.user_to_pick_up:
+                    commute_out = CommuteOutput(actor.rider_cost(rider.house_node), actor.rider_travel_time(rider.house_node), actor.awareness, actor.comfort, actor.provider.name)
+                    user_info = dict()
+                    user_info["user"] = rider
+                    user_info["commute_output"] = commute_out
+                    user_info["utility"] = rider.calculate_utility_value(
+                        commute_out)
+                    final_users.append(user_info)
+            elif(actor.service == "bus"):
+                #go through each user this actor represents
+                for rider in actor.user.users_to_pick_up:
+                    commute_out = CommuteOutput(actor.rider_cost(rider.house_node), actor.rider_travel_time(
+                        rider.house_node), actor.awareness, actor.comfort, actor.provider.name)
+                    user_info = dict()
+                    user_info["user"] = rider
+                    user_info["commute_output"] = commute_out
+                    user_info["utility"] = rider.calculate_utility_value(
+                        commute_out)
+                    final_users.append(user_info)
+
+
 
             # print("mean: {}  utility: {} ".format(commute_out.mean_transportation, user_info["utility"]))
+        print("vou escrever")
+        print(len(self.actors))
+        actors_co = self.actors
+        with open("utility_teste.txt", 'w+') as f:
+            for actor in actors_co:
+                if(len(actor.user.users_to_pick_up) > 0):
+                    print("sou uma ator de: ", actor.service, "\n", file=f)
+                    print("represento este user: ", actor.user, "\n", file=f)
+                    print("fui buscar estes users: ", actor.user.users_to_pick_up, "\n", file=f)
+                    for user in actor.user.users_to_pick_up:
+                        print("ele foi-me buscar e eu vivia aqui: ", user.house_node, "\n", file=f)
+                    print("esta foi a minha rota: ", actor.base_route, "\n", file=f)
+                    print("\n", file=f)
+
+        for user_info in final_users:
+            with open("utility_teste.txt", 'a+') as f:
+                print("eu sou o user: ", user_info["user"], "\n", file=f)
+                print("este foi o meu custo: ", user_info["commute_output"].cost, "\n", file=f)
+                print("este foi o meu ttt: ",user_info["commute_output"].total_time, "\n", file=f)
+                print("esta foi a minha utilidade: ", user_info["utility"], "\n", file=f)
+                print("\n", file=f)
+
+
+        exit()
 
         for user_info in final_users:
             current_state = user_info["user"].get_user_current_state()

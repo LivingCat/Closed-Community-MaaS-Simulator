@@ -85,7 +85,28 @@ class Actor():
         # transport subsidy depends on the mode of transport used:
         # 0.36€/km for private transport
         # 0.11€/km for public transport
-        return self.provider.get_cost(self.total_travel_time)
+        return self.provider.get_cost(self.total_travel_time) - self.calculate_transporte_subsidy(len(self.traveled_nodes)-1)
+
+    def rider_travel_time(self,house_node: int):
+        time_reached_house = 0.0
+        for time,node in self.traveled_nodes:
+            if (node == house_node):
+                time_reached_house = time
+                break
+        
+        return (self.total_travel_time - time_reached_house)
+            
+
+    def rider_cost(self,house_node: int):
+        rider_tt = self.rider_travel_time(house_node)
+        rider_index = -1
+        i=1
+        for node in self.base_route:
+            if(node == house_node):
+                rider_index = i
+                break
+            i += 1
+        return self.provider.get_cost(rider_tt) - self.calculate_transporte_subsidy(len(self.base_route)- rider_index)
 
     @property
     def travel_time(self):
