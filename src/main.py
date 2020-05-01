@@ -30,7 +30,7 @@ import time
 
 import csv
 
-run_name = "cenario_1_300_pessoas_3000_runs"
+run_name = "teste_escrita"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -212,12 +212,15 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         # print("acc")
         # print(edge_flow_acc)
         results['edges_occupation'][e_key] = edge_flow_acc
+
+
     emissions_dict={
         "car":[],
         "bus":[],
         "sharedCar":[],
         "total":[]
     }
+
 
     number_users_dict = {
         "car": [],
@@ -240,9 +243,17 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
             "sharedCar": 0
         }
         for actor in run.actors:
+            print(actor)
             run_emissions_dict[actor.service] += actor.emissions
-            run_number_users_dict[actor.service] += 1
             run_emissions_dict["total"] += actor.emissions
+
+            #have to add the actual users
+            # run_number_users_dict[actor.service] += 1
+            if(actor.service == "bus"):
+                run_number_users_dict[actor.service] += len(actor.user.users_to_pick_up)
+            else:
+                run_number_users_dict[actor.service] = run_number_users_dict[actor.service] + len(actor.user.users_to_pick_up) + 1
+
 
         emissions_dict["car"].append(run_emissions_dict["car"])
         emissions_dict["bus"].append(run_emissions_dict["bus"])
@@ -285,7 +296,12 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
             "total":0
         }
         for ac in run.actors:
-            actor_transp_subsidy = ac.calculate_transporte_subsidy()
+            actor_transp_subsidy = 0.0
+            if(ac.service !=  "bus"):
+                actor_transp_subsidy += ac.calculate_transporte_subsidy(ac.user.house_node)
+            for rider in ac.user.users_to_pick_up:
+                actor_transp_subsidy += ac.calculate_transporte_subsidy(rider.house_node)          
+            
             run_transport_subsidy_dict[ac.service] += actor_transp_subsidy
             run_transport_subsidy_dict["total"] += actor_transp_subsidy
 
@@ -380,10 +396,10 @@ def main(args):
     input_config = read_json_file(args.json_file)
 
     # providers = [Personal(),Friends(),STCP()]
-    providers = [Personal()]
+    # providers = [Personal()]
     # providers = [Personal(), STCP()]
     # providers = [ Friends()]
-    # providers = [STCP()]
+    providers = [STCP()]
     sim = Simulator(config=args,
                     input_config = input_config,
                     actor_constructor=partial(
@@ -451,10 +467,10 @@ def main(args):
     #     for ac in i.actors:
     #         print(ac.provider)
 
-    statistics_print(sim)
+    # statistics_print(sim)
 
-    save_actor_file = run_name + "actors_info.csv"
-    write_user_info(all_stats[0].actors, save_actor_file)
+    # save_actor_file = run_name + "actors_info.csv"
+    # write_user_info(all_stats[0].actors, save_actor_file)
     
 
 

@@ -161,7 +161,10 @@ tensorboard --logdir logs/2x256-1579515056
 # 01-05-2020
 
 * Changed utility function calculation so now every user has the correct utility
+* In Average all results:
+    * Transport subsidy is now correct
+    * Number of users in now correct
 
 # TODO
-* Check how the results file is being written (if with run actors we need to change it to take into consideration the values for the users of ride sharing and public transport)
 * Check if something about the users or anything has to be erased from run to run
+* See how to change emissions values

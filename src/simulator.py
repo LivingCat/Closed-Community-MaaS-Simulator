@@ -556,27 +556,25 @@ class Simulator:
         print("vou escrever")
         print(len(self.actors))
         actors_co = self.actors
-        with open("utility_teste.txt", 'w+') as f:
-            for actor in actors_co:
-                if(len(actor.user.users_to_pick_up) > 0):
-                    print("sou uma ator de: ", actor.service, "\n", file=f)
-                    print("represento este user: ", actor.user, "\n", file=f)
-                    print("fui buscar estes users: ", actor.user.users_to_pick_up, "\n", file=f)
-                    for user in actor.user.users_to_pick_up:
-                        print("ele foi-me buscar e eu vivia aqui: ", user.house_node, "\n", file=f)
-                    print("esta foi a minha rota: ", actor.base_route, "\n", file=f)
-                    print("\n", file=f)
+        # with open("utility_teste.txt", 'w+') as f:
+        #     for actor in actors_co:
+        #         if(len(actor.user.users_to_pick_up) > 0):
+        #             print("sou uma ator de: ", actor.service, "\n", file=f)
+        #             print("represento este user: ", actor.user, "\n", file=f)
+        #             print("fui buscar estes users: ", actor.user.users_to_pick_up, "\n", file=f)
+        #             for user in actor.user.users_to_pick_up:
+        #                 print("ele foi-me buscar e eu vivia aqui: ", user.house_node, "\n", file=f)
+        #             print("esta foi a minha rota: ", actor.base_route, "\n", file=f)
+        #             print("\n", file=f)
 
-        for user_info in final_users:
-            with open("utility_teste.txt", 'a+') as f:
-                print("eu sou o user: ", user_info["user"], "\n", file=f)
-                print("este foi o meu custo: ", user_info["commute_output"].cost, "\n", file=f)
-                print("este foi o meu ttt: ",user_info["commute_output"].total_time, "\n", file=f)
-                print("esta foi a minha utilidade: ", user_info["utility"], "\n", file=f)
-                print("\n", file=f)
+        # for user_info in final_users:
+        #     with open("utility_teste.txt", 'a+') as f:
+        #         print("eu sou o user: ", user_info["user"], "\n", file=f)
+        #         print("este foi o meu custo: ", user_info["commute_output"].cost, "\n", file=f)
+        #         print("este foi o meu ttt: ",user_info["commute_output"].total_time, "\n", file=f)
+        #         print("esta foi a minha utilidade: ", user_info["utility"], "\n", file=f)
+        #         print("\n", file=f)
 
-
-        exit()
 
         for user_info in final_users:
             current_state = user_info["user"].get_user_current_state()

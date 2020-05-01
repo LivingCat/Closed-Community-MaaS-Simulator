@@ -97,16 +97,14 @@ class Actor():
         return (self.total_travel_time - time_reached_house)
             
 
+    def rider_traveled_dist(self,house_node: int):
+        rider_index = self.base_route.index(house_node) + 1
+        return (len(self.base_route) - rider_index )
+
     def rider_cost(self,house_node: int):
         rider_tt = self.rider_travel_time(house_node)
-        rider_index = -1
-        i=1
-        for node in self.base_route:
-            if(node == house_node):
-                rider_index = i
-                break
-            i += 1
-        return self.provider.get_cost(rider_tt) - self.calculate_transporte_subsidy(len(self.base_route)- rider_index)
+        rider_trav_dist = self.rider_traveled_dist(house_node)
+        return self.provider.get_cost(rider_tt) - self.calculate_transporte_subsidy(rider_trav_dist)
 
     @property
     def travel_time(self):
