@@ -45,6 +45,7 @@ class User:
     users_to_pick_up: List['User']
     route_name: str
     route: List[int]
+    capacity: int
 
 
     def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int, distance_from_destination: int):
@@ -57,6 +58,7 @@ class User:
        self.budget = budget
        self.friends = list()
        self.available_seats = available_seats
+       self.capacity = available_seats
        self.distance_from_destination = distance_from_destination
        self.num_friends = 0
        self.users_to_pick_up = []
@@ -97,7 +99,7 @@ class User:
         return [self.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference, int(personality.has_private)]
     
     def pprint(self):
-        personality = self.personality
+        # personality = self.personality
         # print("cluster: {} \n". format(self.cluster))
         # print("course: {} \n". format(self.course))
         # print("grade: {} \n". format(self.grade))
@@ -115,7 +117,7 @@ class User:
         # print("friends: {} \n".format(self.friends))
         # print("has private: {} \n". format(personality.has_private))
         # print("available seats: {} \n".format(self.available_seats))
-        print("distance: {} \n".format(self.distance_from_destination))
-        print("house node: {} \n".format(self.house_node))
+        # print("distance: {} \n".format(self.distance_from_destination))
+        # print("house node: {} \n".format(self.house_node))
         return True
 
