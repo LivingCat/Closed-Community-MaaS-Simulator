@@ -46,6 +46,7 @@ class User:
     route_name: str
     route: List[int]
     capacity: int
+    time_spent_waiting: float
 
 
     def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int, distance_from_destination: int):

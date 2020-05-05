@@ -47,6 +47,7 @@ class Simulator:
         self.actors = None
         self.providers = providers
         self.first_run = False
+        self.runn = 0
 
         random.seed(seed)
         # plt.ion()
@@ -164,11 +165,6 @@ class Simulator:
                             poss_friend.friends.append(user)
                             poss_friend.num_friends -= 1
                             break              
-
-        # for user in self.users:
-        #     print("user")
-        #     print(user.friends)
-        #     print(user.num_friends)
 
         return True
 
@@ -333,7 +329,7 @@ class Simulator:
         #     print("vou buscar: {} \n", user.users_to_pick_up)
 
     def create_buses(self):
-        print("tou no create buses \n")
+        print("im in create buses \n")
         peaks = get_traffic_peaks(self.traffic_distribution)
         bus_times = []
         value = 0.0
@@ -342,7 +338,8 @@ class Simulator:
         #Get routes from input file
         existing_routes = self.input_config["buses"]
 
-        while value < 24:
+        #24
+        while value < 0.5:
             bus_times.append(value)
 
             #check if the time is between any of peaks +- standard deviation
@@ -374,10 +371,20 @@ class Simulator:
                 us.route = existing_routes[route]
                 #available seats
                 us.available_seats = 50
+                #capacity
+                us.capacity = 50
 
                 bus_users.append(us)
         return bus_users
 
+    def reset(self):
+        for bus_driver in self.bus_users:
+            bus_driver.available_seats = bus_driver.capacity
+            bus_driver.users_to_pick_up = []
+        for user in self.users:
+            user.available_seats = user.capacity
+            user.users_to_pick_up = []
+        
 
     def run(self, agent: DQNAgent):
         # Empty actors list, in case of consecutive calls to this method
@@ -387,14 +394,25 @@ class Simulator:
             print("first run")
             self.users = self.create_users()
             self.create_friends()
-            bus_users = self.create_buses()
+            self.bus_users = self.create_buses()
+        else:
+            self.users = self.users[1:]
+            self.reset()
         self.choose_mode(agent)
+
+        # with open("buses_info.txt", 'a+') as f:
+        #     print("run ", self.runn, file=f)
+        #     for bus in self.bus_users:
+        #         print("available : \n", bus.available_seats, file=f)
+        #         print("capacity : \n", bus.capacity, file=f)
+
 
         #Take care of the public transport option - match users to buses
         users_public_transport = []
         for user in self.users:
             if (user.mean_transportation == "bus"):
                 users_public_transport.append(user)
+      
 
 
         #Take care of the ride sharing option - matching
@@ -424,7 +442,6 @@ class Simulator:
         #     print("available seats: \n", user.available_seats)
 
         self.ride_sharing_matching(users_ride_sharing)
-        self.public_transport_matching(users_public_transport, bus_users)
 
         # for user in self.users:
         #     user.pprint()
@@ -457,13 +474,18 @@ class Simulator:
         for service in services:
             if(service == "bus"):
                 # add bus drivers to the users who will become actors
-                users_turn_actors = users_turn_actors + bus_users
+                self.public_transport_matching(users_public_transport, self.bus_users)
+                users_turn_actors = users_turn_actors + self.bus_users
 
         # print("depois de ver se temos stcp ", len(users_turn_actors))
 
         create_actor_events = self.create_actors_events(users_turn_actors)
 
         # print("users {}".format(len(self.users)))
+
+        with open("ughh.txt", 'a+') as f:
+            print("run ", self.runn, file=f)
+            print("run users  ", len(self.users), file=f)
 
         for ae in create_actor_events:
             event_queue.put_nowait(ae.get_priorized())
@@ -493,7 +515,6 @@ class Simulator:
         #     print("esta é a minha rota: \n", ac.base_route)
         #     print("vou buscar: \n", ac.user.users_to_pick_up)
 
-
         for actor in self.actors:
             #actor.cost e actor.spent_credits
             #TODO
@@ -519,8 +540,10 @@ class Simulator:
                 final_users.append(user_info)
             elif(actor.service == "sharedCar"):
                 #create commute output for the driver
-                commute_out = CommuteOutput(
-                    actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                travel_cost = actor.simple_travel_cost()
+                travel_cost_portion = travel_cost / (len(actor.user.users_to_pick_up) + 1)
+                driver_cost = travel_cost_portion + actor.calculate_transporte_subsidy(len(actor.traveled_nodes)-1)
+                commute_out = CommuteOutput(driver_cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 user_info = dict()
                 user_info["user"] = actor.user
                 user_info["commute_output"] = commute_out
@@ -530,8 +553,13 @@ class Simulator:
                 final_users.append(user_info)
 
                 #go through each user this actor represents
-                for rider in actor.user.user_to_pick_up:
-                    commute_out = CommuteOutput(actor.rider_cost(rider.house_node), actor.rider_travel_time(rider.house_node), actor.awareness, actor.comfort, actor.provider.name)
+                for rider in actor.user.users_to_pick_up:
+                    #calculate the time the user spent waiting (difference between user starting time and time when the actor arrived to the house node)
+                    time_waiting = actor.driver_reached_pick_up(
+                        rider.house_node) - rider.start_time
+                    rider.time_spent_waiting = max(time_waiting,0)
+                    rider_cost = travel_cost_portion + actor.calculate_transporte_subsidy(actor.rider_traveled_dist(rider.house_node))
+                    commute_out = CommuteOutput(rider_cost, actor.rider_travel_time(rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     user_info = dict()
                     user_info["user"] = rider
                     user_info["commute_output"] = commute_out
@@ -541,8 +569,11 @@ class Simulator:
             elif(actor.service == "bus"):
                 #go through each user this actor represents
                 for rider in actor.user.users_to_pick_up:
+                    time_waiting = actor.driver_reached_pick_up(
+                        rider.house_node) - rider.start_time
+                    rider.time_spent_waiting = max(time_waiting, 0)
                     commute_out = CommuteOutput(actor.rider_cost(rider.house_node), actor.rider_travel_time(
-                        rider.house_node), actor.awareness, actor.comfort, actor.provider.name)
+                        rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     user_info = dict()
                     user_info["user"] = rider
                     user_info["commute_output"] = commute_out
@@ -553,9 +584,7 @@ class Simulator:
 
 
             # print("mean: {}  utility: {} ".format(commute_out.mean_transportation, user_info["utility"]))
-        print("vou escrever")
-        print(len(self.actors))
-        actors_co = self.actors
+        # actors_co = self.actors
         # with open("utility_teste.txt", 'w+') as f:
         #     for actor in actors_co:
         #         if(len(actor.user.users_to_pick_up) > 0):
@@ -589,6 +618,10 @@ class Simulator:
             agent.train(True, 1)
 
         # self.draw_graph()
+        with open("ughh.txt", 'a+') as f:
+            print("run ", self.runn, file=f)
+            self.runn += 1
+            print("run num final users  ", len(final_users), file=f)
         return final_users
 
     def create_actors_events(self, users: [User]) -> List[CreateActorEvent]:
@@ -686,8 +719,6 @@ class Simulator:
             if(has_private):
                 seats_num = list((self.input_config["users"]["clusters"][chosen_cluster]["seat_probs"]).keys())
                 seats_percentages = (self.input_config["users"]["clusters"][chosen_cluster]["seat_probs"]).values()
-                # print(seats_num)
-                # print(seats_percentages)
 
                 available_seats = random.choices(
                     seats_num, weights=seats_percentages, k=1)

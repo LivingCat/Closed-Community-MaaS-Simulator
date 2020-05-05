@@ -27,10 +27,11 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import json
 import time
+import copy
 
 import csv
 
-run_name = "teste_escrita"
+run_name = "teste_public_100_users_1000_runs"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -125,6 +126,8 @@ def statistics_print(sim: Simulator):
 
 def average_all_results(all_s: List[SimStats], display_plots: bool):
     """Gather information regarding all runs and its metrics"""
+    
+    print("tou no average_all_results \n")
 
     # gather summary information
     actors_wo_end = [
@@ -155,6 +158,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
 
     # gather new information with atis separation
     actors_flow = defaultdict(lambda: [(0.0, 0)])
+    print("vou ver actors flow")
     for s in all_s:
         for key in s.actors_atis.keys():
             s.actors_atis[key] = s.actors_atis[key][1:]
@@ -174,45 +178,59 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
     # plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
     # plt.waitforbuttonpress(0)
 
+    print("tou a guardar os actors_atis_natis")
+
     results['actors_atis_natis'] = actors_flow_acc
 
     # the above but for every edge
     inner_default_dict = lambda: defaultdict(lambda: [])
-    results['edges_occupation'] = defaultdict(inner_default_dict)
+    # results['edges_occupation'] = defaultdict(inner_default_dict)
 
-    for s in all_s:
-        edges = s.edges_flow_atis
-        for key in edges.keys():
-            for service in edges[key]:
-                results['edges_occupation'][str(
-                    key)][service].append(edges[key][service])
+    print("vou ver edges \n")
 
-    for e_key in results['edges_occupation'].keys():
-        edge_flow = defaultdict(lambda: [(0.0, 0)])
-        # pretty(results['edges_occupation'][e_key])
-        for actor_key in results['edges_occupation'][e_key]:
-            for tuple_list in results['edges_occupation'][e_key][actor_key]:
-                tuple_list = tuple_list[1:]
-                for tuple in tuple_list:
-                    edge_flow[actor_key].append(tuple)
+    # for s in all_s:
+    #     edges = s.edges_flow_atis
+    #     for key in edges.keys():
+    #         for service in edges[key]:
+    #             results['edges_occupation'][str(
+    #                 key)][service].append(edges[key][service])
 
-        for key in edge_flow.keys():
-            edge_flow[key] = sorted(edge_flow[key], key=lambda t: t[0])
+    # with open("edges_occupation.txt", 'w+') as f:
+    #     print(results['edges_occupation'], file=f)
+    # exit()
 
-        edge_flow_acc = defaultdict(lambda: [(0.0, 0)])
-        for actor_key in edge_flow.keys():
-            for edge_tuple in edge_flow[actor_key]:
-                edge_flow_acc[actor_key].append([edge_tuple[0],
-                                    edge_tuple[1] + edge_flow_acc[actor_key][-1][1]])
+    # print("vou agora para os results[edges ocupation] \n")
+    # for e_key in results['edges_occupation'].keys():
+    #     edge_flow = defaultdict(lambda: [(0.0, 0)])
+    #     # pretty(results['edges_occupation'][e_key])
+    #     for actor_key in results['edges_occupation'][e_key]:
+    #         for tuple_list in results['edges_occupation'][e_key][actor_key]:
+    #             tuple_list = tuple_list[1:]
+    #             for tuple in tuple_list:
+    #                 edge_flow[actor_key].append(tuple)
 
+    #     print("vou para o edge_flow.keys")
 
-        for actor_key in edge_flow_acc.keys():
-            edge_flow_acc[actor_key] = edge_flow_acc[actor_key][1:]
+    #     for key in edge_flow.keys():
+    #         edge_flow[key] = sorted(edge_flow[key], key=lambda t: t[0])
 
-        # print("acc")
-        # print(edge_flow_acc)
-        results['edges_occupation'][e_key] = edge_flow_acc
+    #     edge_flow_acc = defaultdict(lambda: [(0.0, 0)])
 
+    #     print("vou para o edge_flow.keys outra vez")
+    #     for actor_key in edge_flow.keys():
+    #         for edge_tuple in edge_flow[actor_key]:
+    #             edge_flow_acc[actor_key].append([edge_tuple[0],
+    #                                 edge_tuple[1] + edge_flow_acc[actor_key][-1][1]])
+
+    #     print("vou para o edge flow acc keys")
+    #     for actor_key in edge_flow_acc.keys():
+    #         edge_flow_acc[actor_key] = edge_flow_acc[actor_key][1:]
+
+    #     # print("acc")
+    #     # print(edge_flow_acc)
+    #     results['edges_occupation'][e_key] = edge_flow_acc
+
+    print("vou calcular as emissoes e os users \n")
 
     emissions_dict={
         "car":[],
@@ -230,7 +248,16 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
 
     tax_list = []
 
+    runn = 0
     for run in all_s:
+
+        print("num actors: ", len(run.actors))
+        users = 0
+        for a in run.actors:
+            users += len(a.user.users_to_pick_up)
+        print("num users: ", users)
+
+
         run_emissions_dict={
             "car": 0,
             "bus" :0,
@@ -242,10 +269,27 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
             "bus" :0,
             "sharedCar": 0
         }
+
+
+        with open("ughh.txt", 'a+') as f:
+            print("run ", runn, file=f)
+            runn += 1
+            print("run actors number ", len(run.actors), file=f)
+            for actor in run.actors:
+                if(len(actor.user.users_to_pick_up) > 0):
+                    print("sou uma ator de: ", actor.service, "\n", file=f)
+                    print("represento este user: ", actor.user, "\n", file=f)
+                    print("fui buscar estes users: ", len(actor.user.users_to_pick_up), "\n", file=f)
+                    print("\n", file=f)
         for actor in run.actors:
-            print(actor)
-            run_emissions_dict[actor.service] += actor.emissions
-            run_emissions_dict["total"] += actor.emissions
+            if(actor.service == "bus"):
+                #if its serving users
+                if(len(actor.user.users_to_pick_up) > 0):
+                    run_emissions_dict[actor.service] += actor.emissions
+                    run_emissions_dict["total"] += actor.emissions
+            else:
+                run_emissions_dict[actor.service] += actor.emissions
+                run_emissions_dict["total"] += actor.emissions
 
             #have to add the actual users
             # run_number_users_dict[actor.service] += 1
@@ -254,7 +298,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
             else:
                 run_number_users_dict[actor.service] = run_number_users_dict[actor.service] + len(actor.user.users_to_pick_up) + 1
 
-
+        # exit()
         emissions_dict["car"].append(run_emissions_dict["car"])
         emissions_dict["bus"].append(run_emissions_dict["bus"])
         emissions_dict["sharedCar"].append(run_emissions_dict["sharedCar"])
@@ -265,6 +309,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         number_users_dict["car"].append(run_number_users_dict["car"])
         number_users_dict["bus"].append(run_number_users_dict["bus"])
         number_users_dict["sharedCar"].append(run_number_users_dict["sharedCar"])
+        # print("sou o number users dict")
+        # print(number_users_dict)
 
     # print("emission dict")
     # print(emissions_dict)
@@ -273,6 +319,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
 
     #Calculate Emissions Tax - total and per run
     average_total_value_tax = sum(tax_list)/len(tax_list)
+
+    print("vou fazer display das plots \n")
 
     if display_plots:
         plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
@@ -364,6 +412,7 @@ def write_user_info(actors: List[Actor], file:str):
         "has private", "Friendliness", "Suscetible", "Transport", "Urban", "Willing", "Transportation", "Distance from Destination"]
 
     # writing to csv file
+    print("tou no write user info \n")
     with open(file, 'w+', newline='') as csvfile:
         # creating a csv writer object
         csvwriter = csv.writer(csvfile)
@@ -371,12 +420,19 @@ def write_user_info(actors: List[Actor], file:str):
         csvwriter.writerow(fields)
 
         for act in actors:
-            us = act.user
-            personality = us.personality
-            info = [us.course, us.grade, us.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
-                personality.has_private, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
-                us.provider.service, us.distance_from_destination]
-            csvwriter.writerow(info)
+            if(act.service != "bus"):
+                us = act.user
+                personality = us.personality
+                info = [us.course, us.grade, us.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
+                    personality.has_private, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
+                    us.provider.service, us.distance_from_destination]
+                csvwriter.writerow(info)
+            for rider in act.user.users_to_pick_up:
+                personality = rider.personality
+                info = [rider.course, rider.grade, rider.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
+                        personality.has_private, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
+                        rider.provider.service, rider.distance_from_destination]
+                csvwriter.writerow(info)
 
 
 def main(args):
@@ -422,6 +478,7 @@ def main(args):
             sim.first_run = False
         #runs the simulation
         final_users = sim.run(agent)
+        print("final users ", len(final_users))
 
         # Restarting episode - reset episode reward and step number
         episode_reward = 0
@@ -451,8 +508,22 @@ def main(args):
                     ))
         # current_state, action, reward, new_current_state, done
         agent.update_epsilon()
-        sim.stats.add_actors(sim.actors)
+        a = copy.deepcopy(sim.actors)
+        sim.stats.add_actors(a) 
+        num_user = 0
+        for ac in sim.actors:
+            num_user += len(ac.user.users_to_pick_up)
+
+        print("num users antes do append ao all stats: ", num_user)
+        num_user = 0
         all_stats.append(sim.stats)
+
+        for stat in all_stats:
+            num_user = 0
+            for ac in stat.actors:
+                num_user += len(ac.user.users_to_pick_up)
+
+            print("num users depois do append ao all stats: ", num_user)
 
 
     json_object = average_all_results(all_stats, args.plots)
@@ -469,8 +540,8 @@ def main(args):
 
     # statistics_print(sim)
 
-    # save_actor_file = run_name + "actors_info.csv"
-    # write_user_info(all_stats[0].actors, save_actor_file)
+    save_user_file = run_name + "_users_info.csv"
+    write_user_info(all_stats[0].actors, save_user_file)
     
 
 

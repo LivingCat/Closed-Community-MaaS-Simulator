@@ -39,23 +39,22 @@ class Personal(Provider):
 
 class Friends(Provider):
 
-    n_passengers = 2
     def __init__(self):
         super().__init__("Friends", "sharedCar")
     
     
     def get_cost(self,time):
         # - creditos/min_creditos_para_desconto
-        return (time*fuel_cost + fixed_added_cost)/self.n_passengers 
+        return time*fuel_cost + fixed_added_cost
     
     def get_time(self, time):
-        return time + 1
+        return time
 
     def get_comfort(self):
         return 0.6
 
     def get_emissions(self, time):
-        return Car.emissions(time)/self.n_passengers
+        return Car.emissions(time)
 
     def get_awareness(self):
         return 0.5
@@ -68,7 +67,7 @@ class STCP(Provider):
         return 2
     
     def get_time(self, time):
-        return time + 3
+        return time
 
     def get_comfort(self):
         return 0.4

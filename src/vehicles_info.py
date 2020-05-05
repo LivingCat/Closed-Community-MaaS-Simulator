@@ -10,7 +10,7 @@ class Car:
 class Bus:
 	@staticmethod
 	def emissions(time):
-		return time * 81.63
+		return time * 1250
 	
 	@staticmethod
 	def awareness():

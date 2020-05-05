@@ -85,7 +85,11 @@ class Actor():
         # transport subsidy depends on the mode of transport used:
         # 0.36€/km for private transport
         # 0.11€/km for public transport
-        return self.provider.get_cost(self.total_travel_time) - self.calculate_transporte_subsidy(len(self.traveled_nodes)-1)
+        return (- self.provider.get_cost(self.total_travel_time) + self.calculate_transporte_subsidy(len(self.traveled_nodes)-1))
+
+    def simple_travel_cost(self):
+        return (- self.provider.get_cost(self.total_travel_time))
+
 
     def rider_travel_time(self,house_node: int):
         time_reached_house = 0.0
@@ -96,6 +100,14 @@ class Actor():
         
         return (self.total_travel_time - time_reached_house)
             
+    def driver_reached_pick_up(self,house_node: int):
+        time_reached_house = 0.0
+        for time,node in self.traveled_nodes:
+            if (node == house_node):
+                time_reached_house = time
+                break
+        return time_reached_house
+
 
     def rider_traveled_dist(self,house_node: int):
         rider_index = self.base_route.index(house_node) + 1
@@ -104,7 +116,7 @@ class Actor():
     def rider_cost(self,house_node: int):
         rider_tt = self.rider_travel_time(house_node)
         rider_trav_dist = self.rider_traveled_dist(house_node)
-        return self.provider.get_cost(rider_tt) - self.calculate_transporte_subsidy(rider_trav_dist)
+        return (- self.provider.get_cost(rider_tt) + self.calculate_transporte_subsidy(rider_trav_dist))
 
     @property
     def travel_time(self):
@@ -130,4 +142,7 @@ class Actor():
             return 0.11 * num_travelled_nodes
         #need to change the value for shared car
         elif(self.service == "sharedCar"):
-            return 0.36 * num_travelled_nodes
+            if(len(self.user.users_to_pick_up) == 1):
+                return 0.144 * num_travelled_nodes
+            else:
+                return 0.11 * num_travelled_nodes
