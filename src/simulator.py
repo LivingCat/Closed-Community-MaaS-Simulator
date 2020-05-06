@@ -168,6 +168,49 @@ class Simulator:
 
         return True
 
+    def choose_mode_descriptive(self):
+        for user in self.users:
+            percents_cluster = self.input_config["users"]["clusters"][user.cluster]["original_choices"]
+
+
+            # provider = self.providers[action]
+            # user.mean_transportation = provider.service
+            # user.provider = provider
+            
+            for key in percents_cluster.keys():
+                # print(key)
+                key_copy = str(key)
+                limits = key_copy.split("-")
+                limits = [int(limit) for limit in limits]
+                # print(percents_cluster[key])
+                keys = percents_cluster[key].keys()
+                values = percents_cluster[key].values()
+
+                if(len(limits) == 2):
+                    if(user.distance_from_destination >= limits[0] and user.distance_from_destination < limits[1]):
+                        mode = random.choices(list(keys), list(values), k=1)
+                        print(mode)
+                        for provider in self.providers:
+                            if(provider.service == mode):
+                                user.mean_transportation = provider.service
+                                user.provider = provider
+                        break
+                #upper bound
+                if(len(limits) == 1):
+                    if(user.distance_from_destination >= limits[0]):
+                        mode = random.choices(list(keys),list(values),k=1)
+                        print(mode)
+                        for provider in self.providers:
+                            if(provider.service == mode):
+                                user.mean_transportation = provider.service
+                                user.provider = provider
+                        break
+                    else: 
+                        print("erro")
+                
+
+                
+
     def choose_mode(self, agent: DQNAgent):
         for user in self.users:
             #Users chooses action to take (ask Tiago why this is here and where is the learning part)
@@ -410,15 +453,22 @@ class Simulator:
         # Empty actors list, in case of consecutive calls to this method
         self.actors = []
 
+        # Cleaning road graph
+        self.graph = RoadGraph(self.input_config)
+
         if(self.first_run):
             print("first run")
             self.users = self.create_users()
+            #Assign house nodes to each user according to graph structure
+            self.add_house_nodes()
             self.create_friends()
             self.bus_users = self.create_buses()
         else:
             # self.users = self.users[1:]
             self.reset()
         self.choose_mode(agent)
+        # self.choose_mode_descriptive()
+        # exit()
 
         # with open("buses_info.txt", 'a+') as f:
         #     print("run ", self.runn, file=f)
@@ -444,13 +494,6 @@ class Simulator:
         #############################################################################################################
         #######################################################################################
 
-        # Cleaning road graph
-        self.graph = RoadGraph(self.input_config)
-
-        #Assign house nodes to each user according to graph structure
-        if(self.first_run):
-            self.add_house_nodes()
-
         # Create the Statistics module
         self.stats = self.stats_constructor(self.graph)
 
@@ -470,6 +513,7 @@ class Simulator:
 
         #check if people that wish to cycle exist, if so check if its possible, if they have a path
         cyclists_not_possible = []
+        cyclists = []
         if(len(possible_cyclists) > 0):
             cyclists = self.can_cycle(possible_cyclists)
             cyclists_not_possible = list(set(possible_cyclists) - set(cyclists))
@@ -504,7 +548,10 @@ class Simulator:
             if(service == "bus"):
                 # add bus drivers to the users who will become actors
                 public_transport_unmatched = self.public_transport_matching(users_public_transport, self.bus_users)
-                users_turn_actors = users_turn_actors + self.bus_users
+                #create actors representing only the buses that are going to pick people up
+                for bus_driver in self.bus_users:
+                    if(len(bus_driver.users_to_pick_up) > 0):
+                        users_turn_actors.append(bus_driver)
             if(service == "bike"):
                 users_turn_actors = users_turn_actors + cyclists
 

@@ -245,6 +245,14 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         "total":[]
     }
 
+    number_actors_dict = {
+        "car": [],
+        "bus": [],
+        "sharedCar": [],
+        "bike": [],
+        "total": []
+    }
+
     tax_list = []
 
     runn = 0
@@ -272,6 +280,14 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
             "total":0
         }
 
+        run_number_actors_dict = {
+            "car": 0,
+            "bus": 0,
+            "sharedCar": 0,
+            "bike": 0,
+            "total": 0
+        }
+
 
         # with open("ughh.txt", 'a+') as f:
         #     print("run ", runn, file=f)
@@ -284,6 +300,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         #             print("fui buscar estes users: ", len(actor.user.users_to_pick_up), "\n", file=f)
         #             print("\n", file=f)
         for actor in run.actors:
+            run_number_actors_dict[actor.service] += 1
             if(actor.service == "bus"):
                 #if its serving users
                 if(len(actor.user.users_to_pick_up) > 0):
@@ -316,6 +333,13 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         number_users_dict["sharedCar"].append(run_number_users_dict["sharedCar"])
         number_users_dict["bike"].append(run_number_users_dict["bike"])
         number_users_dict["total"].append(run_number_users_dict["total"])
+
+        number_actors_dict["car"].append(run_number_actors_dict["car"])
+        number_actors_dict["bus"].append(run_number_actors_dict["bus"])
+        number_actors_dict["sharedCar"].append(
+            run_number_actors_dict["sharedCar"])
+        number_actors_dict["bike"].append(run_number_actors_dict["bike"])
+        number_actors_dict["total"].append(run_number_actors_dict["total"])
         # print("sou o number users dict")
         # print(number_users_dict)
 
@@ -378,6 +402,9 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         average_ttt_all_runs.append(run_ttt/len(stats.actors))
 
     with open("{}_results.txt".format(run_name), 'w+') as f:
+        print("Number of actors per mode: \n", file=f)
+        print(number_actors_dict, file=f)
+        print("\n", file=f)
         print("Number of users per mode: \n", file=f)
         print(number_users_dict, file=f)
         print("\n", file=f)
@@ -418,7 +445,7 @@ def get_user_current_state(user: User):
 
 def write_user_info(actors: List[Actor], file:str):
     fields = ["Course", "Grade", "Cluster", "Willingness to pay", "Willingness to wait", "Awareness", "Comfort preference",
-        "has private", "Friendliness", "Suscetible", "Transport", "Urban", "Willing", "Transportation", "Distance from Destination"]
+              "has private", "Friendliness", "Suscetible", "Transport", "Urban", "Willing", "Distance from Destination", "House Node", "Car Capacity", "Transportation", ]
 
     # writing to csv file
     print("tou no write user info \n")
@@ -434,13 +461,13 @@ def write_user_info(actors: List[Actor], file:str):
                 personality = us.personality
                 info = [us.course, us.grade, us.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
                     personality.has_private, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
-                    us.provider.service, us.distance_from_destination]
+                    us.provider.service, us.distance_from_destination, us.house_node, us.capacity]
                 csvwriter.writerow(info)
             for rider in act.user.users_to_pick_up:
                 personality = rider.personality
                 info = [rider.course, rider.grade, rider.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
                         personality.has_private, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
-                        rider.provider.service, rider.distance_from_destination]
+                         rider.distance_from_destination, rider.house_node, rider.capacity, rider.provider.service]
                 csvwriter.writerow(info)
 
 
@@ -460,12 +487,12 @@ def main(args):
 
     input_config = read_json_file(args.json_file)
 
-    # providers = [Personal(),Friends(),STCP()]
+    providers = [Personal(),Friends(),STCP(), Bicycle()]
     # providers = [Personal()]
     # providers = [Personal(), STCP()]
     # providers = [ Friends()]
     # providers = [STCP()]
-    providers = [Bicycle()]
+    # providers = [Bicycle()]
     sim = Simulator(config=args,
                     input_config = input_config,
                     actor_constructor=partial(
