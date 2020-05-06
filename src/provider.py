@@ -1,4 +1,4 @@
-from vehicles_info import Car, Bus
+from vehicles_info import Car, Bus, Bike
 from utils import bidict
 
 providers = bidict({
@@ -77,3 +77,23 @@ class STCP(Provider):
 
     def get_awareness(self):
         return Bus.awareness()
+
+
+class Bicycle(Provider):
+    def __init__(self):
+        super().__init__("Bicycle", "bike")
+
+    def get_cost(self, time):
+        return 0
+
+    def get_time(self, time):
+        return time
+
+    def get_comfort(self):
+        return 0.5
+
+    def get_emissions(self, time):
+        return Bike.emissions(time)
+
+    def get_awareness(self):
+        return Bike.awareness()

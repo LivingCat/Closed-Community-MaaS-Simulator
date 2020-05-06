@@ -6,7 +6,7 @@ from ipdb import set_trace
 from actor import Actor
 from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs, plot_emissions_development, plot_number_users_development
 from simulator import Simulator
-from provider import Provider, Personal, Friends, STCP
+from provider import Provider, Personal, Friends, STCP, Bicycle
 from graph import RoadGraph
 from user import User, Personality
 from queue import PriorityQueue
@@ -158,7 +158,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
 
     # gather new information with atis separation
     actors_flow = defaultdict(lambda: [(0.0, 0)])
-    print("vou ver actors flow")
+
     for s in all_s:
         for key in s.actors_atis.keys():
             s.actors_atis[key] = s.actors_atis[key][1:]
@@ -178,15 +178,11 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
     # plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
     # plt.waitforbuttonpress(0)
 
-    print("tou a guardar os actors_atis_natis")
-
     results['actors_atis_natis'] = actors_flow_acc
 
     # the above but for every edge
-    inner_default_dict = lambda: defaultdict(lambda: [])
+    # inner_default_dict = lambda: defaultdict(lambda: [])
     # results['edges_occupation'] = defaultdict(inner_default_dict)
-
-    print("vou ver edges \n")
 
     # for s in all_s:
     #     edges = s.edges_flow_atis
@@ -230,12 +226,13 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
     #     # print(edge_flow_acc)
     #     results['edges_occupation'][e_key] = edge_flow_acc
 
-    print("vou calcular as emissoes e os users \n")
+    # print("vou calcular as emissoes e os users \n")
 
     emissions_dict={
         "car":[],
         "bus":[],
         "sharedCar":[],
+        "bike":[],
         "total":[]
     }
 
@@ -243,7 +240,9 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
     number_users_dict = {
         "car": [],
         "bus": [],
-        "sharedCar": []
+        "sharedCar": [],
+        "bike": [],
+        "total":[]
     }
 
     tax_list = []
@@ -251,36 +250,39 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
     runn = 0
     for run in all_s:
 
-        print("num actors: ", len(run.actors))
-        users = 0
-        for a in run.actors:
-            users += len(a.user.users_to_pick_up)
-        print("num users: ", users)
+        # print("num actors: ", len(run.actors))
+        # users = 0
+        # for a in run.actors:
+        #     users += len(a.user.users_to_pick_up)
+        # print("num users: ", users)
 
 
         run_emissions_dict={
             "car": 0,
             "bus" :0,
             "sharedCar": 0,
+            "bike": 0,
             "total": 0
         }
         run_number_users_dict = {
             "car": 0,
             "bus" :0,
-            "sharedCar": 0
+            "sharedCar": 0,
+            "bike": 0,
+            "total":0
         }
 
 
-        with open("ughh.txt", 'a+') as f:
-            print("run ", runn, file=f)
-            runn += 1
-            print("run actors number ", len(run.actors), file=f)
-            for actor in run.actors:
-                if(len(actor.user.users_to_pick_up) > 0):
-                    print("sou uma ator de: ", actor.service, "\n", file=f)
-                    print("represento este user: ", actor.user, "\n", file=f)
-                    print("fui buscar estes users: ", len(actor.user.users_to_pick_up), "\n", file=f)
-                    print("\n", file=f)
+        # with open("ughh.txt", 'a+') as f:
+        #     print("run ", runn, file=f)
+        #     runn += 1
+        #     print("run actors number ", len(run.actors), file=f)
+        #     for actor in run.actors:
+        #         if(len(actor.user.users_to_pick_up) > 0):
+        #             print("sou uma ator de: ", actor.service, "\n", file=f)
+        #             # print("represento este user: ", actor.user, "\n", file=f)
+        #             print("fui buscar estes users: ", len(actor.user.users_to_pick_up), "\n", file=f)
+        #             print("\n", file=f)
         for actor in run.actors:
             if(actor.service == "bus"):
                 #if its serving users
@@ -295,13 +297,16 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
             # run_number_users_dict[actor.service] += 1
             if(actor.service == "bus"):
                 run_number_users_dict[actor.service] += len(actor.user.users_to_pick_up)
+                run_number_users_dict["total"] += len(actor.user.users_to_pick_up)
             else:
                 run_number_users_dict[actor.service] = run_number_users_dict[actor.service] + len(actor.user.users_to_pick_up) + 1
+                run_number_users_dict["total"] = run_number_users_dict["total"] + len(actor.user.users_to_pick_up) + 1
 
         # exit()
         emissions_dict["car"].append(run_emissions_dict["car"])
         emissions_dict["bus"].append(run_emissions_dict["bus"])
         emissions_dict["sharedCar"].append(run_emissions_dict["sharedCar"])
+        emissions_dict["bike"].append(run_emissions_dict["bike"])
         emissions_dict["total"].append(run_emissions_dict["total"])
 
         tax_list.append(calculate_carbon_tax(run_emissions_dict["total"]))
@@ -309,6 +314,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         number_users_dict["car"].append(run_number_users_dict["car"])
         number_users_dict["bus"].append(run_number_users_dict["bus"])
         number_users_dict["sharedCar"].append(run_number_users_dict["sharedCar"])
+        number_users_dict["bike"].append(run_number_users_dict["bike"])
+        number_users_dict["total"].append(run_number_users_dict["total"])
         # print("sou o number users dict")
         # print(number_users_dict)
 
@@ -345,6 +352,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         }
         for ac in run.actors:
             actor_transp_subsidy = 0.0
+            if(ac.service == "bike"):
+                continue
             if(ac.service !=  "bus"):
                 actor_transp_subsidy += ac.calculate_transporte_subsidy(ac.user.house_node)
             for rider in ac.user.users_to_pick_up:
@@ -455,7 +464,8 @@ def main(args):
     # providers = [Personal()]
     # providers = [Personal(), STCP()]
     # providers = [ Friends()]
-    providers = [STCP()]
+    # providers = [STCP()]
+    providers = [Bicycle()]
     sim = Simulator(config=args,
                     input_config = input_config,
                     actor_constructor=partial(
@@ -510,20 +520,8 @@ def main(args):
         agent.update_epsilon()
         a = copy.deepcopy(sim.actors)
         sim.stats.add_actors(a) 
-        num_user = 0
-        for ac in sim.actors:
-            num_user += len(ac.user.users_to_pick_up)
-
-        print("num users antes do append ao all stats: ", num_user)
-        num_user = 0
+      
         all_stats.append(sim.stats)
-
-        for stat in all_stats:
-            num_user = 0
-            for ac in stat.actors:
-                num_user += len(ac.user.users_to_pick_up)
-
-            print("num users depois do append ao all stats: ", num_user)
 
 
     json_object = average_all_results(all_stats, args.plots)

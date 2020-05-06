@@ -47,9 +47,10 @@ class User:
     route: List[int]
     capacity: int
     time_spent_waiting: float
+    has_bike: bool
 
 
-    def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int, distance_from_destination: int):
+    def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int, distance_from_destination: int, has_bike: bool):
        self.personality = personality
        self.start_time = start_time
        self.cluster = cluster
@@ -63,10 +64,12 @@ class User:
        self.distance_from_destination = distance_from_destination
        self.num_friends = 0
        self.users_to_pick_up = []
+       self.time_spent_waiting = 0.0
+       self.has_bike = has_bike
 
     @staticmethod
     def default():
-        return User(Personality(0,0,0,0,0,0,0,0,0,0), 0.0, "","","",0.0,0.0,0,0)
+        return User(Personality(0,0,0,0,0,0,0,0,0,0), 0.0, "","","",0.0,0.0,0,0,False)
 
     def set_route_name(self,route_name: str):
         self.route_name = route_name
@@ -81,7 +84,10 @@ class User:
         self.house_node = house_node
 
     def cost_util(self, commute_out: CommuteOutput):
-        return 1/(commute_out.cost) * self.personality.willingness_to_pay
+        if(commute_out.cost == 0):
+            return 0
+        else:
+            return 1/(commute_out.cost) * self.personality.willingness_to_pay
 
     def time_util(self, commute_out: CommuteOutput):
         return 1/(commute_out.total_time) * self.personality.willingness_to_wait
@@ -99,6 +105,8 @@ class User:
         personality = self.personality
         return [self.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference, int(personality.has_private)]
     
+    def __str__(self):
+        return "I live here %s, cluster %s, have private %s, have bike %s , mode chosen %s \n" % (self.house_node, self.cluster, self.personality.has_private, self.has_bike, self.mean_transportation)
     def pprint(self):
         # personality = self.personality
         # print("cluster: {} \n". format(self.cluster))

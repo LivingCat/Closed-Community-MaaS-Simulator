@@ -15,3 +15,13 @@ class Bus:
 	@staticmethod
 	def awareness():
 		return 0.9
+
+
+class Bike:
+	@staticmethod
+	def emissions(time):
+		return 0
+
+	@staticmethod
+	def awareness():
+		return 1

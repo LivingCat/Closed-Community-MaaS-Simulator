@@ -56,6 +56,21 @@ class RoadGraph:
         a = list(a)
         return a
 
+    def check_has_route(self, start_node:int, actor:str):
+        possible_edges = []
+        for edge in self.graph.edges:
+            allowed_transports = (self.get_edge_data(edge)[
+                                    'allowed_transports'])
+            if(actor in allowed_transports):
+                possible_edges.append(edge)
+        new_graph = nx.DiGraph(possible_edges)
+
+        #if both start and end node are in this new graph than there exists a path between them
+        if(new_graph.has_node(start_node) and new_graph.has_node(self.nend)):
+            return True
+        else:
+            return False
+
     def get_all_routes(self, start_node:int, actor: str) -> List[List[int]]:
         # results in [[0, 1, 3], [0, 2, 1, 3], [0, 2, 3]]
         return self.get_possible_routes(start_node, self.nend, actor)

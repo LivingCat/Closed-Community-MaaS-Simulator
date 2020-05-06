@@ -146,3 +146,5 @@ class Actor():
                 return 0.144 * num_travelled_nodes
             else:
                 return 0.11 * num_travelled_nodes
+        elif(self.service == "bike"):
+            return 0

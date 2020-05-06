@@ -181,10 +181,17 @@ class Simulator:
                     action = np.random.randint(0, agent.output_dim)
 
                 provider = self.providers[action]
+                #if the user chose to use "personal", as in, personal engine powered vehicle bu it doesnt own one, it gets a punishment
                 if((not user.personality.has_private) and provider.name == "Personal"):
                     agent.update_replay_memory(
                         (user.get_user_current_state(), action,
-                            self.input_config["users"]["punishment_doesnt_have_car"], 1, True))
+                            self.input_config["users"]["punishment_doesnt_have_mode"], 1, True))
+                    agent.train(True, 1)
+                #if the user chose to use "bike", as in, cycling but it doesnt own one, it gets a punishment
+                elif((not user.has_bike) and provider.name == "Bicycle"):
+                    agent.update_replay_memory(
+                        (user.get_user_current_state(), action,
+                            self.input_config["users"]["punishment_doesnt_have_mode"], 1, True))
                     agent.train(True, 1)
                 else:
                     break
@@ -283,6 +290,7 @@ class Simulator:
             possible_drivers.remove(driver)
             #remove driver from users that want ride sharing, since he has been chosen to be the driver and has been matched
             users_want_ride_sharing.remove(driver)
+        return users_want_ride_sharing
 
     def in_time_slot(self,rider:User, driver: User):
         wait_time = MAX_WAITING_TIME * rider.willingness_to_wait
@@ -312,6 +320,18 @@ class Simulator:
                     
             driver.users_to_pick_up = pickup
             users_want_public_transport = list(set(users_want_public_transport) - set(pickup))
+        return users_want_public_transport
+
+    def can_cycle(self,users: List['User']):
+        allowed_users = []
+        for user in users:
+            has_path = self.graph.check_has_route(user.house_node, "bike")
+            #if the user has at least one path to go from their house to the destination then it can use their bicycle
+            if(has_path):
+                allowed_users.append(user)
+        return allowed_users
+
+
 
 
     #depois ver porque se
@@ -396,7 +416,7 @@ class Simulator:
             self.create_friends()
             self.bus_users = self.create_buses()
         else:
-            self.users = self.users[1:]
+            # self.users = self.users[1:]
             self.reset()
         self.choose_mode(agent)
 
@@ -441,10 +461,18 @@ class Simulator:
         #     print("vivo aqui: \n", user.house_node)
         #     print("available seats: \n", user.available_seats)
 
-        self.ride_sharing_matching(users_ride_sharing)
+        #check if people that wish to ride share exist, if so match them
+        ride_sharing_unmatched = []
+        if(len(users_ride_sharing) > 0):
+            ride_sharing_unmatched = self.ride_sharing_matching(users_ride_sharing)
 
-        # for user in self.users:
-        #     user.pprint()
+        possible_cyclists = [user for user in self.users if(user.mean_transportation == "bike")]
+
+        #check if people that wish to cycle exist, if so check if its possible, if they have a path
+        cyclists_not_possible = []
+        if(len(possible_cyclists) > 0):
+            cyclists = self.can_cycle(possible_cyclists)
+            cyclists_not_possible = list(set(possible_cyclists) - set(cyclists))
 
         # Create the Simulation Actors
         event_queue = PriorityQueue()
@@ -471,11 +499,15 @@ class Simulator:
         for provider in self.providers:
             services.append(provider.service)
 
-        for service in services:
+        public_transport_unmatched = []
+        for service in services:           
             if(service == "bus"):
                 # add bus drivers to the users who will become actors
-                self.public_transport_matching(users_public_transport, self.bus_users)
+                public_transport_unmatched = self.public_transport_matching(users_public_transport, self.bus_users)
                 users_turn_actors = users_turn_actors + self.bus_users
+            if(service == "bike"):
+                users_turn_actors = users_turn_actors + cyclists
+
 
         # print("depois de ver se temos stcp ", len(users_turn_actors))
 
@@ -485,7 +517,11 @@ class Simulator:
 
         with open("ughh.txt", 'a+') as f:
             print("run ", self.runn, file=f)
-            print("run users  ", len(self.users), file=f)
+            print("ride sharing unmatched  ", len(ride_sharing_unmatched), file=f)
+            print("public transport unmatched  ", len(public_transport_unmatched), file=f)
+            print("cycling unmatched  ", len(cyclists_not_possible), file=f)
+        for user in self.users:
+            print(user)
 
         for ae in create_actor_events:
             event_queue.put_nowait(ae.get_priorized())
@@ -528,7 +564,7 @@ class Simulator:
             # Ride Sharing:
             # igual ao transport coletivo
 
-            if(actor.service == "car"):
+            if(actor.service == "car" or actor.service == "bike"):
                 commute_out = CommuteOutput(
                     actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 user_info = dict()
@@ -583,6 +619,7 @@ class Simulator:
 
 
 
+
             # print("mean: {}  utility: {} ".format(commute_out.mean_transportation, user_info["utility"]))
         # actors_co = self.actors
         # with open("utility_teste.txt", 'w+') as f:
@@ -618,10 +655,10 @@ class Simulator:
             agent.train(True, 1)
 
         # self.draw_graph()
-        with open("ughh.txt", 'a+') as f:
-            print("run ", self.runn, file=f)
-            self.runn += 1
-            print("run num final users  ", len(final_users), file=f)
+        # with open("ughh.txt", 'a+') as f:
+        #     print("run ", self.runn, file=f)
+        #     self.runn += 1
+        #     print("run num final users  ", len(final_users), file=f)
         return final_users
 
     def create_actors_events(self, users: [User]) -> List[CreateActorEvent]:
@@ -715,6 +752,10 @@ class Simulator:
             has_private = 1 if np.random.uniform(
             ) < self.input_config["users"]["clusters"][chosen_cluster]["has_private"]["ratio"] else 0
 
+            #Choose if the user has a bicycle
+            has_bike = 1 if np.random.uniform(
+            ) < self.input_config["users"]["has_bike"] else 0
+
             #Assign the available seats in the private vehicle for each user who has a private vehicle according to the cluster
             if(has_private):
                 seats_num = list((self.input_config["users"]["clusters"][chosen_cluster]["seat_probs"]).keys())
@@ -805,7 +846,7 @@ class Simulator:
             personality = Personality(willingness_to_pay, willingness_to_wait, awareness, comfort_preference, bool(has_private),
                                       user_factors_values["friendliness"], user_factors_values["suscetible"], user_factors_values["transport"], user_factors_values["urban"], user_factors_values["willing"])
             user = User(personality, time, chosen_cluster,
-                        chosen_course, chosen_grade, salary, budget, available_seats, distance_from_destination)
+                        chosen_course, chosen_grade, salary, budget, available_seats, distance_from_destination, bool(has_bike))
 
             # se estiverem entao proximo passo é adicionar tambem informaçao de ano e curso!
             users.append(user)
