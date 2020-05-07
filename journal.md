@@ -165,6 +165,13 @@ tensorboard --logdir logs/2x256-1579515056
     * Transport subsidy is now correct
     * Number of users in now correct
 
+# 06-05-2020
+* Added bicycling
+
+# 07-05-2020
+* Added run and choose mode for the descriptive scenario
+* More info being saved such as the number of users lost during each run
+
 # TODO
 * Check if something about the users or anything has to be erased from run to run
 * See how to change emissions values

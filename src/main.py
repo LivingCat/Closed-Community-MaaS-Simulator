@@ -31,7 +31,7 @@ import copy
 
 import csv
 
-run_name = "teste_public_100_users_1000_runs"
+run_name = "teste"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -124,10 +124,15 @@ def statistics_print(sim: Simulator):
     print("ATIS NO: mean: %f || std: %f" % (np.mean(atis_no), np.std(atis_no)))
 
 
-def average_all_results(all_s: List[SimStats], display_plots: bool):
+def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: dict(dict())):
     """Gather information regarding all runs and its metrics"""
     
     print("tou no average_all_results \n")
+
+    max_emissions = 0
+    max_carbon_tax = 0
+    max_transport_subsidy = 0
+    max_combined_cost = 0
 
     # gather summary information
     actors_wo_end = [
@@ -301,6 +306,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         #             print("\n", file=f)
         for actor in run.actors:
             run_number_actors_dict[actor.service] += 1
+            run_number_actors_dict["total"] += 1
             if(actor.service == "bus"):
                 #if its serving users
                 if(len(actor.user.users_to_pick_up) > 0):
@@ -326,7 +332,13 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         emissions_dict["bike"].append(run_emissions_dict["bike"])
         emissions_dict["total"].append(run_emissions_dict["total"])
 
+        if(run_emissions_dict["total"] > max_emissions):
+            max_emissions = run_emissions_dict["total"]
+
         tax_list.append(calculate_carbon_tax(run_emissions_dict["total"]))
+
+        if(tax_list[-1] > max_carbon_tax):
+            max_carbon_tax = tax_list[-1]
 
         number_users_dict["car"].append(run_number_users_dict["car"])
         number_users_dict["bus"].append(run_number_users_dict["bus"])
@@ -393,6 +405,16 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         transport_subsidy_dict["total"].append(
             run_transport_subsidy_dict["total"])
 
+        if(run_transport_subsidy_dict["total"] > max_transport_subsidy):
+            max_transport_subsidy = run_transport_subsidy_dict["total"]
+
+    total_cost_list = []
+    for i in range(0,len(all_s)):
+        total_cost_list.append(tax_list[i] + transport_subsidy_dict["total"][i])
+        i += 1
+
+    max_combined_cost = max(total_cost_list)
+
     #get average travel times for all runs in the simulation
     average_ttt_all_runs = []
     for stats in all_s:
@@ -402,6 +424,9 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         average_ttt_all_runs.append(run_ttt/len(stats.actors))
 
     with open("{}_results.txt".format(run_name), 'w+') as f:
+        print("Number users lost per run: \n", file=f)
+        print(users_lost, file=f)
+        print("\n", file=f)
         print("Number of actors per mode: \n", file=f)
         print(number_actors_dict, file=f)
         print("\n", file=f)
@@ -414,12 +439,27 @@ def average_all_results(all_s: List[SimStats], display_plots: bool):
         print("Carbon Tax: \n", file=f)
         print(tax_list, file=f)
         print("\n",file=f)
-        print("Total Carbon Tax: \n", file=f)
+        print("Average Carbon Tax: \n", file=f)
         print(average_total_value_tax, file=f)
         print("\n", file=f)
         print("Transport subsidy: \n", file=f)
         print(transport_subsidy_dict, file=f)
         print("\n",file=f)
+        print("Combined Cost (Carbon Tax + Transport Subsidy): \n", file=f)
+        print(total_cost_list, file=f)
+        print("\n", file=f)
+        print("Max Emissions: \n", file=f)
+        print(max_emissions, file=f)
+        print("\n", file=f)
+        print("Max Carbon Tax: \n", file=f)
+        print(max_carbon_tax, file=f)
+        print("\n", file=f)
+        print("Max Transport Subsidy: \n", file=f)
+        print(max_transport_subsidy, file=f)
+        print("\n", file=f)
+        print("Max Combined Cost (Carbon Tax + Transport Subsidy): \n", file=f)
+        print(max_combined_cost, file=f)
+        print("\n", file=f)
         print("Average and STD Total Travel Time: {} - {} \n".format(results["time_atis_no"][0], results["time_atis_no"][1]), file=f)
         print("Average Total Travel Time By Run: \n", file=f)
         print(average_ttt_all_runs, file=f)
@@ -443,15 +483,20 @@ def get_user_current_state(user: User):
     return [user.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, int(personality.has_private)]
 
 
-def write_user_info(actors: List[Actor], file:str):
+def write_user_info(actors: List[Actor], run: int, file:str):
+    run_header = ["Run"]
+    run_row = [run]
     fields = ["Course", "Grade", "Cluster", "Willingness to pay", "Willingness to wait", "Awareness", "Comfort preference",
-              "has private", "Friendliness", "Suscetible", "Transport", "Urban", "Willing", "Distance from Destination", "House Node", "Car Capacity", "Transportation", ]
+              "has private", "Friendliness", "Suscetible", "Transport", "Urban", "Willing", "Distance from Destination", "House Node", "Car Capacity", "Users he picked up","Transportation"]
 
     # writing to csv file
     print("tou no write user info \n")
-    with open(file, 'w+', newline='') as csvfile:
+    with open(file, 'a+', newline='') as csvfile:
         # creating a csv writer object
         csvwriter = csv.writer(csvfile)
+
+        csvwriter.writerow(run_header)
+        csvwriter.writerow(run_row)
         # writing the fields
         csvwriter.writerow(fields)
 
@@ -461,13 +506,13 @@ def write_user_info(actors: List[Actor], file:str):
                 personality = us.personality
                 info = [us.course, us.grade, us.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
                     personality.has_private, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
-                    us.provider.service, us.distance_from_destination, us.house_node, us.capacity]
+                        us.distance_from_destination, us.house_node, us.capacity, len(us.users_to_pick_up), us.provider.service]
                 csvwriter.writerow(info)
             for rider in act.user.users_to_pick_up:
                 personality = rider.personality
                 info = [rider.course, rider.grade, rider.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
                         personality.has_private, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
-                         rider.distance_from_destination, rider.house_node, rider.capacity, rider.provider.service]
+                        rider.distance_from_destination, rider.house_node, rider.capacity, len(rider.users_to_pick_up), rider.provider.service]
                 csvwriter.writerow(info)
 
 
@@ -487,7 +532,8 @@ def main(args):
 
     input_config = read_json_file(args.json_file)
 
-    providers = [Personal(),Friends(),STCP(), Bicycle()]
+    # providers = [Personal(),Friends(),STCP(), Bicycle()]
+    providers = [Personal(), STCP(), Bicycle()]
     # providers = [Personal()]
     # providers = [Personal(), STCP()]
     # providers = [ Friends()]
@@ -515,6 +561,7 @@ def main(args):
             sim.first_run = False
         #runs the simulation
         final_users = sim.run(agent)
+        # final_users = sim.run_descriptive()
         print("final users ", len(final_users))
 
         # Restarting episode - reset episode reward and step number
@@ -550,8 +597,7 @@ def main(args):
       
         all_stats.append(sim.stats)
 
-
-    json_object = average_all_results(all_stats, args.plots)
+    json_object = average_all_results(all_stats, args.plots, sim.users_lost)
     json_object['graph'] = nx.readwrite.jit_data(sim.graph.graph)
 
     json.dump(json_object, open(args.save_path, "w+"))
@@ -566,7 +612,11 @@ def main(args):
     # statistics_print(sim)
 
     save_user_file = run_name + "_users_info.csv"
-    write_user_info(all_stats[0].actors, save_user_file)
+
+    runn = 0
+    for run in all_stats:
+        write_user_info(run.actors, runn, save_user_file)
+        runn += 1
     
 
 
