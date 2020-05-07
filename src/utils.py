@@ -46,9 +46,14 @@ class MultimodalDistribution:
         return MultimodalDistribution([8, 3], [18, 3])
 
 
-def congestion_time_estimate(free_flow: float, capacity: float, volume: float) -> float:
+def congestion_time_estimate(free_flow: float, capacity: float, volume: float, service: str) -> float:
     """US Bureau ofPublic Roads (BPR) congestion function.
     Used to compute the traverse time of an edge"""
+
+    if(service == "bike"):
+        free_flow = 0.05
+    else:
+        free_flow = 0.02
     return free_flow * (1 + 0.15 * math.pow((volume/capacity), 4))
 
 

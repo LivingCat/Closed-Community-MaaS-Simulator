@@ -86,16 +86,16 @@ class RoadGraph:
 
         return sum(estimates)
 
-    def get_edge_travel_time(self, edge: Tuple[int, int], volume: int) -> float:
+    def get_edge_travel_time(self, edge: Tuple[int, int], volume: int, service:str) -> float:
         """Get the time it takes to transverse the edge, considering a given volume"""
         edge_data = self.get_edge_data(edge)
         return congestion_time_estimate(edge_data['free_flow_travel_time'],
                                         edge_data['capacity'],
-                                        volume)
+                                        volume, service)
 
-    def get_edge_real_travel_time(self, edge: Tuple[int, int]) -> float:
+    def get_edge_real_travel_time(self, edge: Tuple[int, int], service:str) -> float:
         """Get the real actual time it takes to transverse the edge (congestion included)"""
-        return self.get_edge_travel_time(edge, self.get_edge_data(edge)['volume'])
+        return self.get_edge_travel_time(edge, self.get_edge_data(edge)['volume'],service)
 
     def create_graph(self, input_config):
         """Creates a graph from from input file configuration"""

@@ -85,7 +85,7 @@ class EdgeStartEvent(Event):
         sim.stats.add_actor_edge(self.actor,
             self.at_time, self.edge)
 
-        tt = sim.graph.get_edge_real_travel_time(self.edge)
+        tt = sim.graph.get_edge_real_travel_time(self.edge, self.actor.service)
         sim.graph.add_vehicle(self.edge)
 
         self.actor.add_time_for_edge(self.edge, tt)

@@ -4,7 +4,7 @@ From micro-level decision making and learning, to macro-level simulation of User
 """
 from typing import List
 from queue import PriorityQueue
-from event import CreateActorEvent, AccidentEvent
+from event import CreateActorEvent
 from graph import RoadGraph
 from utils import MultimodalDistribution, get_time_from_traffic_distribution, get_traffic_peaks
 from user import User, Personality, CommuteOutput
@@ -611,6 +611,10 @@ class Simulator:
 
         # Cleaning road graph
         self.graph = RoadGraph(self.input_config)
+        # for edge in self.graph.graph.edges:
+        #     print(edge)
+
+        # exit()
 
         if(self.first_run):
             print("first run")
@@ -891,10 +895,10 @@ class Simulator:
             for user in users
         ]
 
-    def create_accident_events(self) -> List[AccidentEvent]:
-        return [
-            # AccidentEvent(10.0, (3, 6), 0.2)
-        ]
+    # def create_accident_events(self) -> List[AccidentEvent]:
+    #     return [
+    #         # AccidentEvent(10.0, (3, 6), 0.2)
+    #     ]
 
     def create_users(self):
         users = []
