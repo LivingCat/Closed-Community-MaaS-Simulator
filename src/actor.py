@@ -21,8 +21,6 @@ class Actor():
 
     static_model_id = 1
 
-    users_represent: List['User']
-
     def __init__(self, route: List[int], user: User, provider: Provider):
         self.user = user
         self.base_route = route
@@ -37,6 +35,15 @@ class Actor():
 
     def __repr__(self):
         return "A%d :: TI %.4f :: TTT %.4f" % (self.actor_id, round(self.start_time, 4), round(self.total_travel_time, 4))
+
+    def my_copy(self):
+        new_actor = Actor(self.base_route, self.user,self.provider)
+        new_actor.route_travel_time = self.route_travel_time
+        new_actor.total_travel_time = self.total_travel_time
+        new_actor.start_time = self.start_time
+        new_actor.traveled_nodes = self.traveled_nodes
+        return new_actor
+        
 
     def add_time_for_edge(self, edge: Tuple[int, int], tt: float):
         self.route_travel_time[edge] = tt
@@ -85,7 +92,7 @@ class Actor():
         # transport subsidy depends on the mode of transport used:
         # 0.36€/km for private transport
         # 0.11€/km for public transport
-        return (- self.provider.get_cost(self.total_travel_time) + self.calculate_transporte_subsidy(len(self.traveled_nodes)-1))
+        return (self.provider.get_cost(self.total_travel_time) - self.calculate_transporte_subsidy(len(self.traveled_nodes)-1))
 
     def simple_travel_cost(self):
         return (- self.provider.get_cost(self.total_travel_time))
@@ -148,3 +155,8 @@ class Actor():
                 return 0.11 * num_travelled_nodes
         elif(self.service == "bike"):
             return 0
+
+  
+
+
+

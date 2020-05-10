@@ -33,7 +33,7 @@ def plot_accumulated_actor_graph(actors_flow_acc: Dict[str, List[List[float]]], 
     plt.xlabel("hours")
     plt.ylabel("actors in graph")
     plt.legend(loc='upper right')
-    plt.xlim(right=30)
+    plt.xlim(right=25)
     plt.show()
 
 

@@ -31,7 +31,7 @@ import copy
 
 import csv
 
-run_name = "teste"
+run_name = "scenario_no_ridesharing_800_users_3000_runs_new_model"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -125,6 +125,21 @@ def statistics_print(sim: Simulator):
 
 
 def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: dict(dict())):
+
+    #Get Min Users lost run
+    min_val = 99999999
+    min_run = -1
+
+    # print("users lost")
+    # print(users_lost)
+
+    for key in users_lost.keys():
+        total = users_lost[key]["total"]
+        if(total < min_val):
+            min_val = total
+            min_run = key
+
+
     """Gather information regarding all runs and its metrics"""
     
     print("tou no average_all_results \n")
@@ -133,6 +148,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
     max_carbon_tax = 0
     max_transport_subsidy = 0
     max_combined_cost = 0
+
 
     # gather summary information
     actors_wo_end = [
@@ -164,6 +180,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
     # gather new information with atis separation
     actors_flow = defaultdict(lambda: [(0.0, 0)])
 
+    print("resultados iniciais")
+
     for s in all_s:
         for key in s.actors_atis.keys():
             s.actors_atis[key] = s.actors_atis[key][1:]
@@ -183,6 +201,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
     # plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
     # plt.waitforbuttonpress(0)
 
+    print("flow")
     results['actors_atis_natis'] = actors_flow_acc
 
     # the above but for every edge
@@ -261,6 +280,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
     tax_list = []
 
     runn = 0
+
+    print("vou fazer emissions, num actor e num users")
     for run in all_s:
 
         # print("num actors: ", len(run.actors))
@@ -423,19 +444,35 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
             run_ttt += a.total_travel_time
         average_ttt_all_runs.append(run_ttt/len(stats.actors))
 
+    # for key in dictionary.keys():
+    #     print(key,file=f)
+    #     run_res = dicitonary[key]
+    #     for mode in fun_res:
+    #         print(mode)
+    #         print() 
+   # print(users_lost)
+    # print(users_lost.keys())
+    # print(users_lost.values())
+    # print(users_lost[0])
+
     with open("{}_results.txt".format(run_name), 'w+') as f:
         print("Number users lost per run: \n", file=f)
-        print(users_lost, file=f)
-        print("\n", file=f)
+        # print(users_lost, file=f)
+        write_dict_file(users_lost,f)
+        # print("\n", file=f)
+        print("Min users lost: {} in run {} \n".format(min_val,min_run), file=f)
         print("Number of actors per mode: \n", file=f)
-        print(number_actors_dict, file=f)
-        print("\n", file=f)
+        write_dict_file(number_actors_dict,f)
+        # print(number_actors_dict, file=f)
+        # print("\n", file=f)
         print("Number of users per mode: \n", file=f)
-        print(number_users_dict, file=f)
-        print("\n", file=f)
+        # print(number_users_dict, file=f)
+        write_dict_file(number_users_dict, f)
+        # print("\n", file=f)
         print("Emissions: \n", file=f)
-        print(emissions_dict, file=f)
-        print("\n", file=f)
+        write_dict_file(emissions_dict, f)
+        # print(emissions_dict, file=f)
+        # print("\n", file=f)
         print("Carbon Tax: \n", file=f)
         print(tax_list, file=f)
         print("\n",file=f)
@@ -443,8 +480,9 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         print(average_total_value_tax, file=f)
         print("\n", file=f)
         print("Transport subsidy: \n", file=f)
-        print(transport_subsidy_dict, file=f)
-        print("\n",file=f)
+        write_dict_file(transport_subsidy_dict, f)
+        # print(transport_subsidy_dict, file=f)
+        # print("\n",file=f)
         print("Combined Cost (Carbon Tax + Transport Subsidy): \n", file=f)
         print(total_cost_list, file=f)
         print("\n", file=f)
@@ -464,11 +502,13 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         print("Average Total Travel Time By Run: \n", file=f)
         print(average_ttt_all_runs, file=f)
 
-
-
-
-
     return results
+
+def write_dict_file(dictionary, f):
+    for key in dictionary.keys():
+        print(key,file=f)
+        print(dictionary[key], file=f)
+        print("\n",file=f)
 
 def calculate_carbon_tax(emissions: float):
     return (emissions / 1000000) * CARBON_TAX
@@ -487,10 +527,10 @@ def write_user_info(actors: List[Actor], run: int, file:str):
     run_header = ["Run"]
     run_row = [run]
     fields = ["Course", "Grade", "Cluster", "Willingness to pay", "Willingness to wait", "Awareness", "Comfort preference",
-              "has private", "Friendliness", "Suscetible", "Transport", "Urban", "Willing", "Distance from Destination", "House Node", "Car Capacity", "Users he picked up","Transportation"]
+              "has private", "has bike","Friendliness", "Suscetible", "Transport", "Urban", "Willing", "Distance from Destination", "House Node", "Car Capacity", "Users he picked up","Transportation"]
 
     # writing to csv file
-    print("tou no write user info \n")
+    
     with open(file, 'a+', newline='') as csvfile:
         # creating a csv writer object
         csvwriter = csv.writer(csvfile)
@@ -505,13 +545,13 @@ def write_user_info(actors: List[Actor], run: int, file:str):
                 us = act.user
                 personality = us.personality
                 info = [us.course, us.grade, us.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
-                    personality.has_private, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
+                    personality.has_private, us.has_bike,personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
                         us.distance_from_destination, us.house_node, us.capacity, len(us.users_to_pick_up), us.provider.service]
                 csvwriter.writerow(info)
             for rider in act.user.users_to_pick_up:
                 personality = rider.personality
                 info = [rider.course, rider.grade, rider.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
-                        personality.has_private, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
+                        personality.has_private, rider.has_bike, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
                         rider.distance_from_destination, rider.house_node, rider.capacity, len(rider.users_to_pick_up), rider.provider.service]
                 csvwriter.writerow(info)
 
@@ -547,12 +587,14 @@ def main(args):
                     stats_constructor=stats_constructor,
                     traffic_distribution=MultimodalDistribution(*args.traffic_peaks)
                     )
-    n_inputs = 6
+    n_inputs = 10
     n_output = len(providers)
     agent = DQNAgent(n_inputs, n_output)
     # gather stats from all runs
     all_stats = []
     for episode in trange(args.n_runs, leave=False):
+        # print(" episode")
+        # print(episode)
         # Update tensorboard step every episode
         agent.tensorboard.step = episode
         if(episode == 0):
@@ -562,7 +604,8 @@ def main(args):
         #runs the simulation
         final_users = sim.run(agent)
         # final_users = sim.run_descriptive()
-        print("final users ", len(final_users))
+        
+        # print("final users ", len(final_users))
 
         # Restarting episode - reset episode reward and step number
         episode_reward = 0
@@ -575,6 +618,7 @@ def main(args):
         # Append episode reward to a list and log stats (every given number of episodes)
         ep_rewards.append(episode_reward)
 
+        # print("tenho o ep reqwrd")
 
         if not episode % AGGREGATE_STATS_EVERY or episode == 1:
             average_reward = sum(
@@ -590,12 +634,23 @@ def main(args):
                     'models/{}__{}.model'.format(
                         MODEL_NAME, int(time.time())
                     ))
+
+        # print("sai do if")
         # current_state, action, reward, new_current_state, done
         agent.update_epsilon()
-        a = copy.deepcopy(sim.actors)
-        sim.stats.add_actors(a) 
-      
+        # print("update epsilon")
+        
+        # a = copy.deepcopy(sim.actors)
+        copy_actors = []
+        for actor in sim.actors:
+            new_actor = actor.my_copy()
+            copy_actors.append(new_actor)
+        # print("deep copy")
+        # sim.stats.add_actors(a) 
+        sim.stats.add_actors(copy_actors)
+        # print("adicionei actors")
         all_stats.append(sim.stats)
+        # print("vou para o proximo run")
 
     json_object = average_all_results(all_stats, args.plots, sim.users_lost)
     json_object['graph'] = nx.readwrite.jit_data(sim.graph.graph)
