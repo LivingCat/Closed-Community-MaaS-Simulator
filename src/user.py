@@ -48,6 +48,8 @@ class User:
     capacity: int
     time_spent_waiting: float
     has_bike: bool
+    credits_own: int
+    credits_spent: int
 
 
     def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int, distance_from_destination: int, has_bike: bool):
@@ -66,6 +68,8 @@ class User:
        self.users_to_pick_up = []
        self.time_spent_waiting = 0.0
        self.has_bike = has_bike
+       self.credits_own = 0
+       self.credits_spent = 0
 
     @staticmethod
     def default():
@@ -103,10 +107,28 @@ class User:
 
     def get_user_current_state(self):
         personality = self.personality
-        return [self.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference, int(personality.has_private)]
+        return [self.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference, int(personality.has_private), int(self.has_bike), self.credits_own, self.distance_from_destination, self.capacity ]
     
+    def add_credits(self,credits_gained:int):
+        self.credits_own += credits_gained
+        return self.credits_own
+
+    def remove_credits(self,credits_spent:int):
+        self.credits_own -= credits_spent
+        self.credits_spent += credits_spent
+
+    def credits_discount(self, min_credits: int, credit_value: float):
+        #User has the minimum amount of credits which makes him elegible for discount
+        discount = -1
+        if(self.credits_own >= min_credits):
+            discount = min_credits * credit_value
+            #remove credits spent
+            self.remove_credits(min_credits)
+        return discount
+        
+
     def __str__(self):
-        return "I live here %s, cluster %s, have private %s, have bike %s , mode chosen %s \n" % (self.house_node, self.cluster, self.personality.has_private, self.has_bike, self.mean_transportation)
+        return "I live here %s, cluster %s, have private %s, have bike %s , credits i own %s, credits i spent %s, mode chosen %s \n" % (self.house_node, self.cluster, self.personality.has_private, self.has_bike, self.credits_own, self.credits_spent,self.mean_transportation)
     def pprint(self):
         # personality = self.personality
         # print("cluster: {} \n". format(self.cluster))

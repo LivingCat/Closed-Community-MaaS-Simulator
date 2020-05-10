@@ -8,7 +8,7 @@ from event import CreateActorEvent
 from graph import RoadGraph
 from utils import MultimodalDistribution, get_time_from_traffic_distribution, get_traffic_peaks
 from user import User, Personality, CommuteOutput
-from provider import Provider, STCP, Personal, Friends
+from provider import Provider, STCP, Personal, Friends, Bicycle
 from DeepRL import DQNAgent
 from actor import Actor
 import networkx as nx
@@ -21,7 +21,13 @@ DEFAULT_VALUE_NUM = -100.0
 DEFAULT_VALUE_STRING = ""
 MIN_HOUSE_DISTANCE = 1
 MAX_HOUSE_DISTANCE = 30
-MAX_WAITING_TIME = 0.10
+MAX_WAITING_TIME = 0.5
+
+#Credits
+N_CREDITS_DISCOUNT = 10
+CREDIT_VALUE = 0.01
+CREDIT_INCENTIVE = False
+
 
 
 class Simulator:
@@ -100,7 +106,7 @@ class Simulator:
         return distance
 
     def create_friends(self):
-        print("im create friends")
+        # print("im create friends")
         friend_distrib_info = self.input_config["users"]["friends_distribution"]
 
         dist = getattr(scipy.stats, friend_distrib_info["distrib"])
@@ -332,11 +338,12 @@ class Simulator:
         return users_want_ride_sharing
 
     def in_time_slot(self,rider:User, driver: User):
-        wait_time = MAX_WAITING_TIME * rider.willingness_to_wait
+        wait_time = MAX_WAITING_TIME * rider.personality.willingness_to_wait
         return (abs(driver.start_time - rider.start_time) <= wait_time)
 
 
     def public_transport_matching(self, users: List['User'], bus_users: List['User']):
+        
         users_want_public_transport = users
         bus_drivers = bus_users
         
@@ -349,7 +356,7 @@ class Simulator:
             possible_pickup = []
             for user in users_want_public_transport:
                 # and in_time_slot(user, driver)
-                if(user.house_node in driver.route): 
+                if(user.house_node in driver.route and self.in_time_slot(user,driver)): 
                     possible_pickup.append(user)
 
             for user in possible_pickup:
@@ -397,8 +404,8 @@ class Simulator:
         #Get routes from input file
         existing_routes = self.input_config["buses"]
 
-        #24
-        while value < 0.5:
+        #0.5
+        while value < 24:
             bus_times.append(value)
 
             #check if the time is between any of peaks +- standard deviation
@@ -462,8 +469,9 @@ class Simulator:
             # self.users = self.users[1:]
             self.reset()
         self.choose_mode_descriptive()
-        for user in self.users:
-            print(user)
+
+        # for user in self.users:
+        #     print(user)
 
           #Take care of the public transport option - match users to buses
         users_public_transport = []
@@ -533,11 +541,12 @@ class Simulator:
         lost["car"] = len(users_no_car_but_chose_car)
         lost["bus"] = len(public_transport_unmatched)
         lost["bike"] = len(cyclists_not_possible)
+        lost["total"] = len(users_no_car_but_chose_car) + len(public_transport_unmatched) + len(cyclists_not_possible)
 
         self.users_lost[self.runn] = lost
 
-        print("users lost")
-        print(self.users_lost)
+        # print("users lost")
+        # print(self.users_lost)
 
         self.runn += 1
 
@@ -593,7 +602,7 @@ class Simulator:
                         rider.house_node) - rider.start_time
                     rider.time_spent_waiting = max(time_waiting, 0)
                     commute_out = CommuteOutput(actor.rider_cost(rider.house_node), actor.rider_travel_time(
-                        rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
+                            rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     user_info = dict()
                     user_info["user"] = rider
                     user_info["commute_output"] = commute_out
@@ -603,6 +612,10 @@ class Simulator:
 
         return final_users
 
+    def unviable_choice(self, agent: DQNAgent, users: List['User'], action_index: int):
+        for user in users:
+            agent.update_replay_memory((user.get_user_current_state(), action_index, self.input_config["users"]["unviable_choice"], 1, True))
+        # agent.train(True, 1)
 
 
     def run(self, agent: DQNAgent):
@@ -716,6 +729,21 @@ class Simulator:
 
         #Make list combining all the users that aren't gonna participate in this run
         users_not_participating = public_transport_unmatched + cyclists_not_possible + ride_sharing_unmatched
+
+        #Training the users to learn that the mode choice they made was not good, they weren't matched
+        for index in range(0,len(self.providers)):
+            if(self.providers[index].service == "bus"):
+                public_index = index
+                self.unviable_choice(agent, public_transport_unmatched, public_index)
+            elif(self.providers[index].service == "bike"):
+                bicycle_index = index
+                self.unviable_choice(
+                    agent, cyclists_not_possible, bicycle_index)
+            elif(self.providers[index].service == "sharedCar"):
+                ride_sharing_index = index
+                self.unviable_choice(agent, ride_sharing_unmatched, ride_sharing_index)        
+        
+            
         # print("depois de ver se temos stcp ", len(users_turn_actors))
 
         create_actor_events = self.create_actors_events(users_turn_actors)
@@ -726,6 +754,7 @@ class Simulator:
         lost["sharedCar"] = len(ride_sharing_unmatched)
         lost["bus"] = len(public_transport_unmatched)
         lost["bike"] = len(cyclists_not_possible)
+        lost["total"] = len(ride_sharing_unmatched) + len(public_transport_unmatched) + len(cyclists_not_possible)
 
         self.users_lost[self.runn] = lost
 
@@ -764,10 +793,10 @@ class Simulator:
 
         final_users = []
 
-        for a in self.actors:
-            print("actor percurso ")
-            print(a.traveled_nodes)
-        exit()
+        # for a in self.actors:
+        #     print("actor percurso ")
+        #     print(a.traveled_nodes)
+        # exit()
 
         # print("olaaa")
         # for ac in self.actors:
@@ -789,8 +818,25 @@ class Simulator:
             # igual ao transport coletivo
 
             if(actor.service == "car" or actor.service == "bike"):
-                commute_out = CommuteOutput(
-                    actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                if(CREDIT_INCENTIVE):
+                    # print("tenho desconto")
+                    discount = actor.user.credits_discount(N_CREDITS_DISCOUNT, CREDIT_VALUE)
+                    if(discount == -1):
+                        #this means that the user doesn't have the minimum amount of credits to have discount
+                        #since the user didnt spent credits, he will gain credits for his trip
+                        actor.user.add_credits(actor.provider.get_credits())
+                        # print("i gained ", actor.provider.get_credits())
+                        commute_out = CommuteOutput(
+                            actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                    else:
+                        #this means the user has the minimum amount of credits and will have a discounted trip
+                        # print("gastei creditos!")
+                        # print(discount)
+                        commute_out = CommuteOutput(
+                            actor.cost - discount, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                else:
+                    commute_out = CommuteOutput(
+                        actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 user_info = dict()
                 user_info["user"] = actor.user
                 user_info["commute_output"] = commute_out
@@ -803,7 +849,25 @@ class Simulator:
                 travel_cost = actor.simple_travel_cost()
                 travel_cost_portion = travel_cost / (len(actor.user.users_to_pick_up) + 1)
                 driver_cost = travel_cost_portion + actor.calculate_transporte_subsidy(len(actor.traveled_nodes)-1)
-                commute_out = CommuteOutput(driver_cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                if(CREDIT_INCENTIVE):
+                    print("tenho desconto")
+                    discount = actor.user.credits_discount(
+                        N_CREDITS_DISCOUNT, CREDIT_VALUE)
+                    if(discount == -1):
+                        #this means that the user doesn't have the minimum amount of credits to have discount
+                        #since the user didnt spent credits, he will gain credits for his trip
+                        actor.user.add_credits(actor.provider.get_credits())
+                        print("i gained ", actor.provider.get_credits())
+                        commute_out = CommuteOutput(
+                            driver_cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                    else:
+                        #this means the user has the minimum amount of credits and will have a discounted trip
+                        print(discount)
+                        print("gastei creditos!")
+                        commute_out = CommuteOutput(
+                            driver_cost - discount, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                else:
+                    commute_out = CommuteOutput(driver_cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 user_info = dict()
                 user_info["user"] = actor.user
                 user_info["commute_output"] = commute_out
@@ -819,7 +883,25 @@ class Simulator:
                         rider.house_node) - rider.start_time
                     rider.time_spent_waiting = max(time_waiting,0)
                     rider_cost = travel_cost_portion + actor.calculate_transporte_subsidy(actor.rider_traveled_dist(rider.house_node))
-                    commute_out = CommuteOutput(rider_cost, actor.rider_travel_time(rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
+
+                    if(CREDIT_INCENTIVE):
+                        print("tenho desconto")
+                        discount = rider.credits_discount(N_CREDITS_DISCOUNT, CREDIT_VALUE)
+                        if(discount == -1):
+                            #this means that the user doesn't have the minimum amount of credits to have discount
+                            #since the user didnt spent credits, he will gain credits for his trip
+                            rider.add_credits(actor.provider.get_credits())
+                            print("i gained ", actor.provider.get_credits())
+                            commute_out = CommuteOutput(rider_cost, actor.rider_travel_time(
+                                rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
+                        else:
+                            #this means the user has the minimum amount of credits and will have a discounted trip
+                            print(discount)
+                            print("gastei creditos!")
+                            commute_out = CommuteOutput(rider_cost - discount, actor.rider_travel_time(
+                                rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
+                    else:
+                        commute_out = CommuteOutput(rider_cost, actor.rider_travel_time(rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     user_info = dict()
                     user_info["user"] = rider
                     user_info["commute_output"] = commute_out
@@ -832,8 +914,27 @@ class Simulator:
                     time_waiting = actor.driver_reached_pick_up(
                         rider.house_node) - rider.start_time
                     rider.time_spent_waiting = max(time_waiting, 0)
-                    commute_out = CommuteOutput(actor.rider_cost(rider.house_node), actor.rider_travel_time(
-                        rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
+
+                    if(CREDIT_INCENTIVE):
+                        print("tenho desconto")
+                        discount = rider.credits_discount(
+                            N_CREDITS_DISCOUNT, CREDIT_VALUE)
+                        if(discount == -1):
+                            #this means that the user doesn't have the minimum amount of credits to have discount
+                            #since the user didnt spent credits, he will gain credits for his trip
+                            rider.add_credits(actor.provider.get_credits())
+                            print("i gained ", actor.provider.get_credits())
+                            commute_out = CommuteOutput(actor.rider_cost(rider.house_node), actor.rider_travel_time(
+                                rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
+                        else:
+                            #this means the user has the minimum amount of credits and will have a discounted trip
+                            print(discount)
+                            print("gastei creditos!")
+                            commute_out = CommuteOutput(actor.rider_cost(rider.house_node) - discount, actor.rider_travel_time(
+                                rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
+                    else:
+                        commute_out = CommuteOutput(actor.rider_cost(rider.house_node), actor.rider_travel_time(
+                            rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     user_info = dict()
                     user_info["user"] = rider
                     user_info["commute_output"] = commute_out
@@ -865,6 +966,8 @@ class Simulator:
         #         print("esta foi a minha utilidade: ", user_info["utility"], "\n", file=f)
         #         print("\n", file=f)
 
+        # for user in self.users:
+        #     print(user)
 
         for user_info in final_users:
             current_state = user_info["user"].get_user_current_state()
@@ -876,7 +979,7 @@ class Simulator:
             agent.update_replay_memory(
                 (current_state, provider_index,
                     user_info["utility"], 1, True))
-            agent.train(True, 1)
+        agent.train(True, 1)
 
         # self.draw_graph()
         # with open("ughh.txt", 'a+') as f:

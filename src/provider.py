@@ -36,6 +36,9 @@ class Personal(Provider):
 
     def get_awareness(self):
         return Car.awareness()
+    
+    def get_credits(self):
+        return Car.credits()
 
 class Friends(Provider):
 
@@ -59,6 +62,9 @@ class Friends(Provider):
     def get_awareness(self):
         return 0.5
 
+    def get_credits(self):
+        return Car.credits() + 1
+
 class STCP(Provider):
     def __init__(self):
         super().__init__("STCP", "bus")
@@ -77,6 +83,9 @@ class STCP(Provider):
 
     def get_awareness(self):
         return Bus.awareness()
+
+    def get_credits(self):
+        return Bus.credits()
 
 
 class Bicycle(Provider):
@@ -97,3 +106,6 @@ class Bicycle(Provider):
 
     def get_awareness(self):
         return Bike.awareness()
+
+    def get_credits(self):
+        return Bike.credits()
