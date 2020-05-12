@@ -31,7 +31,7 @@ import copy
 
 import csv
 
-run_name = "scenario_no_ridesharing_800_users_3000_runs_new_model"
+run_name = "test_average_occupancy"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -217,7 +217,6 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
 
     # with open("edges_occupation.txt", 'w+') as f:
     #     print(results['edges_occupation'], file=f)
-    # exit()
 
     # print("vou agora para os results[edges ocupation] \n")
     # for e_key in results['edges_occupation'].keys():
@@ -346,7 +345,6 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
                 run_number_users_dict[actor.service] = run_number_users_dict[actor.service] + len(actor.user.users_to_pick_up) + 1
                 run_number_users_dict["total"] = run_number_users_dict["total"] + len(actor.user.users_to_pick_up) + 1
 
-        # exit()
         emissions_dict["car"].append(run_emissions_dict["car"])
         emissions_dict["bus"].append(run_emissions_dict["bus"])
         emissions_dict["sharedCar"].append(run_emissions_dict["sharedCar"])
@@ -455,7 +453,50 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
     # print(users_lost.values())
     # print(users_lost[0])
 
-    with open("{}_results.txt".format(run_name), 'w+') as f:
+    # print("number actors dict")
+    # print(number_actors_dict)
+    # print("number users dict")
+    # print(number_users_dict)
+
+      #bus and shared car actors from the last 100 runs
+    bus_last_100_actors = number_actors_dict["bus"][-100:]
+    shared_car_last_100_actors = number_actors_dict["sharedCar"][-100:]
+
+    #bus and shared car users from the last 100 runs
+    bus_last_100_users = number_users_dict["bus"][-100:]
+    shared_car_last_100_users = number_users_dict["sharedCar"][-100:]
+
+    # print("sum bus users")
+    # print(sum(bus_last_100_users))
+    # print("sum bus actors")
+    # print(sum(bus_last_100_actors))
+    # print("sum shared car users")
+    # print(sum(shared_car_last_100_users))
+    # print("sum shared car actors")
+    # print(sum(shared_car_last_100_actors))
+
+    if(sum(bus_last_100_actors) == 0 or sum(shared_car_last_100_actors) == 0):
+        if(sum(bus_last_100_actors) == 0 and sum(shared_car_last_100_actors) == 0):
+            average_bus_occupancy = 0
+            average_sharedCar_occupancy = 0
+        elif(sum(bus_last_100_actors) == 0):
+            average_bus_occupancy = 0
+            average_sharedCar_occupancy = sum(
+                shared_car_last_100_users)/sum(shared_car_last_100_actors)
+        elif(sum(shared_car_last_100_actors) == 0):
+            average_bus_occupancy = sum(
+                bus_last_100_users)/sum(bus_last_100_actors)
+            average_sharedCar_occupancy = 0
+    else:
+        average_bus_occupancy = sum(bus_last_100_users)/sum(bus_last_100_actors)
+        average_sharedCar_occupancy = sum(
+            shared_car_last_100_users)/sum(shared_car_last_100_actors)
+
+
+
+
+
+    with open("{}_results.txt".format(run_name), 'a+') as f:
         print("Number users lost per run: \n", file=f)
         # print(users_lost, file=f)
         write_dict_file(users_lost,f)
@@ -469,6 +510,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         # print(number_users_dict, file=f)
         write_dict_file(number_users_dict, f)
         # print("\n", file=f)
+        print("Average Bus Ocuppancy (last 100 runs): {} \n".format(average_bus_occupancy), file=f)
+        print("Average Shared Ride Ocuppancy (last 100 runs): {} \n".format(average_sharedCar_occupancy), file=f)
         print("Emissions: \n", file=f)
         write_dict_file(emissions_dict, f)
         # print(emissions_dict, file=f)
@@ -554,6 +597,7 @@ def write_user_info(actors: List[Actor], run: int, file:str):
                         personality.has_private, rider.has_bike, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
                         rider.distance_from_destination, rider.house_node, rider.capacity, len(rider.users_to_pick_up), rider.provider.service]
                 csvwriter.writerow(info)
+      
 
 
 def main(args):
@@ -572,8 +616,8 @@ def main(args):
 
     input_config = read_json_file(args.json_file)
 
-    # providers = [Personal(),Friends(),STCP(), Bicycle()]
-    providers = [Personal(), STCP(), Bicycle()]
+    providers = [Personal(),Friends(),STCP(), Bicycle()]
+    # providers = [Personal(), STCP(), Bicycle()]
     # providers = [Personal()]
     # providers = [Personal(), STCP()]
     # providers = [ Friends()]
@@ -652,6 +696,9 @@ def main(args):
         all_stats.append(sim.stats)
         # print("vou para o proximo run")
 
+    # exit()
+    #Add distance info to results file
+    write_user_distance_interval_info(sim)
     json_object = average_all_results(all_stats, args.plots, sim.users_lost)
     json_object['graph'] = nx.readwrite.jit_data(sim.graph.graph)
 
@@ -673,7 +720,10 @@ def main(args):
         write_user_info(run.actors, runn, save_user_file)
         runn += 1
     
-
+def write_user_distance_interval_info(sim: Simulator):
+    with open("{}_results.txt".format(run_name), 'w+') as f:
+        print("Number of Users per distance interval: \n", file=f)
+        write_dict_file(sim.distance_dict, f)
 
 if __name__ == '__main__':
     main(parse_args())
