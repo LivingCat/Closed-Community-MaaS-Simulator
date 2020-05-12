@@ -20,12 +20,15 @@ class Personality:
 
 
 class CommuteOutput:
-     def __init__(self, cost, total_time, awareness, comfort, mean_transportation):
+    def __init__(self, cost, total_time, awareness, comfort, mean_transportation):
         self.cost = cost
         self.total_time = total_time
         self.awareness = awareness
         self.mean_transportation = mean_transportation
         self.comfort = comfort
+
+    def __str__(self):
+        return "Cost %s, total time %s, awareness %s, mean transportation %s , comfort %s" % (self.cost, self.total_time, self.awareness, self.mean_transportation, self.comfort)
 
 
 class User:
@@ -91,10 +94,15 @@ class User:
         if(commute_out.cost == 0):
             return 0
         else:
-            return 1/(commute_out.cost) * self.personality.willingness_to_pay
+
+            #normalize 
+            return (1 - (commute_out.cost/22) )* self.personality.willingness_to_pay
+            # return 1/(commute_out.cost) * self.personality.willingness_to_pay
 
     def time_util(self, commute_out: CommuteOutput):
-        return 1/(commute_out.total_time) * self.personality.willingness_to_wait
+        #normalize
+        return (1 - (commute_out.total_time/0.85)) * self.personality.willingness_to_wait 
+        # return 1/(commute_out.total_time) * self.personality.willingness_to_wait
 
     def social_util(self, commute_out: CommuteOutput):
         return commute_out.awareness * self.personality.awareness

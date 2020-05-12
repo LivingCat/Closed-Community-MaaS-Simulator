@@ -55,6 +55,11 @@ class Simulator:
         self.first_run = False
         self.runn = 0
         self.users_lost = dict(dict())
+        # self.list_times = List[Tuple[int,float]]
+        # self.list_cost = List[Tuple[int,float]]
+
+        self.list_times = []
+        self.list_cost = []
 
         random.seed(seed)
         # plt.ion()
@@ -238,10 +243,17 @@ class Simulator:
                         (user.get_user_current_state(), action,
                             self.input_config["users"]["punishment_doesnt_have_mode"], 1, True))
                     agent.train(True, 1)
+                #user owns a bicycle, wants to use it, but lives too far awar
+                elif(user.has_bike and provider.name == "Bicycle" and not self.graph.check_has_route(user.house_node, "bike")):
+                    agent.update_replay_memory(
+                        (user.get_user_current_state(), action,
+                            self.input_config["users"]["punishment_doesnt_have_mode"], 1, True))
+                    agent.train(True, 1)
                 else:
                     break
             user.mean_transportation = provider.service
             user.provider = provider
+
 
     def add_house_nodes(self):
         distances = self.calculate_distance_nodes_destination()
@@ -376,7 +388,6 @@ class Simulator:
             if(has_path and user.has_bike):
                 allowed_users.append(user)
         return allowed_users
-
 
 
 
@@ -680,14 +691,16 @@ class Simulator:
         if(len(users_ride_sharing) > 0):
             ride_sharing_unmatched = self.ride_sharing_matching(users_ride_sharing)
 
-        possible_cyclists = [user for user in self.users if(user.mean_transportation == "bike")]
+        cyclists = [user for user in self.users if(user.mean_transportation == "bike")]
 
-        #check if people that wish to cycle exist, if so check if its possible, if they have a path
-        cyclists_not_possible = []
-        cyclists = []
-        if(len(possible_cyclists) > 0):
-            cyclists = self.can_cycle(possible_cyclists)
-            cyclists_not_possible = list(set(possible_cyclists) - set(cyclists))
+        # #check if people that wish to cycle exist, if so check if its possible, if they have a path
+        # cyclists_not_possible = []
+        # cyclists = []
+        # if(len(possible_cyclists) > 0):
+        #     cyclists = self.can_cycle(possible_cyclists)
+        #     cyclists_not_possible = list(set(possible_cyclists) - set(cyclists))
+
+        # cyclists = 
 
         # Create the Simulation Actors
         event_queue = PriorityQueue()
@@ -728,17 +741,13 @@ class Simulator:
 
 
         #Make list combining all the users that aren't gonna participate in this run
-        users_not_participating = public_transport_unmatched + cyclists_not_possible + ride_sharing_unmatched
+        users_not_participating = public_transport_unmatched  + ride_sharing_unmatched
 
         #Training the users to learn that the mode choice they made was not good, they weren't matched
         for index in range(0,len(self.providers)):
             if(self.providers[index].service == "bus"):
                 public_index = index
                 self.unviable_choice(agent, public_transport_unmatched, public_index)
-            elif(self.providers[index].service == "bike"):
-                bicycle_index = index
-                self.unviable_choice(
-                    agent, cyclists_not_possible, bicycle_index)
             elif(self.providers[index].service == "sharedCar"):
                 ride_sharing_index = index
                 self.unviable_choice(agent, ride_sharing_unmatched, ride_sharing_index)        
@@ -753,10 +762,10 @@ class Simulator:
         lost = dict()
         lost["sharedCar"] = len(ride_sharing_unmatched)
         lost["bus"] = len(public_transport_unmatched)
-        lost["bike"] = len(cyclists_not_possible)
-        lost["total"] = len(ride_sharing_unmatched) + len(public_transport_unmatched) + len(cyclists_not_possible)
+        lost["total"] = len(ride_sharing_unmatched) + len(public_transport_unmatched)
 
         self.users_lost[self.runn] = lost
+
 
         # print("users lost")
         # print(self.users_lost)
@@ -798,7 +807,7 @@ class Simulator:
         #     print(a.traveled_nodes)
         # exit()
 
-        # print("olaaa")
+        print("olaaa")
         # for ac in self.actors:
         #     print("eu represento este user: \n", ac.user)
         #     print("esta é a minha rota: \n", ac.base_route)
@@ -835,6 +844,12 @@ class Simulator:
                         commute_out = CommuteOutput(
                             actor.cost - discount, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 else:
+                    new_tuple_t = (actor.user.distance_from_destination, actor.total_travel_time)
+                    new_tuple_c = (actor.user.distance_from_destination, actor.provider.get_cost(
+                        actor.total_travel_time))
+                    self.list_times.append(new_tuple_t)
+                    self.list_cost.append(new_tuple_c)
+
                     commute_out = CommuteOutput(
                         actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 user_info = dict()
@@ -846,7 +861,7 @@ class Simulator:
                 final_users.append(user_info)
             elif(actor.service == "sharedCar"):
                 #create commute output for the driver
-                travel_cost = actor.simple_travel_cost()
+                travel_cost = actor.sharing_travel_cost()
                 travel_cost_portion = travel_cost / (len(actor.user.users_to_pick_up) + 1)
                 driver_cost = travel_cost_portion + actor.calculate_transporte_subsidy(len(actor.traveled_nodes)-1)
                 if(CREDIT_INCENTIVE):
@@ -933,6 +948,12 @@ class Simulator:
                             commute_out = CommuteOutput(actor.rider_cost(rider.house_node) - discount, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     else:
+                        new_tuple_t = (rider.distance_from_destination, actor.rider_travel_time(
+                            rider.house_node) + rider.time_spent_waiting)
+                        new_tuple_c = (rider.distance_from_destination, actor.provider.get_cost(actor.rider_travel_time(rider.house_node)))
+                        self.list_times.append(new_tuple_t)
+                        self.list_cost.append(new_tuple_c)
+
                         commute_out = CommuteOutput(actor.rider_cost(rider.house_node), actor.rider_travel_time(
                             rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     user_info = dict()
@@ -969,6 +990,33 @@ class Simulator:
         # for user in self.users:
         #     print(user)
 
+        users_copy = self.users
+        final_users_copy = final_users
+
+        # with open("utility_teste.txt", 'a+') as f:
+        #     print("users", file=f)
+        #     for user in users_copy:
+        #         print(user,file=f)
+        #         print("\n",file=f)
+
+        #     print("utility", file=f)
+        #     for info in final_users_copy:
+        #         print(info["user"], file=f)
+        #         print(info["commute_output"], file=f)
+        #         print(info["utility"], file=f)
+        #         print("\n", file=f)
+
+        with open("cost_and_time.txt", 'a+') as f:
+            print("dist,cost", file=f)
+            for c_tuple in self.list_cost :
+                print("{},{}".format(c_tuple[0], c_tuple[1]), file=f)
+
+            print("\n", file=f)
+            print("dist,time", file=f)
+            for t_tuple in self.list_times:
+                print("{},{}".format(t_tuple[0], t_tuple[1]), file=f)
+
+        # exit()
         for user_info in final_users:
             current_state = user_info["user"].get_user_current_state()
             provider_index = -1

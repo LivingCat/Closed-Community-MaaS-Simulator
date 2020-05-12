@@ -7,7 +7,10 @@ providers = bidict({
     "STCP": 2
 })
 
-fuel_cost = 1/0.6
+car_cost = 2*0.36
+bus_cost = 2*0.11
+friend_cost_2 = 2 * 0.144
+friend_cost_more = 2 * 0.11
 
 fixed_added_cost = 0
 
@@ -23,7 +26,7 @@ class Personal(Provider):
         super().__init__("Personal", "car")
     
     def get_cost(self,time):
-        return time*fuel_cost + fixed_added_cost
+        return time* Car.speed * car_cost + fixed_added_cost
     
     def get_time(self, time):
         return time
@@ -46,9 +49,12 @@ class Friends(Provider):
         super().__init__("Friends", "sharedCar")
     
     
-    def get_cost(self,time):
+    def get_cost(self,time,num_riders):
         # - creditos/min_creditos_para_desconto
-        return time*fuel_cost + fixed_added_cost
+        if(num_riders == 1):
+            return time * Car.speed * friend_cost_2 + fixed_added_cost
+        else:
+            return time * Car.speed * friend_cost_more + fixed_added_cost
     
     def get_time(self, time):
         return time
@@ -70,7 +76,7 @@ class STCP(Provider):
         super().__init__("STCP", "bus")
     
     def get_cost(self,time):
-        return 2
+        return time * Bus.speed * bus_cost
     
     def get_time(self, time):
         return time
