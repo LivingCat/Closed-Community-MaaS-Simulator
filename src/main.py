@@ -124,7 +124,7 @@ def statistics_print(sim: Simulator):
     print("ATIS NO: mean: %f || std: %f" % (np.mean(atis_no), np.std(atis_no)))
 
 
-def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: dict(dict()), time_per_mode_last_runs: dict()):
+def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: dict(dict()), time_per_mode_last_runs: dict(), utility_per_mode_last_runs: dict()):
 
     #Get Min Users lost run
     min_val = 99999999
@@ -550,6 +550,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         print("\n", file=f)
         print("Total Travel Time by mode (last 100 runs):", file=f)
         write_dict_file(time_per_mode_last_runs,f)
+        print("Average Utility by mode (last 100 runs): ", file=f)
+        write_dict_file(utility_per_mode_last_runs,f)
 
     return results
 
@@ -653,6 +655,13 @@ def main(args):
         "Bicycle":0
     }
 
+    utility_per_mode_last_runs_dict = {
+        "Personal": [],
+        "Friends": [],
+        "STCP": [],
+        "Bicycle": []
+    }
+
     for episode in trange(args.n_runs, leave=False):
         # print(" episode")
         # print(episode)
@@ -675,13 +684,28 @@ def main(args):
         for user_info in final_users:
             episode_reward += user_info["utility"]
             if(episode >= last_episodes):
-                time_per_mode_last_runs[user_info["commute_output"]
-                                        .mean_transportation] += user_info["commute_output"].total_time
+                time_per_mode_last_runs[user_info["commute_output"].mean_transportation] += user_info["commute_output"].total_time
+                print(utility_per_mode_last_runs_dict)
+                print(user_info["commute_output"].mean_transportation)
+                utility_per_mode_last_runs_dict[user_info["commute_output"].mean_transportation].append(user_info["utility"])
 
 
 
         # Append episode reward to a list and log stats (every given number of episodes)
         ep_rewards.append(episode_reward)
+
+        utility_per_mode_last_runs = {
+            "Personal": 0,
+            "Friends": 0,
+            "STCP": 0,
+            "Bicycle": 0
+        }
+
+        for key in utility_per_mode_last_runs_dict.keys():
+            if(len(utility_per_mode_last_runs_dict[key]) == 0):
+                utility_per_mode_last_runs[key] = 0
+            else:
+                utility_per_mode_last_runs[key] = sum( utility_per_mode_last_runs_dict[key]) / len(utility_per_mode_last_runs_dict[key])
 
         # print("tenho o ep reqwrd")
 
@@ -720,7 +744,7 @@ def main(args):
     #Add distance info to results file
     write_user_distance_interval_info(sim)
     json_object = average_all_results(
-        all_stats, args.plots, sim.users_lost, time_per_mode_last_runs)
+        all_stats, args.plots, sim.users_lost, time_per_mode_last_runs, utility_per_mode_last_runs)
     json_object['graph'] = nx.readwrite.jit_data(sim.graph.graph)
 
     json.dump(json_object, open(args.save_path, "w+"))
