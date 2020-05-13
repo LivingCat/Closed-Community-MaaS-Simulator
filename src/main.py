@@ -124,11 +124,12 @@ def statistics_print(sim: Simulator):
     print("ATIS NO: mean: %f || std: %f" % (np.mean(atis_no), np.std(atis_no)))
 
 
-def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: dict(dict())):
+def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: dict(dict()), time_per_mode_last_runs: dict()):
 
     #Get Min Users lost run
     min_val = 99999999
     min_run = -1
+    last_runs = 100
 
     # print("users lost")
     # print(users_lost)
@@ -276,9 +277,19 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         "total": []
     }
 
+    transport_subsidy_dict = {
+        "car": [],
+        "bus": [],
+        "sharedCar": [],
+        "total": []
+    }
+
     tax_list = []
 
     runn = 0
+
+    # if(actor.service != "bus"):
+    #     average_tt[actor.service] += actor.user.CommuteOutput
 
     print("vou fazer emissions, num actor e num users")
     for run in all_s:
@@ -310,6 +321,13 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
             "bus": 0,
             "sharedCar": 0,
             "bike": 0,
+            "total": 0
+        }
+
+        run_transport_subsidy_dict = {
+            "car": 0,
+            "bus": 0,
+            "sharedCar": 0,
             "total": 0
         }
 
@@ -345,6 +363,17 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
                 run_number_users_dict[actor.service] = run_number_users_dict[actor.service] + len(actor.user.users_to_pick_up) + 1
                 run_number_users_dict["total"] = run_number_users_dict["total"] + len(actor.user.users_to_pick_up) + 1
 
+            actor_transp_subsidy = 0.0
+            if(actor.service == "bike"):
+                continue
+            if(actor.service !=  "bus"):
+                actor_transp_subsidy += actor.calculate_transporte_subsidy(actor.user.house_node)
+            for rider in actor.user.users_to_pick_up:
+                actor_transp_subsidy += actor.calculate_transporte_subsidy(actor.rider_traveled_dist(rider.house_node))
+            
+            run_transport_subsidy_dict[actor.service] += actor_transp_subsidy
+            run_transport_subsidy_dict["total"] += actor_transp_subsidy
+
         emissions_dict["car"].append(run_emissions_dict["car"])
         emissions_dict["bus"].append(run_emissions_dict["bus"])
         emissions_dict["sharedCar"].append(run_emissions_dict["sharedCar"])
@@ -371,6 +400,16 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
             run_number_actors_dict["sharedCar"])
         number_actors_dict["bike"].append(run_number_actors_dict["bike"])
         number_actors_dict["total"].append(run_number_actors_dict["total"])
+
+        transport_subsidy_dict["car"].append(run_transport_subsidy_dict["car"])
+        transport_subsidy_dict["bus"].append(run_transport_subsidy_dict["bus"])
+        transport_subsidy_dict["sharedCar"].append(
+            run_transport_subsidy_dict["sharedCar"])
+        transport_subsidy_dict["total"].append(
+            run_transport_subsidy_dict["total"])
+
+        if(run_transport_subsidy_dict["total"] > max_transport_subsidy):
+            max_transport_subsidy = run_transport_subsidy_dict["total"]
         # print("sou o number users dict")
         # print(number_users_dict)
 
@@ -390,42 +429,6 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         plot_emissions_development(emissions_dict)
         plot_number_users_development(number_users_dict)
     plt.waitforbuttonpress(0)  
-
-    transport_subsidy_dict={
-        "car": [],
-        "bus": [],
-        "sharedCar": [],
-        "total": []
-    }
-  
-    for run in all_s:
-        run_transport_subsidy_dict = {
-            "car": 0,
-            "bus": 0,
-            "sharedCar": 0,
-            "total":0
-        }
-        for ac in run.actors:
-            actor_transp_subsidy = 0.0
-            if(ac.service == "bike"):
-                continue
-            if(ac.service !=  "bus"):
-                actor_transp_subsidy += ac.calculate_transporte_subsidy(ac.user.house_node)
-            for rider in ac.user.users_to_pick_up:
-                actor_transp_subsidy += ac.calculate_transporte_subsidy(rider.house_node)          
-            
-            run_transport_subsidy_dict[ac.service] += actor_transp_subsidy
-            run_transport_subsidy_dict["total"] += actor_transp_subsidy
-
-        transport_subsidy_dict["car"].append(run_transport_subsidy_dict["car"])
-        transport_subsidy_dict["bus"].append(run_transport_subsidy_dict["bus"])
-        transport_subsidy_dict["sharedCar"].append(
-            run_transport_subsidy_dict["sharedCar"])
-        transport_subsidy_dict["total"].append(
-            run_transport_subsidy_dict["total"])
-
-        if(run_transport_subsidy_dict["total"] > max_transport_subsidy):
-            max_transport_subsidy = run_transport_subsidy_dict["total"]
 
     total_cost_list = []
     for i in range(0,len(all_s)):
@@ -459,12 +462,12 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
     # print(number_users_dict)
 
       #bus and shared car actors from the last 100 runs
-    bus_last_100_actors = number_actors_dict["bus"][-100:]
-    shared_car_last_100_actors = number_actors_dict["sharedCar"][-100:]
+    bus_last_100_actors = number_actors_dict["bus"][-last_runs:]
+    shared_car_last_100_actors = number_actors_dict["sharedCar"][-last_runs:]
 
     #bus and shared car users from the last 100 runs
-    bus_last_100_users = number_users_dict["bus"][-100:]
-    shared_car_last_100_users = number_users_dict["sharedCar"][-100:]
+    bus_last_100_users = number_users_dict["bus"][-last_runs:]
+    shared_car_last_100_users = number_users_dict["sharedCar"][-last_runs:]
 
     # print("sum bus users")
     # print(sum(bus_last_100_users))
@@ -544,6 +547,9 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         print("Average and STD Total Travel Time: {} - {} \n".format(results["time_atis_no"][0], results["time_atis_no"][1]), file=f)
         print("Average Total Travel Time By Run: \n", file=f)
         print(average_ttt_all_runs, file=f)
+        print("\n", file=f)
+        print("Total Travel Time by mode (last 100 runs):", file=f)
+        write_dict_file(time_per_mode_last_runs,f)
 
     return results
 
@@ -636,6 +642,17 @@ def main(args):
     agent = DQNAgent(n_inputs, n_output)
     # gather stats from all runs
     all_stats = []
+
+    last_runs = 100
+    last_episodes = args.n_runs - last_runs
+
+    time_per_mode_last_runs = {
+        "Personal":0,
+        "Friends":0,
+        "STCP":0,
+        "Bicycle":0
+    }
+
     for episode in trange(args.n_runs, leave=False):
         # print(" episode")
         # print(episode)
@@ -657,6 +674,10 @@ def main(args):
            # Transform new continous state to new discrete state and count reward
         for user_info in final_users:
             episode_reward += user_info["utility"]
+            if(episode >= last_episodes):
+                time_per_mode_last_runs[user_info["commute_output"]
+                                        .mean_transportation] += user_info["commute_output"].total_time
+
 
 
         # Append episode reward to a list and log stats (every given number of episodes)
@@ -696,10 +717,10 @@ def main(args):
         all_stats.append(sim.stats)
         # print("vou para o proximo run")
 
-    # exit()
     #Add distance info to results file
     write_user_distance_interval_info(sim)
-    json_object = average_all_results(all_stats, args.plots, sim.users_lost)
+    json_object = average_all_results(
+        all_stats, args.plots, sim.users_lost, time_per_mode_last_runs)
     json_object['graph'] = nx.readwrite.jit_data(sim.graph.graph)
 
     json.dump(json_object, open(args.save_path, "w+"))
