@@ -17,6 +17,7 @@ import numpy as np
 import random
 import scipy
 
+
 DEFAULT_VALUE_NUM = -100.0
 DEFAULT_VALUE_STRING = ""
 MIN_HOUSE_DISTANCE = 1
@@ -29,6 +30,7 @@ CREDIT_VALUE = 0.01
 CREDIT_INCENTIVE = False
 
 
+run_name = "descriptive_100_users_3000_runs"
 
 class Simulator:
     """Runs a simulation from a given set of parameters"""
@@ -58,8 +60,8 @@ class Simulator:
         # self.list_times = List[Tuple[int,float]]
         # self.list_cost = List[Tuple[int,float]]
 
-        self.list_times = []
-        self.list_cost = []
+        # self.list_times = []
+        # self.list_cost = []
 
         self.distance_dict = dict()
 
@@ -485,6 +487,12 @@ class Simulator:
         if(self.first_run):
             print(" first run")
             self.users = self.create_users()
+            # for user in self.users:
+            #     print(user.salary)
+            #     print(user.budget)
+            #     print(user.personality.willingness_to_pay)
+            #     print("\n")
+            # exit()
             #Create distance dictionary
             self.create_dist_dict()
             #Assign house nodes to each user according to graph structure
@@ -695,11 +703,11 @@ class Simulator:
                         commute_out = CommuteOutput(
                             actor.cost - discount, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 else:
-                    new_tuple_t = (actor.user.distance_from_destination, actor.total_travel_time)
-                    new_tuple_c = (actor.user.distance_from_destination, actor.provider.get_cost(
-                        actor.total_travel_time))
-                    self.list_times.append(new_tuple_t)
-                    self.list_cost.append(new_tuple_c)
+                    # new_tuple_t = (actor.user.distance_from_destination, actor.total_travel_time)
+                    # new_tuple_c = (actor.user.distance_from_destination, actor.provider.get_cost(
+                    #     actor.total_travel_time))
+                    # self.list_times.append(new_tuple_t)
+                    # self.list_cost.append(new_tuple_c)
 
                     commute_out = CommuteOutput(
                         actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
@@ -708,6 +716,7 @@ class Simulator:
                 user_info["commute_output"] = commute_out
                 user_info["utility"] = actor.user.calculate_utility_value(
                     commute_out)
+                # user_info["fastest_time"] = self.fastest_private_travel_time(actor.user.house_node)
                 #update dos creditos do user
                 final_users.append(user_info)
             elif(actor.service == "sharedCar"):
@@ -739,6 +748,8 @@ class Simulator:
                 user_info["commute_output"] = commute_out
                 user_info["utility"] = actor.user.calculate_utility_value(
                     commute_out)
+                # user_info["fastest_time"] = self.fastest_private_travel_time(
+                #     actor.user.house_node)
                 #update dos creditos do user
                 final_users.append(user_info)
 
@@ -773,6 +784,8 @@ class Simulator:
                     user_info["commute_output"] = commute_out
                     user_info["utility"] = rider.calculate_utility_value(
                         commute_out)
+                    # user_info["fastest_time"] = self.fastest_private_travel_time(
+                    #     rider.house_node)
                     final_users.append(user_info)
             elif(actor.service == "bus"):
                 #go through each user this actor represents
@@ -799,11 +812,11 @@ class Simulator:
                             commute_out = CommuteOutput(actor.rider_cost(rider.house_node) - discount, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     else:
-                        new_tuple_t = (rider.distance_from_destination, actor.rider_travel_time(
-                            rider.house_node) + rider.time_spent_waiting)
-                        new_tuple_c = (rider.distance_from_destination, actor.provider.get_cost(actor.rider_travel_time(rider.house_node)))
-                        self.list_times.append(new_tuple_t)
-                        self.list_cost.append(new_tuple_c)
+                        # new_tuple_t = (rider.distance_from_destination, actor.rider_travel_time(
+                        #     rider.house_node) + rider.time_spent_waiting)
+                        # new_tuple_c = (rider.distance_from_destination, actor.provider.get_cost(actor.rider_travel_time(rider.house_node)))
+                        # self.list_times.append(new_tuple_t)
+                        # self.list_cost.append(new_tuple_c)
 
                         commute_out = CommuteOutput(actor.rider_cost(rider.house_node), actor.rider_travel_time(
                             rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
@@ -812,6 +825,8 @@ class Simulator:
                     user_info["commute_output"] = commute_out
                     user_info["utility"] = rider.calculate_utility_value(
                         commute_out)
+                    # user_info["fastest_time"] = self.fastest_private_travel_time(
+                    #     rider.house_node)
                     final_users.append(user_info)
 
 
@@ -891,6 +906,10 @@ class Simulator:
         # print("users")
         # for user in self.users:
         #     print(user)
+
+        # for user_info in final_users:
+        #     print(user_info["user"])
+        #     print(user_info)
 
         # print("users not participating")
         # print(len(users_not_participating))
@@ -994,9 +1013,7 @@ class Simulator:
 
         # print("users lost")
         # print(self.users_lost)
-
         self.runn += 1
-
         for ae in create_actor_events:
             event_queue.put_nowait(ae.get_priorized())
 
@@ -1040,6 +1057,7 @@ class Simulator:
                 user_info["commute_output"] = commute_out
                 user_info["utility"] = actor.user.calculate_utility_value(
                     commute_out)
+                # user_info["fastest_time"] = self.fastest_private_travel_time(actor.user.house_node)
                 #update dos creditos do user
                 final_users.append(user_info)
             elif(actor.service == "bus"):
@@ -1055,6 +1073,8 @@ class Simulator:
                     user_info["commute_output"] = commute_out
                     user_info["utility"] = rider.calculate_utility_value(
                         commute_out)
+                    # user_info["fastest_time"] = self.fastest_private_travel_time(
+                    #     rider.house_node)
                     final_users.append(user_info)
 
         return final_users
@@ -1274,3 +1294,11 @@ class Simulator:
                 self.distance_dict["3-5"] += 1
             elif(distance >= 1 and distance < 3):
                 self.distance_dict["1-3"] += 1
+
+    def fastest_private_travel_time(self,house_node: int):
+        dist = nx.shortest_path_length(self.graph.graph, source=house_node, target=self.graph.nend)
+        car_p = [provider for provider in self.providers if provider.service == "car"]
+        speed = car_p[0].get_speed()
+        time = dist/speed
+        return time
+

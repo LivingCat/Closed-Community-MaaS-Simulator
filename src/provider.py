@@ -42,6 +42,9 @@ class Personal(Provider):
     
     def get_credits(self):
         return Car.credits()
+    
+    def get_speed(self):
+        return Car.speed
 
 class Friends(Provider):
 
@@ -70,6 +73,7 @@ class Friends(Provider):
 
     def get_credits(self):
         return Car.credits() + 1
+
 
 class STCP(Provider):
     def __init__(self):
