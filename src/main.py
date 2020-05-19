@@ -4,7 +4,7 @@ Main project source file.
 from typing import List, Tuple
 from ipdb import set_trace
 from actor import Actor
-from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs, plot_emissions_development, plot_number_users_development
+from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs, plot_emissions_development, plot_number_users_development, plot_utility_development
 from simulator import Simulator
 from provider import Provider, Personal, Friends, STCP, Bicycle
 from graph import RoadGraph
@@ -31,7 +31,7 @@ import copy
 
 import csv
 
-run_name = "test_average_occupancy"
+run_name = "scenario_with_credits_800_users_3000_runs"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -124,7 +124,7 @@ def statistics_print(sim: Simulator):
     print("ATIS NO: mean: %f || std: %f" % (np.mean(atis_no), np.std(atis_no)))
 
 
-def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: dict(dict()), time_per_mode_last_runs: dict(), utility_per_mode_last_runs: dict()):
+def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: dict(dict()), time_per_mode_last_runs: dict(), utility_per_mode_last_runs: dict(), cost_per_mode_last_runs_dict: dict(), credits_used: dict()):
 
     #Get Min Users lost run
     min_val = 99999999
@@ -347,7 +347,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
             run_number_actors_dict["total"] += 1
             if(actor.service == "bus"):
                 #if its serving users
-                if(len(actor.user.users_to_pick_up) > 0):
+                if(actor.user.riders_num > 0):
                     run_emissions_dict[actor.service] += actor.emissions
                     run_emissions_dict["total"] += actor.emissions
             else:
@@ -357,19 +357,19 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
             #have to add the actual users
             # run_number_users_dict[actor.service] += 1
             if(actor.service == "bus"):
-                run_number_users_dict[actor.service] += len(actor.user.users_to_pick_up)
-                run_number_users_dict["total"] += len(actor.user.users_to_pick_up)
+                run_number_users_dict[actor.service] += actor.user.riders_num
+                run_number_users_dict["total"] += actor.user.riders_num
             else:
-                run_number_users_dict[actor.service] = run_number_users_dict[actor.service] + len(actor.user.users_to_pick_up) + 1
-                run_number_users_dict["total"] = run_number_users_dict["total"] + len(actor.user.users_to_pick_up) + 1
+                run_number_users_dict[actor.service] = run_number_users_dict[actor.service] + actor.user.riders_num + 1
+                run_number_users_dict["total"] = run_number_users_dict["total"] + actor.user.riders_num + 1
 
             actor_transp_subsidy = 0.0
             if(actor.service == "bike"):
                 continue
             if(actor.service !=  "bus"):
                 actor_transp_subsidy += actor.calculate_transporte_subsidy(actor.user.house_node)
-            for rider in actor.user.users_to_pick_up:
-                actor_transp_subsidy += actor.calculate_transporte_subsidy(actor.rider_traveled_dist(rider.house_node))
+            for rider_house in actor.user.house_nodes_riders:
+                actor_transp_subsidy += actor.calculate_transporte_subsidy(actor.rider_traveled_dist(rider_house))
             
             run_transport_subsidy_dict[actor.service] += actor_transp_subsidy
             run_transport_subsidy_dict["total"] += actor_transp_subsidy
@@ -548,10 +548,14 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         print("Average Total Travel Time By Run: \n", file=f)
         print(average_ttt_all_runs, file=f)
         print("\n", file=f)
-        print("Total Travel Time by mode (last 100 runs):", file=f)
+        print("Average Total Travel Time by mode (last 100 runs):", file=f)
         write_dict_file(time_per_mode_last_runs,f)
         print("Average Utility by mode (last 100 runs): ", file=f)
         write_dict_file(utility_per_mode_last_runs,f)
+        print("Average Cost by mode (last 100 runs): ", file=f)
+        write_dict_file(cost_per_mode_last_runs_dict,f)
+        print("Average Credits used by mode: ", file=f)
+        write_dict_file(credits_used,f)
 
     return results
 
@@ -649,13 +653,20 @@ def main(args):
     last_episodes = args.n_runs - last_runs
 
     time_per_mode_last_runs = {
-        "Personal":0,
-        "Friends":0,
-        "STCP":0,
-        "Bicycle":0
+        "Personal":[],
+        "Friends":[],
+        "STCP":[],
+        "Bicycle":[]
     }
 
     utility_per_mode_last_runs_dict = {
+        "Personal": [],
+        "Friends": [],
+        "STCP": [],
+        "Bicycle": []
+    }
+
+    cost_per_mode_last_runs_dict = {
         "Personal": [],
         "Friends": [],
         "STCP": [],
@@ -684,28 +695,17 @@ def main(args):
         for user_info in final_users:
             episode_reward += user_info["utility"]
             if(episode >= last_episodes):
-                time_per_mode_last_runs[user_info["commute_output"].mean_transportation] += user_info["commute_output"].total_time
-                print(utility_per_mode_last_runs_dict)
-                print(user_info["commute_output"].mean_transportation)
+                time_per_mode_last_runs[user_info["commute_output"].mean_transportation].append(user_info["commute_output"].total_time)
+                # print(utility_per_mode_last_runs_dict)
+                # print(user_info["commute_output"].mean_transportation)
                 utility_per_mode_last_runs_dict[user_info["commute_output"].mean_transportation].append(user_info["utility"])
+                cost_per_mode_last_runs_dict[user_info["commute_output"].mean_transportation].append(
+                    user_info["commute_output"].cost)
 
 
 
         # Append episode reward to a list and log stats (every given number of episodes)
         ep_rewards.append(episode_reward)
-
-        utility_per_mode_last_runs = {
-            "Personal": 0,
-            "Friends": 0,
-            "STCP": 0,
-            "Bicycle": 0
-        }
-
-        for key in utility_per_mode_last_runs_dict.keys():
-            if(len(utility_per_mode_last_runs_dict[key]) == 0):
-                utility_per_mode_last_runs[key] = 0
-            else:
-                utility_per_mode_last_runs[key] = sum( utility_per_mode_last_runs_dict[key]) / len(utility_per_mode_last_runs_dict[key])
 
         # print("tenho o ep reqwrd")
 
@@ -731,6 +731,11 @@ def main(args):
         
         # a = copy.deepcopy(sim.actors)
         copy_actors = []
+
+        save_user_file = run_name + "_users_info.csv"
+        if(episode == args.n_runs - 1):
+            write_user_info(sim.actors, episode,save_user_file)
+
         for actor in sim.actors:
             new_actor = actor.my_copy()
             copy_actors.append(new_actor)
@@ -741,10 +746,37 @@ def main(args):
         all_stats.append(sim.stats)
         # print("vou para o proximo run")
 
+    utility_per_mode_last_runs = {
+        "Personal": 0,
+        "Friends": 0,
+        "STCP": 0,
+        "Bicycle": 0
+    }
+
+    for key in utility_per_mode_last_runs_dict.keys():
+        if(len(utility_per_mode_last_runs_dict[key]) == 0):
+            utility_per_mode_last_runs[key] = 0
+        else:
+            utility_per_mode_last_runs[key] = sum(
+                utility_per_mode_last_runs_dict[key]) / len(utility_per_mode_last_runs_dict[key])
+
+    for key in time_per_mode_last_runs.keys():
+        if(len(time_per_mode_last_runs[key]) == 0):
+            time_per_mode_last_runs[key] = 0
+        else:
+            time_per_mode_last_runs[key] = sum(
+                time_per_mode_last_runs[key]) / len(time_per_mode_last_runs[key])
+
+    for key in cost_per_mode_last_runs_dict.keys():
+        if(len(cost_per_mode_last_runs_dict[key]) == 0):
+            cost_per_mode_last_runs_dict[key] = 0
+        else:
+            cost_per_mode_last_runs_dict[key] = sum(
+                cost_per_mode_last_runs_dict[key]) / len(cost_per_mode_last_runs_dict[key])
     #Add distance info to results file
     write_user_distance_interval_info(sim)
     json_object = average_all_results(
-        all_stats, args.plots, sim.users_lost, time_per_mode_last_runs, utility_per_mode_last_runs)
+        all_stats, args.plots, sim.users_lost, time_per_mode_last_runs, utility_per_mode_last_runs, cost_per_mode_last_runs_dict, sim.credits_used)
     json_object['graph'] = nx.readwrite.jit_data(sim.graph.graph)
 
     json.dump(json_object, open(args.save_path, "w+"))
@@ -758,12 +790,12 @@ def main(args):
 
     # statistics_print(sim)
 
-    save_user_file = run_name + "_users_info.csv"
 
-    runn = 0
-    for run in all_stats:
-        write_user_info(run.actors, runn, save_user_file)
-        runn += 1
+
+    # runn = 0
+    # for run in all_stats:
+    #     write_user_info(run.actors, runn, save_user_file)
+    #     runn += 1
     
 def write_user_distance_interval_info(sim: Simulator):
     with open("{}_results.txt".format(run_name), 'w+') as f:

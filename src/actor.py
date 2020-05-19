@@ -39,7 +39,9 @@ class Actor():
 
     def my_copy(self):
         new_actor = Actor(self.base_route, self.user,self.provider)
-        new_actor.user = copy.deepcopy(self.user)
+        # new_actor.user = copy.deepcopy(self.user)
+        new_actor.user = self.user.my_copy(self.provider.service)
+
         new_actor.route_travel_time = self.route_travel_time
         new_actor.total_travel_time = self.total_travel_time
         new_actor.start_time = self.start_time

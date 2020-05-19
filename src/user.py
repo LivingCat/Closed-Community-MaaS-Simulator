@@ -78,6 +78,19 @@ class User:
     def default():
         return User(Personality(0,0,0,0,0,0,0,0,0,0), 0.0, "","","",0.0,0.0,0,0,False)
 
+    def my_copy(self, service: str):
+        new_user = User.default()
+        if(service == "bus"):
+            new_user.house_node = -1
+        else:
+            new_user.house_node = self.house_node
+        new_user.house_nodes_riders = []
+        new_user.riders_num = len(self.users_to_pick_up)
+        
+        for rider in self.users_to_pick_up:
+            new_user.house_nodes_riders.append(rider.house_node)
+        return new_user
+
     def set_route_name(self,route_name: str):
         self.route_name = route_name
 
@@ -91,17 +104,18 @@ class User:
         self.house_node = house_node
 
     def cost_util(self, commute_out: CommuteOutput):
+        max_cost = 22
         if(commute_out.cost == 0):
             return 0
         else:
-
             #normalize 
-            return (1 - (commute_out.cost/22) )* self.personality.willingness_to_pay
+            return (1 - (commute_out.cost/max_cost)) * self.personality.willingness_to_pay
             # return 1/(commute_out.cost) * self.personality.willingness_to_pay
 
     def time_util(self, commute_out: CommuteOutput):
+        max_time = 0.85
         #normalize
-        return (1 - (commute_out.total_time/0.85)) * self.personality.willingness_to_wait 
+        return (1 - (commute_out.total_time/max_time)) * self.personality.willingness_to_wait
         # return 1/(commute_out.total_time) * self.personality.willingness_to_wait
 
     def social_util(self, commute_out: CommuteOutput):

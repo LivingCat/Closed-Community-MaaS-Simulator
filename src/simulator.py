@@ -30,8 +30,6 @@ CREDIT_VALUE = 0.01
 CREDIT_INCENTIVE = False
 
 
-run_name = "descriptive_100_users_3000_runs"
-
 class Simulator:
     """Runs a simulation from a given set of parameters"""
 
@@ -57,11 +55,18 @@ class Simulator:
         self.first_run = False
         self.runn = 0
         self.users_lost = dict(dict())
+        self.credits_used = {
+            "car": 0,
+            "bus": 0,
+            "sharedCar": 0,
+            "bike": 0,
+            "total": 0
+        }
         # self.list_times = List[Tuple[int,float]]
         # self.list_cost = List[Tuple[int,float]]
 
-        # self.list_times = []
-        # self.list_cost = []
+        self.list_times = []
+        self.list_cost = []
 
         self.distance_dict = dict()
 
@@ -290,10 +295,9 @@ class Simulator:
 
             for rider in users_want_ride_sharing:
                 # and (rider.start_time - driver.start_time) <= MAX_WAITING_TIME
-                if(rider.house_node in all_nodes and rider != driver):
+                # and self.in_time_slot(rider, driver)
+                if(rider.house_node in all_nodes and rider != driver and self.in_time_slot(rider, driver)):
                     possible_pickup.append(rider)
-            #pick random rider
-            # while available seats or possible_pickup != vazio
 
             #There doesn't exist a user that the driver can pick up
             if(len(possible_pickup) == 0):
@@ -320,15 +324,15 @@ class Simulator:
                 #start a new list for the possible riders
                 possible_pickup = []
                 new_node = pickup[-1].house_node
-                poss_routes = self.graph.get_all_routes(new_node, pickup[-1].mean_transportation)
+                poss_routes = self.graph.get_all_routes(
+                    new_node, driver.mean_transportation)
                 all_nodes = [node for route in poss_routes for node in route]
 
                 for rider in users_want_ride_sharing:
                     # and (rider.start_time - driver.start_time) <= MAX_WAITING_TIME
-                    if(rider.house_node in all_nodes and rider != driver):
+                    # and self.in_time_slot(rider, driver)
+                    if(rider.house_node in all_nodes and rider != driver and self.in_time_slot(rider, driver)):
                         possible_pickup.append(rider)
-                #pick random rider
-                # while available seats or possible_pickup != vazio
 
                 #There doesn't exist any other user that the driver can pick up
                 if(len(possible_pickup) == 0):
@@ -399,15 +403,6 @@ class Simulator:
     # users nao tem ninguem para pickup entao nao podem ir de ride sharing
     # se users nao fazem parte dos to-pick-up de outros users entao tb nao podem ir de ride sharing
     # se esses users tiverem carro podem ir sozinhos mas se nao tiverem idk
-
-    #mudar como é que os atores fazem a rota
-
-        # for user in self.users:
-        #     print("its me user : {} \n", user)
-        #     print("escolhi : {} \n ", user.mean_transportation)
-        #     print("tenho carro? : {} \n", user.personality.has_private)
-        #     print("vivo aqui: {} \n", user.house_node)
-        #     print("vou buscar: {} \n", user.users_to_pick_up)
 
     def create_buses(self):
         print("im in create buses \n")
@@ -700,14 +695,15 @@ class Simulator:
                         #this means the user has the minimum amount of credits and will have a discounted trip
                         # print("gastei creditos!")
                         # print(discount)
+                        self.credits_used[actor.service] += discount
                         commute_out = CommuteOutput(
                             actor.cost - discount, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 else:
-                    # new_tuple_t = (actor.user.distance_from_destination, actor.total_travel_time)
-                    # new_tuple_c = (actor.user.distance_from_destination, actor.provider.get_cost(
-                    #     actor.total_travel_time))
-                    # self.list_times.append(new_tuple_t)
-                    # self.list_cost.append(new_tuple_c)
+                    new_tuple_t = (actor.user.distance_from_destination, actor.total_travel_time)
+                    new_tuple_c = (actor.user.distance_from_destination, actor.provider.get_cost(
+                        actor.total_travel_time))
+                    self.list_times.append(new_tuple_t)
+                    self.list_cost.append(new_tuple_c)
 
                     commute_out = CommuteOutput(
                         actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
@@ -722,23 +718,26 @@ class Simulator:
             elif(actor.service == "sharedCar"):
                 #create commute output for the driver
                 travel_cost = actor.sharing_travel_cost()
+                # print("travel cost: {}".format(travel_cost))
                 travel_cost_portion = travel_cost / (len(actor.user.users_to_pick_up) + 1)
-                driver_cost = travel_cost_portion + actor.calculate_transporte_subsidy(len(actor.traveled_nodes)-1)
+                # print("travel cost portion: %s", travel_cost_portion)
+                driver_cost = travel_cost_portion - actor.calculate_transporte_subsidy(len(actor.traveled_nodes)-1)
                 if(CREDIT_INCENTIVE):
-                    print("tenho desconto")
+                    # print("tenho desconto")
                     discount = actor.user.credits_discount(
                         N_CREDITS_DISCOUNT, CREDIT_VALUE)
                     if(discount == -1):
                         #this means that the user doesn't have the minimum amount of credits to have discount
                         #since the user didnt spent credits, he will gain credits for his trip
                         actor.user.add_credits(actor.provider.get_credits())
-                        print("i gained ", actor.provider.get_credits())
+                        # print("i gained ", actor.provider.get_credits())
                         commute_out = CommuteOutput(
                             driver_cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                     else:
                         #this means the user has the minimum amount of credits and will have a discounted trip
-                        print(discount)
-                        print("gastei creditos!")
+                        # print(discount)
+                        # print("gastei creditos!")
+                        self.credits_used[actor.service] += discount
                         commute_out = CommuteOutput(
                             driver_cost - discount, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 else:
@@ -759,22 +758,23 @@ class Simulator:
                     time_waiting = actor.driver_reached_pick_up(
                         rider.house_node) - rider.start_time
                     rider.time_spent_waiting = max(time_waiting,0)
-                    rider_cost = travel_cost_portion + actor.calculate_transporte_subsidy(actor.rider_traveled_dist(rider.house_node))
+                    rider_cost = travel_cost_portion - actor.calculate_transporte_subsidy(actor.rider_traveled_dist(rider.house_node))
 
                     if(CREDIT_INCENTIVE):
-                        print("tenho desconto")
+                        # print("tenho desconto")
                         discount = rider.credits_discount(N_CREDITS_DISCOUNT, CREDIT_VALUE)
                         if(discount == -1):
                             #this means that the user doesn't have the minimum amount of credits to have discount
                             #since the user didnt spent credits, he will gain credits for his trip
                             rider.add_credits(actor.provider.get_credits())
-                            print("i gained ", actor.provider.get_credits())
+                            # print("i gained ", actor.provider.get_credits())
                             commute_out = CommuteOutput(rider_cost, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                         else:
                             #this means the user has the minimum amount of credits and will have a discounted trip
-                            print(discount)
-                            print("gastei creditos!")
+                            # print(discount)
+                            # print("gastei creditos!")
+                            self.credits_used[actor.service] += discount
                             commute_out = CommuteOutput(rider_cost - discount, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     else:
@@ -795,28 +795,29 @@ class Simulator:
                     rider.time_spent_waiting = max(time_waiting, 0)
 
                     if(CREDIT_INCENTIVE):
-                        print("tenho desconto")
+                        # print("tenho desconto")
                         discount = rider.credits_discount(
                             N_CREDITS_DISCOUNT, CREDIT_VALUE)
                         if(discount == -1):
                             #this means that the user doesn't have the minimum amount of credits to have discount
                             #since the user didnt spent credits, he will gain credits for his trip
                             rider.add_credits(actor.provider.get_credits())
-                            print("i gained ", actor.provider.get_credits())
+                            # print("i gained ", actor.provider.get_credits())
                             commute_out = CommuteOutput(actor.rider_cost(rider.house_node), actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                         else:
                             #this means the user has the minimum amount of credits and will have a discounted trip
-                            print(discount)
-                            print("gastei creditos!")
+                            # print(discount)
+                            # print("gastei creditos!")
+                            self.credits_used[actor.service] += discount
                             commute_out = CommuteOutput(actor.rider_cost(rider.house_node) - discount, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     else:
-                        # new_tuple_t = (rider.distance_from_destination, actor.rider_travel_time(
-                        #     rider.house_node) + rider.time_spent_waiting)
-                        # new_tuple_c = (rider.distance_from_destination, actor.provider.get_cost(actor.rider_travel_time(rider.house_node)))
-                        # self.list_times.append(new_tuple_t)
-                        # self.list_cost.append(new_tuple_c)
+                        new_tuple_t = (rider.distance_from_destination, actor.rider_travel_time(
+                            rider.house_node) + rider.time_spent_waiting)
+                        new_tuple_c = (rider.distance_from_destination, actor.provider.get_cost(actor.rider_travel_time(rider.house_node)))
+                        self.list_times.append(new_tuple_t)
+                        self.list_cost.append(new_tuple_c)
 
                         commute_out = CommuteOutput(actor.rider_cost(rider.house_node), actor.rider_travel_time(
                             rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
@@ -872,15 +873,15 @@ class Simulator:
         #         print(info["utility"], file=f)
         #         print("\n", file=f)
 
-        # with open("cost_and_time.txt", 'a+') as f:
-        #     print("dist,cost", file=f)
-        #     for c_tuple in self.list_cost :
-        #         print("{},{}".format(c_tuple[0], c_tuple[1]), file=f)
+        with open("cost_and_time.txt", 'a+') as f:
+            print("dist,cost", file=f)
+            for c_tuple in self.list_cost :
+                print("{},{}".format(c_tuple[0], c_tuple[1]), file=f)
 
-        #     print("\n", file=f)
-        #     print("dist,time", file=f)
-        #     for t_tuple in self.list_times:
-        #         print("{},{}".format(t_tuple[0], t_tuple[1]), file=f)
+            print("\n", file=f)
+            print("dist,time", file=f)
+            for t_tuple in self.list_times:
+                print("{},{}".format(t_tuple[0], t_tuple[1]), file=f)
 
         # exit()
         for user_info in final_users:
@@ -910,7 +911,14 @@ class Simulator:
         # for user_info in final_users:
         #     print(user_info["user"])
         #     print(user_info)
+        #     print(user_info["commute_output"])
+        #     if(len(user_info["user"].users_to_pick_up) > 0):
+        #         print("i was the driver \n")
+        #     print("\n")
 
+
+        # for act in self.actors:
+        #     print(act)
         # print("users not participating")
         # print(len(users_not_participating))
         # for user in users_not_participating:
@@ -929,6 +937,7 @@ class Simulator:
             print("first run")
             self.users = self.create_users()
             #Assign house nodes to each user according to graph structure
+            self.create_dist_dict()
             self.add_house_nodes()
             self.create_friends()
             self.bus_users = self.create_buses()
