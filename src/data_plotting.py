@@ -7,6 +7,8 @@ import seaborn as sns
 import numpy as np
 import pandas as pd
 
+from scipy.signal import savgol_filter
+
 
 def plot_accumulated_actor_graph(actors_flow_acc: Dict[str, List[List[float]]], n_runs):
     """Plot the road network occupation during the simulation"""
@@ -100,5 +102,36 @@ def plot_number_users_development(number_users_dict: Dict[str,List[float]]):
 
     plt.xlabel("runs")
     plt.ylabel("number of users")
+    plt.legend(loc='upper right')
+    plt.show()
+
+
+def plot_utility_development(utility_dict: Dict[str, List[float]]):
+    fig = plt.figure()
+
+    print("tou no plot_utility")
+
+    with open("utility_in_plot.txt", 'w+') as f:
+        for key in utility_dict.keys():
+            print(key,file=f)
+            print(utility_dict[key],file=f)
+           
+
+    ax1 = fig.add_subplot(111)
+
+    for key in utility_dict:
+        indexes = [i for i,value in enumerate(utility_dict[key]) if value != 0]
+        # print("indexes: ", indexes)
+        y = [utility_dict[key][i] for i in indexes]
+        # print("y: ", y)
+        # print("y len: ", len(y))
+        if(len(y) < 51):
+            ax1.plot( utility_dict[key], label=key, alpha=0.4)
+        else:
+            yhat = savgol_filter(y, 51, 3)
+            ax1.plot(indexes,yhat, label=key, alpha=0.4)
+
+    plt.xlabel("runs")
+    plt.ylabel("utility")
     plt.legend(loc='upper right')
     plt.show()

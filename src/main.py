@@ -31,7 +31,7 @@ import copy
 
 import csv
 
-run_name = "scenario_with_credits_800_users_3000_runs"
+run_name = "testing_utility"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -124,7 +124,7 @@ def statistics_print(sim: Simulator):
     print("ATIS NO: mean: %f || std: %f" % (np.mean(atis_no), np.std(atis_no)))
 
 
-def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: dict(dict()), time_per_mode_last_runs: dict(), utility_per_mode_last_runs: dict(), cost_per_mode_last_runs_dict: dict(), credits_used: dict()):
+def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: dict(dict()), time_per_mode_last_runs: dict(), utility_per_mode_last_runs: dict(), cost_per_mode_last_runs_dict: dict(), credits_used: dict(), average_utility_per_mode_all_runs: dict()):
 
     #Get Min Users lost run
     min_val = 99999999
@@ -331,7 +331,6 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
             "total": 0
         }
 
-
         # with open("ughh.txt", 'a+') as f:
         #     print("run ", runn, file=f)
         #     runn += 1
@@ -373,6 +372,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
             
             run_transport_subsidy_dict[actor.service] += actor_transp_subsidy
             run_transport_subsidy_dict["total"] += actor_transp_subsidy
+
 
         emissions_dict["car"].append(run_emissions_dict["car"])
         emissions_dict["bus"].append(run_emissions_dict["bus"])
@@ -428,6 +428,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         # plot_accumulated_edges_graphs(results['edges_occupation'], len(all_s))
         plot_emissions_development(emissions_dict)
         plot_number_users_development(number_users_dict)
+        plot_utility_development(average_utility_per_mode_all_runs)
     plt.waitforbuttonpress(0)  
 
     total_cost_list = []
@@ -631,6 +632,7 @@ def main(args):
     providers = [Personal(),Friends(),STCP(), Bicycle()]
     # providers = [Personal(), STCP(), Bicycle()]
     # providers = [Personal()]
+    # providers = [Personal(), Bicycle()]
     # providers = [Personal(), STCP()]
     # providers = [ Friends()]
     # providers = [STCP()]
@@ -666,12 +668,22 @@ def main(args):
         "Bicycle": []
     }
 
+    utility_per_mode_total = {
+        "Personal": [],
+        "Friends": [],
+        "STCP": [],
+        "Bicycle": [],
+        "Total":[]
+    }
+
     cost_per_mode_last_runs_dict = {
         "Personal": [],
         "Friends": [],
         "STCP": [],
         "Bicycle": []
     }
+
+    bu = []
 
     for episode in trange(args.n_runs, leave=False):
         # print(" episode")
@@ -685,6 +697,14 @@ def main(args):
         #runs the simulation
         final_users = sim.run(agent)
         # final_users = sim.run_descriptive()
+
+        utility_per_mode_per_run = {
+            "Personal": [],
+            "Friends": [],
+            "STCP": [],
+            "Bicycle": [],
+            "Total": []
+        }
         
         # print("final users ", len(final_users))
 
@@ -694,6 +714,12 @@ def main(args):
            # Transform new continous state to new discrete state and count reward
         for user_info in final_users:
             episode_reward += user_info["utility"]
+
+            utility_per_mode_per_run[user_info["commute_output"].mean_transportation].append(
+                user_info["utility"])
+            utility_per_mode_per_run["Total"].append(user_info["utility"])
+            # bu.append(episode_reward)
+
             if(episode >= last_episodes):
                 time_per_mode_last_runs[user_info["commute_output"].mean_transportation].append(user_info["commute_output"].total_time)
                 # print(utility_per_mode_last_runs_dict)
@@ -703,6 +729,8 @@ def main(args):
                     user_info["commute_output"].cost)
 
 
+        for key in utility_per_mode_total:
+            utility_per_mode_total[key].append(utility_per_mode_per_run[key])
 
         # Append episode reward to a list and log stats (every given number of episodes)
         ep_rewards.append(episode_reward)
@@ -746,12 +774,40 @@ def main(args):
         all_stats.append(sim.stats)
         # print("vou para o proximo run")
 
+    # plt.plot(bu)
+    # plt.show()
+    # plt.waitforbuttonpress(0)
+
+    # exit()
+
     utility_per_mode_last_runs = {
         "Personal": 0,
         "Friends": 0,
         "STCP": 0,
         "Bicycle": 0
     }
+
+    average_utility_per_mode_all_runs = {
+        "Personal": [],
+        "Friends": [],
+        "STCP": [],
+        "Bicycle": [],
+        "Total": []
+    }
+
+    for key in utility_per_mode_total:
+        for run in utility_per_mode_total[key]:
+            if(len(run) == 0):
+                average_utility_per_mode_all_runs[key].append(0)
+            else:
+                average_utility_per_mode_all_runs[key].append(sum(run)/len(run))
+
+    # print(len(utility_per_mode_total["Personal"][0]))
+    # print("utility per mode total ")
+    # print(utility_per_mode_total)
+    # print("average utility per mode all runs ")
+    # print(average_utility_per_mode_all_runs)
+
 
     for key in utility_per_mode_last_runs_dict.keys():
         if(len(utility_per_mode_last_runs_dict[key]) == 0):
@@ -776,7 +832,7 @@ def main(args):
     #Add distance info to results file
     write_user_distance_interval_info(sim)
     json_object = average_all_results(
-        all_stats, args.plots, sim.users_lost, time_per_mode_last_runs, utility_per_mode_last_runs, cost_per_mode_last_runs_dict, sim.credits_used)
+        all_stats, args.plots, sim.users_lost, time_per_mode_last_runs, utility_per_mode_last_runs, cost_per_mode_last_runs_dict, sim.credits_used, average_utility_per_mode_all_runs)
     json_object['graph'] = nx.readwrite.jit_data(sim.graph.graph)
 
     json.dump(json_object, open(args.save_path, "w+"))

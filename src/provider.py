@@ -54,10 +54,12 @@ class Friends(Provider):
     
     def get_cost(self,time,num_riders):
         # - creditos/min_creditos_para_desconto
-        if(num_riders == 1):
-            return time * Car.speed * friend_cost_2 + fixed_added_cost
-        else:
-            return time * Car.speed * friend_cost_more + fixed_added_cost
+        # if(num_riders == 1):
+        #     return time * Car.speed * friend_cost_2 + fixed_added_cost
+        # else:
+        #     return time * Car.speed * friend_cost_more + fixed_added_cost
+
+        return time * Car.speed * car_cost + fixed_added_cost
     
     def get_time(self, time):
         return time
