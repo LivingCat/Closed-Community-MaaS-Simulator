@@ -22,6 +22,8 @@ class Actor():
 
     static_model_id = 1
 
+    parking_cost = 0
+
     def __init__(self, route: List[int], user: User, provider: Provider):
         self.user = user
         self.base_route = route
@@ -163,7 +165,11 @@ class Actor():
         elif(self.service == "bike"):
             return 0
 
-  
+    def add_parking_cost(self,cost:float):
+        self.parking_cost = cost
+    
+    def get_parking_cost(self,cost:float):
+        return self.get_parking_cost
 
 
 
