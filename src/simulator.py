@@ -70,7 +70,7 @@ class Simulator:
 
         self.distance_dict = dict()
 
-        self.parking_lot = ParkingLot(4,0,0,0)
+        self.parking_lot = ParkingLot(2000,1000,0.3,0.1)
 
         random.seed(seed)
         # plt.ion()
@@ -726,11 +726,11 @@ class Simulator:
                         commute_out = CommuteOutput(
                             actor.cost - discount + actor.get_parking_cost(), actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 else:
-                    new_tuple_t = (actor.user.distance_from_destination, actor.total_travel_time)
-                    new_tuple_c = (actor.user.distance_from_destination, actor.provider.get_cost(
-                        actor.total_travel_time))
-                    self.list_times.append(new_tuple_t)
-                    self.list_cost.append(new_tuple_c)
+                    # new_tuple_t = (actor.user.distance_from_destination, actor.total_travel_time)
+                    # new_tuple_c = (actor.user.distance_from_destination, actor.provider.get_cost(
+                    #     actor.total_travel_time))
+                    # self.list_times.append(new_tuple_t)
+                    # self.list_cost.append(new_tuple_c)
 
                     commute_out = CommuteOutput(
                         actor.cost + actor.get_parking_cost(), actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
@@ -840,11 +840,11 @@ class Simulator:
                             commute_out = CommuteOutput(actor.rider_cost(rider.house_node) - discount, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     else:
-                        new_tuple_t = (rider.distance_from_destination, actor.rider_travel_time(
-                            rider.house_node) + rider.time_spent_waiting)
-                        new_tuple_c = (rider.distance_from_destination, actor.provider.get_cost(actor.rider_travel_time(rider.house_node)))
-                        self.list_times.append(new_tuple_t)
-                        self.list_cost.append(new_tuple_c)
+                        # new_tuple_t = (rider.distance_from_destination, actor.rider_travel_time(
+                        #     rider.house_node) + rider.time_spent_waiting)
+                        # new_tuple_c = (rider.distance_from_destination, actor.provider.get_cost(actor.rider_travel_time(rider.house_node)))
+                        # self.list_times.append(new_tuple_t)
+                        # self.list_cost.append(new_tuple_c)
 
                         commute_out = CommuteOutput(actor.rider_cost(rider.house_node), actor.rider_travel_time(
                             rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
@@ -900,15 +900,15 @@ class Simulator:
         #         print(info["utility"], file=f)
         #         print("\n", file=f)
 
-        with open("cost_and_time.txt", 'a+') as f:
-            print("dist,cost", file=f)
-            for c_tuple in self.list_cost :
-                print("{},{}".format(c_tuple[0], c_tuple[1]), file=f)
+        # with open("cost_and_time.txt", 'a+') as f:
+        #     print("dist,cost", file=f)
+        #     for c_tuple in self.list_cost :
+        #         print("{},{}".format(c_tuple[0], c_tuple[1]), file=f)
 
-            print("\n", file=f)
-            print("dist,time", file=f)
-            for t_tuple in self.list_times:
-                print("{},{}".format(t_tuple[0], t_tuple[1]), file=f)
+        #     print("\n", file=f)
+        #     print("dist,time", file=f)
+        #     for t_tuple in self.list_times:
+        #         print("{},{}".format(t_tuple[0], t_tuple[1]), file=f)
 
         # exit()
         for user_info in final_users:
