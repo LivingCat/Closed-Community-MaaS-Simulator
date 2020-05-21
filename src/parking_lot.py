@@ -9,7 +9,7 @@ class ParkingLot():
 
 
 
-    PARKING_OUTSIDE: float
+    PARKING_OUTSIDE = 0.7
 
     def __init__(self,lot_capacity:int, lot_capacity_shared: int, parking_cost_personal: float, parking_cost_shared: float):
         self.lot_capacity = lot_capacity
