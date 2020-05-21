@@ -168,8 +168,8 @@ class Actor():
     def add_parking_cost(self,cost:float):
         self.parking_cost = cost
     
-    def get_parking_cost(self,cost:float):
-        return self.get_parking_cost
+    def get_parking_cost(self):
+        return self.parking_cost
 
 
 
