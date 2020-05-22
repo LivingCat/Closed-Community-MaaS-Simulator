@@ -10,7 +10,7 @@ from provider import Provider, Personal, Friends, STCP, Bicycle
 from graph import RoadGraph
 from user import User, Personality
 from queue import PriorityQueue
-from utils import softmax_travel_times, compute_average_over_time, MultimodalDistribution, get_time_from_traffic_distribution
+from utils import softmax_travel_times, compute_average_over_time, UnimodalDistribution, get_time_from_traffic_distribution
 from statistics import SimStats
 from DeepRL import DQNAgent
 from pprint import pprint
@@ -31,7 +31,7 @@ import copy
 
 import csv
 
-run_name = "testing_utility"
+run_name = "mudar_unimodal"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -623,14 +623,14 @@ def main(args):
 
     if args.traffic_peaks is None:
         # Needed since "action=append" doesn't overwrite "default=X"
-        args.traffic_peaks = [(8, 3), (18, 3)]
+        args.traffic_peaks = [(7, 3)]
 
     print_args(args)
 
     input_config = read_json_file(args.json_file)
 
-    providers = [Personal(),Friends(),STCP(), Bicycle()]
-    # providers = [Personal(), STCP(), Bicycle()]
+    # providers = [Personal(),Friends(),STCP(), Bicycle()]
+    providers = [Personal(), STCP(), Bicycle()]
     # providers = [Personal()]
     # providers = [Personal(), Bicycle()]
     # providers = [Personal(), STCP()]
@@ -643,7 +643,8 @@ def main(args):
                         actor_constructor),
                     providers=providers,
                     stats_constructor=stats_constructor,
-                    traffic_distribution=MultimodalDistribution(*args.traffic_peaks)
+                    traffic_distribution=UnimodalDistribution(
+                        *args.traffic_peaks)
                     )
     n_inputs = 10
     n_output = len(providers)
