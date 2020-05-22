@@ -1,4 +1,4 @@
-from vehicles_info import Car, Bus, Bike
+from vehicles_info import Car, Bus, Bike, Walk
 from utils import bidict
 
 providers = bidict({
@@ -121,3 +121,26 @@ class Bicycle(Provider):
 
     def get_credits(self):
         return Bike.credits()
+
+
+class Walking(Provider):
+    def __init__(self):
+        super().__init__("Walking", "walk")
+
+    def get_cost(self, time):
+        return 0
+
+    def get_time(self, time):
+        return time
+
+    def get_comfort(self):
+        return 0.5
+
+    def get_emissions(self, time):
+        return Walk.emissions(time)
+
+    def get_awareness(self):
+        return Walk.awareness()
+
+    def get_credits(self):
+        return Walk.credits()

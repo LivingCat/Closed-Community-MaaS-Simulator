@@ -45,3 +45,20 @@ class Bike:
 	@staticmethod
 	def credits():
 		return 4
+
+
+class Walk:
+
+	speed = 20
+
+	@staticmethod
+	def emissions(time):
+		return 0
+
+	@staticmethod
+	def awareness():
+		return 1
+
+	@staticmethod
+	def credits():
+		return 4
