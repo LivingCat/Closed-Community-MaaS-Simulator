@@ -6,7 +6,7 @@ from typing import List
 from queue import PriorityQueue
 from event import CreateActorEvent
 from graph import RoadGraph
-from utils import MultimodalDistribution, get_time_from_traffic_distribution, get_traffic_peaks
+from utils import UnimodalDistribution, get_time_from_traffic_distribution, get_traffic_peaks
 from user import User, Personality, CommuteOutput
 from provider import Provider, STCP, Personal, Friends, Bicycle
 from DeepRL import DQNAgent
@@ -41,7 +41,7 @@ class Simulator:
                  actor_constructor,
                  providers,
                  stats_constructor,
-                 traffic_distribution=MultimodalDistribution.default(),
+                 traffic_distribution=UnimodalDistribution.default(),
                  seed=42):
         self.config = config
         self.input_config = input_config
@@ -70,7 +70,7 @@ class Simulator:
 
         self.distance_dict = dict()
 
-        self.parking_lot = ParkingLot(2000,1000,0.3,0.1)
+        self.parking_lot = ParkingLot(2000,1000,0,0)
 
         random.seed(seed)
         # plt.ion()
@@ -260,6 +260,12 @@ class Simulator:
                         (user.get_user_current_state(), action,
                             self.input_config["users"]["punishment_doesnt_have_mode"], 1, True))
                     agent.train(True, 1)
+                #user wants to walk but lives too far away
+                elif(provider.name == "Walking" and not self.graph.check_has_route(user.house_node,"walk")):
+                    agent.update_replay_memory(
+                        (user.get_user_current_state(), action,
+                            self.input_config["users"]["punishment_doesnt_have_mode"], 1, True))
+                    agent.train(True, 1)
                 else:
                     break
             user.mean_transportation = provider.service
@@ -401,8 +407,6 @@ class Simulator:
             if(has_path and user.has_bike):
                 allowed_users.append(user)
         return allowed_users
-
-
 
     #depois ver porque se
     # users nao tem ninguem para pickup entao nao podem ir de ride sharing
@@ -664,16 +668,23 @@ class Simulator:
     ###################################################################################################
     ##################################################################################################
     #################################################################################
-        self.actors.sort(key=self.sort_actors_fun)
-        for a in self.actors:
-            if (a.service == "car" or a.service == "sharedCar"):
-                parking_cost =  self.parking_lot.park_vehicle(a.service)
-                a.add_parking_cost(parking_cost)
+        # self.actors.sort(key=self.sort_actors_fun)
+        # for a in self.actors:
+        #     if (a.service == "car" or a.service == "sharedCar"):
+        #         parking_cost =  self.parking_lot.park_vehicle(a.service)
+        #         a.add_parking_cost(parking_cost)
 
         #########################################################################################
         ############################################################################################
         #############################################################################################
 
+
+        # print("depois do sort")
+        # for a in self.actors:
+        #     print(a)
+        #     print(a.parking_cost)
+        #     print(a.traveled_nodes[-1][0])
+        # exit()
         final_users = []
 
         # for a in self.actors:
@@ -717,14 +728,14 @@ class Simulator:
                         actor.user.add_credits(actor.provider.get_credits())
                         # print("i gained ", actor.provider.get_credits())
                         commute_out = CommuteOutput(
-                            actor.cost + actor.get_parking_cost(), actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                            actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                     else:
                         #this means the user has the minimum amount of credits and will have a discounted trip
                         # print("gastei creditos!")
                         # print(discount)
                         self.credits_used[actor.service] += discount
                         commute_out = CommuteOutput(
-                            actor.cost - discount + actor.get_parking_cost(), actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                            actor.cost - discount, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 else:
                     # new_tuple_t = (actor.user.distance_from_destination, actor.total_travel_time)
                     # new_tuple_c = (actor.user.distance_from_destination, actor.provider.get_cost(
@@ -733,7 +744,7 @@ class Simulator:
                     # self.list_cost.append(new_tuple_c)
 
                     commute_out = CommuteOutput(
-                        actor.cost + actor.get_parking_cost(), actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                        actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 user_info = dict()
                 user_info["user"] = actor.user
                 user_info["commute_output"] = commute_out
@@ -744,7 +755,7 @@ class Simulator:
                 final_users.append(user_info)
             elif(actor.service == "sharedCar"):
                 #create commute output for the driver
-                travel_cost = actor.sharing_travel_cost() + actor.get_parking_cost()
+                travel_cost = actor.sharing_travel_cost()
                 # print("travel cost: {}".format(travel_cost))
                 travel_cost_portion = travel_cost / (len(actor.user.users_to_pick_up) + 1)
                 # print("travel cost portion: %s", travel_cost_portion)

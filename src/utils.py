@@ -10,40 +10,59 @@ from scipy.integrate import simps, trapz
 import numpy as np
 
 
-class MultimodalDistribution:
-    """
-    Class to represent a multimodal distribution: a distribution
-    composed of several normal distributions with different peaks.
-    """
-    class UnimodalDistribution:
-        def __init__(self, mean, std):
-            self.mean = mean
-            self.std = std
-
-        def __call__(self):
-            return np.random.normal(self.mean, self.std)
-
-        def pdf(self, x: float) -> float:
-            """Get the value of the Probability Density Function (pdf) at the given x value"""
-            return 1/(np.sqrt(2 * np.pi * self.std**2)) *\
-                np.exp(- (x - self.mean)**2 / (2 * self.std**2))
-
+class UnimodalDistribution:
     def __init__(self, *dist_stats):
         self.stats = dist_stats
-        self.distributions = [
-            self.UnimodalDistribution(peak, std) for peak, std in self.stats
-        ]
+        for mean, std in self.stats:
+           self.mean = mean
+           self.std = std
+
+    def __call__(self):
+        return np.random.normal(self.mean, self.std)
 
     def pdf(self, x: float) -> float:
         """Get the value of the Probability Density Function (pdf) at the given x value"""
-        return sum(map(lambda dist: dist.pdf(x), self.distributions))
-
-    def __call__(self):
-        return random.choice(self.distributions)()
+        return 1/(np.sqrt(2 * np.pi * self.std**2)) *\
+            np.exp(- (x - self.mean)**2 / (2 * self.std**2))
 
     @staticmethod
     def default():
-        return MultimodalDistribution([8, 3], [18, 3])
+        return UnimodalDistribution([7, 3])
+
+# class MultimodalDistribution:
+#     """
+#     Class to represent a multimodal distribution: a distribution
+#     composed of several normal distributions with different peaks.
+#     """
+#     class UnimodalDistribution:
+#         def __init__(self, mean, std):
+#             self.mean = mean
+#             self.std = std
+
+#         def __call__(self):
+#             return np.random.normal(self.mean, self.std)
+
+#         def pdf(self, x: float) -> float:
+#             """Get the value of the Probability Density Function (pdf) at the given x value"""
+#             return 1/(np.sqrt(2 * np.pi * self.std**2)) *\
+#                 np.exp(- (x - self.mean)**2 / (2 * self.std**2))
+
+#     def __init__(self, *dist_stats):
+#         self.stats = dist_stats
+#         self.distributions = [
+#             self.UnimodalDistribution(peak, std) for peak, std in self.stats
+#         ]
+
+#     def pdf(self, x: float) -> float:
+#         """Get the value of the Probability Density Function (pdf) at the given x value"""
+#         return sum(map(lambda dist: dist.pdf(x), self.distributions))
+
+#     def __call__(self):
+#         return random.choice(self.distributions)()
+
+#     @staticmethod
+#     def default():
+#         return MultimodalDistribution([8, 3], [18, 3])
 
 
 def congestion_time_estimate(free_flow: float, capacity: float, volume: float, service: str) -> float:
