@@ -111,8 +111,9 @@ class DQNAgent:
 
     def create_model(self):
         model = Sequential()
-        model.add(Dense(8, input_dim=self.input_dim, activation='relu'))
+        model.add(Dense(10, input_dim=self.input_dim, activation='relu'))
         model.add(Dense(8, activation='relu'))
+        model.add(Dense(6, activation='relu'))
         model.add(Dense(self.output_dim, activation='linear'))
         model.compile(loss="mse", optimizer=Adam(
             lr=0.001), metrics=['accuracy'])
