@@ -71,7 +71,7 @@ class Simulator:
 
         self.distance_dict = dict()
 
-        self.parking_lot = ParkingLot(2000,1000,0,0)
+        self.parking_lot = ParkingLot(500,0,0.5,0)
 
         random.seed(seed)
         # plt.ion()
@@ -470,6 +470,7 @@ class Simulator:
         for user in self.users:
             user.available_seats = user.capacity
             user.users_to_pick_up = []
+            user.mean_transportation = ""
 
         self.parking_lot.available_seats_personal = self.parking_lot.lot_capacity - self.parking_lot.lot_capacity_shared
         self.parking_lot.available_seats_shared = self.parking_lot.lot_capacity_shared
@@ -674,11 +675,16 @@ class Simulator:
     ###################################################################################################
     ##################################################################################################
     #################################################################################
-        # self.actors.sort(key=self.sort_actors_fun)
-        # for a in self.actors:
-        #     if (a.service == "car" or a.service == "sharedCar"):
-        #         parking_cost =  self.parking_lot.park_vehicle(a.service)
-        #         a.add_parking_cost(parking_cost)
+        self.actors.sort(key=self.sort_actors_fun)
+        for a in self.actors:
+            if (a.service == "car" or a.service == "sharedCar"):
+                parking_cost =  self.parking_lot.park_vehicle(a.service)
+                a.add_parking_cost(parking_cost)
+                # print(self.parking_lot.available_seats_personal)
+                # print(self.parking_lot.parking_cost_personal)
+                # print(self.parking_lot.available_seats_shared)
+                # print(self.parking_lot.parking_cost_shared)
+                # print("\n")
 
         #########################################################################################
         ############################################################################################
@@ -734,14 +740,14 @@ class Simulator:
                         actor.user.add_credits(actor.provider.get_credits())
                         # print("i gained ", actor.provider.get_credits())
                         commute_out = CommuteOutput(
-                            actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                            actor.cost + actor.get_parking_cost(), actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                     else:
                         #this means the user has the minimum amount of credits and will have a discounted trip
                         # print("gastei creditos!")
                         # print(discount)
                         self.credits_used[actor.service] += discount
                         commute_out = CommuteOutput(
-                            actor.cost - discount, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                            actor.cost - discount + actor.get_parking_cost(), actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 else:
                     # new_tuple_t = (actor.user.distance_from_destination, actor.total_travel_time)
                     # new_tuple_c = (actor.user.distance_from_destination, actor.provider.get_cost(
@@ -750,7 +756,7 @@ class Simulator:
                     # self.list_cost.append(new_tuple_c)
 
                     commute_out = CommuteOutput(
-                        actor.cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                        actor.cost + actor.get_parking_cost(), actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 user_info = dict()
                 user_info["user"] = actor.user
                 user_info["commute_output"] = commute_out
@@ -761,7 +767,7 @@ class Simulator:
                 final_users.append(user_info)
             elif(actor.service == "sharedCar"):
                 #create commute output for the driver
-                travel_cost = actor.sharing_travel_cost()
+                travel_cost = actor.sharing_travel_cost() + actor.get_parking_cost()
                 # print("travel cost: {}".format(travel_cost))
                 travel_cost_portion = travel_cost / (len(actor.user.users_to_pick_up) + 1)
                 # print("travel cost portion: %s", travel_cost_portion)
@@ -964,6 +970,9 @@ class Simulator:
 
         # for act in self.actors:
         #     print(act)
+        #     print(act.service)
+        #     print(act.parking_cost)
+        
 
         # print("users not participating")
         # print(len(users_not_participating))
