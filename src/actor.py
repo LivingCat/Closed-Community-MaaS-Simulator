@@ -162,7 +162,7 @@ class Actor():
                 return 0.144 * num_travelled_nodes
             else:
                 return 0.11 * num_travelled_nodes
-        elif(self.service == "bike"):
+        elif(self.service == "bike" or self.service=="walk"):
             return 0
 
     def add_parking_cost(self,cost:float):

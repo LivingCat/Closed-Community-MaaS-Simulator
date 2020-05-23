@@ -6,7 +6,7 @@ from ipdb import set_trace
 from actor import Actor
 from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs, plot_emissions_development, plot_number_users_development, plot_utility_development
 from simulator import Simulator
-from provider import Provider, Personal, Friends, STCP, Bicycle
+from provider import Provider, Personal, Friends, STCP, Bicycle, Walking
 from graph import RoadGraph
 from user import User, Personality
 from queue import PriorityQueue
@@ -256,7 +256,6 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         "car":[],
         "bus":[],
         "sharedCar":[],
-        "bike":[],
         "total":[]
     }
 
@@ -266,6 +265,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         "bus": [],
         "sharedCar": [],
         "bike": [],
+        "walk": [],
         "total":[]
     }
 
@@ -274,6 +274,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         "bus": [],
         "sharedCar": [],
         "bike": [],
+        "walk": [],
         "total": []
     }
 
@@ -305,7 +306,6 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
             "car": 0,
             "bus" :0,
             "sharedCar": 0,
-            "bike": 0,
             "total": 0
         }
         run_number_users_dict = {
@@ -313,6 +313,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
             "bus" :0,
             "sharedCar": 0,
             "bike": 0,
+            "walk": 0,
             "total":0
         }
 
@@ -321,6 +322,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
             "bus": 0,
             "sharedCar": 0,
             "bike": 0,
+            "walk": 0,
             "total": 0
         }
 
@@ -349,6 +351,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
                 if(actor.user.riders_num > 0):
                     run_emissions_dict[actor.service] += actor.emissions
                     run_emissions_dict["total"] += actor.emissions
+            elif(actor.service == "bike" or actor.service=="walk"):
+                None
             else:
                 run_emissions_dict[actor.service] += actor.emissions
                 run_emissions_dict["total"] += actor.emissions
@@ -363,7 +367,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
                 run_number_users_dict["total"] = run_number_users_dict["total"] + actor.user.riders_num + 1
 
             actor_transp_subsidy = 0.0
-            if(actor.service == "bike"):
+            if(actor.service == "bike" or actor.service == "walk"):
                 continue
             if(actor.service !=  "bus"):
                 actor_transp_subsidy += actor.calculate_transporte_subsidy(actor.user.house_node)
@@ -377,7 +381,6 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         emissions_dict["car"].append(run_emissions_dict["car"])
         emissions_dict["bus"].append(run_emissions_dict["bus"])
         emissions_dict["sharedCar"].append(run_emissions_dict["sharedCar"])
-        emissions_dict["bike"].append(run_emissions_dict["bike"])
         emissions_dict["total"].append(run_emissions_dict["total"])
 
         if(run_emissions_dict["total"] > max_emissions):
@@ -392,6 +395,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         number_users_dict["bus"].append(run_number_users_dict["bus"])
         number_users_dict["sharedCar"].append(run_number_users_dict["sharedCar"])
         number_users_dict["bike"].append(run_number_users_dict["bike"])
+        number_users_dict["walk"].append(run_number_users_dict["walk"])
         number_users_dict["total"].append(run_number_users_dict["total"])
 
         number_actors_dict["car"].append(run_number_actors_dict["car"])
@@ -399,6 +403,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         number_actors_dict["sharedCar"].append(
             run_number_actors_dict["sharedCar"])
         number_actors_dict["bike"].append(run_number_actors_dict["bike"])
+        number_actors_dict["walk"].append(run_number_actors_dict["walk"])
         number_actors_dict["total"].append(run_number_actors_dict["total"])
 
         transport_subsidy_dict["car"].append(run_transport_subsidy_dict["car"])
@@ -630,13 +635,14 @@ def main(args):
     input_config = read_json_file(args.json_file)
 
     # providers = [Personal(),Friends(),STCP(), Bicycle()]
-    providers = [Personal(), STCP(), Bicycle()]
+    # providers = [Personal(), STCP(), Bicycle()]
     # providers = [Personal()]
     # providers = [Personal(), Bicycle()]
     # providers = [Personal(), STCP()]
     # providers = [ Friends()]
     # providers = [STCP()]
     # providers = [Bicycle()]
+    providers = [Personal(), Bicycle(), Walking()]
     sim = Simulator(config=args,
                     input_config = input_config,
                     actor_constructor=partial(
@@ -659,14 +665,16 @@ def main(args):
         "Personal":[],
         "Friends":[],
         "STCP":[],
-        "Bicycle":[]
+        "Bicycle":[],
+        "Walking":[]
     }
 
     utility_per_mode_last_runs_dict = {
         "Personal": [],
         "Friends": [],
         "STCP": [],
-        "Bicycle": []
+        "Bicycle": [],
+        "Walking": []
     }
 
     utility_per_mode_total = {
@@ -674,6 +682,7 @@ def main(args):
         "Friends": [],
         "STCP": [],
         "Bicycle": [],
+        "Walking": [],
         "Total":[]
     }
 
@@ -681,7 +690,8 @@ def main(args):
         "Personal": [],
         "Friends": [],
         "STCP": [],
-        "Bicycle": []
+        "Bicycle": [],
+        "Walking": []
     }
 
     bu = []
@@ -704,6 +714,7 @@ def main(args):
             "Friends": [],
             "STCP": [],
             "Bicycle": [],
+            "Walking": [],
             "Total": []
         }
         
@@ -785,7 +796,8 @@ def main(args):
         "Personal": 0,
         "Friends": 0,
         "STCP": 0,
-        "Bicycle": 0
+        "Bicycle": 0,
+        "Walking":0
     }
 
     average_utility_per_mode_all_runs = {
@@ -793,6 +805,7 @@ def main(args):
         "Friends": [],
         "STCP": [],
         "Bicycle": [],
+        "Walking": [],
         "Total": []
     }
 

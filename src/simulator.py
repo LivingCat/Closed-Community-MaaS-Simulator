@@ -62,6 +62,7 @@ class Simulator:
             "bus": 0,
             "sharedCar": 0,
             "bike": 0,
+            "walk": 0,
             "total": 0
         }
 
@@ -552,6 +553,9 @@ class Simulator:
 
         cyclists = [user for user in self.users if(user.mean_transportation == "bike")]
 
+        walkers = [user for user in self.users if(
+            user.mean_transportation == "walk")]
+
         # #check if people that wish to cycle exist, if so check if its possible, if they have a path
         # cyclists_not_possible = []
         # cyclists = []
@@ -597,6 +601,8 @@ class Simulator:
                         users_turn_actors.append(bus_driver)
             if(service == "bike"):
                 users_turn_actors = users_turn_actors + cyclists
+            if(service == "walk"):
+                users_turn_actors = users_turn_actors + walkers
 
 
         #Make list combining all the users that aren't gonna participate in this run
@@ -718,7 +724,7 @@ class Simulator:
             # Ride Sharing:
             # igual ao transport coletivo
 
-            if(actor.service == "car" or actor.service == "bike"):
+            if(actor.service == "car" or actor.service == "bike" or actor.service == "walk"):
                 if(CREDIT_INCENTIVE):
                     # print("tenho desconto")
                     discount = actor.user.credits_discount(N_CREDITS_DISCOUNT, CREDIT_VALUE)
@@ -952,11 +958,13 @@ class Simulator:
         #     print(user_info["commute_output"])
         #     if(len(user_info["user"].users_to_pick_up) > 0):
         #         print("i was the driver \n")
+        #     print(user_info["user"].mean_transportation)
         #     print("\n")
 
 
         # for act in self.actors:
         #     print(act)
+
         # print("users not participating")
         # print(len(users_not_participating))
         # for user in users_not_participating:

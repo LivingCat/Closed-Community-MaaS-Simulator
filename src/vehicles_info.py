@@ -49,7 +49,7 @@ class Bike:
 
 class Walk:
 
-	speed = 20
+	speed = 5
 
 	@staticmethod
 	def emissions(time):

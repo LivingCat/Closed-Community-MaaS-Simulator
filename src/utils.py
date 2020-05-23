@@ -71,6 +71,8 @@ def congestion_time_estimate(free_flow: float, capacity: float, volume: float, s
 
     if(service == "bike"):
         free_flow = 0.05
+    elif(service == "walk"):
+        free_flow = 0.2
     else:
         free_flow = 0.02
     return free_flow * (1 + 0.15 * math.pow((volume/capacity), 4))
