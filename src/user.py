@@ -48,6 +48,7 @@ class User:
     users_to_pick_up: List['User']
     route_name: str
     route: List[int]
+    schedule: {}
     capacity: int
     time_spent_waiting: float
     has_bike: bool

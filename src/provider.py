@@ -99,6 +99,9 @@ class STCP(Provider):
     def get_credits(self):
         return Bus.credits()
 
+    def get_speed(self):
+        return Bus.speed
+
 
 class Bicycle(Provider):
     def __init__(self):

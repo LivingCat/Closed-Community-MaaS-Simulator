@@ -20,6 +20,7 @@ import scipy
 from parking_lot import ParkingLot
 
 
+
 DEFAULT_VALUE_NUM = -100.0
 DEFAULT_VALUE_STRING = ""
 MIN_HOUSE_DISTANCE = 1
@@ -71,7 +72,7 @@ class Simulator:
 
         self.distance_dict = dict()
 
-        self.parking_lot = ParkingLot(500,0,0.5,0)
+        self.parking_lot = ParkingLot(400,200,0,0)
 
         random.seed(seed)
         # plt.ion()
@@ -373,32 +374,67 @@ class Simulator:
         wait_time = MAX_WAITING_TIME * rider.personality.willingness_to_wait
         return (abs(driver.start_time - rider.start_time) <= wait_time)
 
+    #criar maneira de saber quando autiocarros talvez cheguem ao no
+    #matching ser por cada user tentar dar match ao autocarro
+
+
 
     def public_transport_matching(self, users: List['User'], bus_users: List['User']):
         
         users_want_public_transport = users
+
+        users_not_matched = []
+
         bus_drivers = bus_users
         
         bus_drivers.sort(key=self.sort_bus_func)
-        for driver in bus_drivers:
-            # if(driver.available_seats == 0):
-            #     continue
-            #find users which the house node belongs to the bus route
-            pickup = []
-            possible_pickup = []
-            for user in users_want_public_transport:
-                # and in_time_slot(user, driver)
-                if(user.house_node in driver.route and self.in_time_slot(user,driver)): 
-                    possible_pickup.append(user)
 
-            for user in possible_pickup:
-                if(driver.available_seats > 0):
-                    pickup.append(user)
-                    driver.available_seats -= 1
+        for user in users_want_public_transport:
+            #get buses that pass by the user's house
+            poss_buses = [bus for bus in bus_users if(user.house_node in bus.schedule)]
+            #there are no buses that pass through his house
+            if(len(poss_buses) == 0):
+                users_not_matched.append(user)
+                continue
+            else:
+                #there are buses that pass through his house
+                min_time = 1000 #big number
+                min_time_index = -1
+                for i,bus in enumerate(poss_buses):
+                    wait_time = abs(bus.schedule[user.house_node] - user.start_time)
+                    #if the bus is within the time window
+                    if(wait_time <= (MAX_WAITING_TIME * user.personality.willingness_to_wait)):
+                        #and the bus has space for the user
+                        if(bus.available_seats > 0):
+                            min_time_index = i
+                            min_time = wait_time
+                #if he was matched
+                if(min_time_index != -1):
+                    poss_buses[min_time_index].users_to_pick_up.append(user)
+                    poss_buses[min_time_index].available_seats -= 1
+                else:
+                    users_not_matched.append(user)
+        return users_not_matched
+
+        # for driver in bus_drivers:
+        #     # if(driver.available_seats == 0):
+        #     #     continue
+        #     #find users which the house node belongs to the bus route
+        #     pickup = []
+        #     possible_pickup = []
+        #     for user in users_want_public_transport:
+        #         # and in_time_slot(user, driver)
+        #         if(user.house_node in driver.route and self.in_time_slot(user,driver)): 
+        #             possible_pickup.append(user)
+
+        #     for user in possible_pickup:
+        #         if(driver.available_seats > 0):
+        #             pickup.append(user)
+        #             driver.available_seats -= 1
                     
-            driver.users_to_pick_up = pickup
-            users_want_public_transport = list(set(users_want_public_transport) - set(pickup))
-        return users_want_public_transport
+        #     driver.users_to_pick_up = pickup
+        #     users_want_public_transport = list(set(users_want_public_transport) - set(pickup))
+        # return users_want_public_transport
 
     def can_cycle(self,users: List['User']):
         allowed_users = []
@@ -424,15 +460,15 @@ class Simulator:
         #Get routes from input file
         existing_routes = self.input_config["buses"]
 
-        #0.5
-        while value < 24:
+        #0.5 #16
+        while value < 16:
             bus_times.append(value)
 
             #check if the time is between any of peaks +- standard deviation
             for peak,std in peaks:
                 if( (peak - std) <= value < (peak + std) ):
-                    #If in peak time the bus comes every 15 minutes
-                    value += 0.25
+                    #If in peak time the bus comes every 10 minutes
+                    value += 10/60
                     peak_time = True
             #If not in peak time the bus comes every 30 minutes
             if(peak_time == False):
@@ -481,6 +517,19 @@ class Simulator:
             agent.update_replay_memory((user.get_user_current_state(), action_index, self.input_config["users"]["unviable_choice"], 1, True))
         # agent.train(True, 1)
 
+    def create_buses_schedule(self,buses: List[User]):
+        #go through all the buses and create their schedule
+        for bus in buses:
+            schedule = {}
+            for i,node in enumerate(bus.route):
+                schedule[node] = bus.start_time + i/STCP().get_speed()
+            bus.schedule = schedule
+
+    def assess_can_cycle_var(self,user:User):
+        return (user.has_bike and self.graph.check_has_route(user.house_node, "bike"))
+
+    def assess_can_walk_var(self,user:User):
+        return (self.graph.check_has_route(user.house_node, "walk"))
 
     def run(self, agent: DQNAgent):
         # Empty actors list, in case of consecutive calls to this method
@@ -491,8 +540,6 @@ class Simulator:
         # for edge in self.graph.graph.edges:
         #     print(edge)
 
-        # exit()
-
         if(self.first_run):
             print(" first run")
             self.users = self.create_users()
@@ -501,13 +548,14 @@ class Simulator:
             #     print(user.budget)
             #     print(user.personality.willingness_to_pay)
             #     print("\n")
-            # exit()
+          
             #Create distance dictionary
             self.create_dist_dict()
             #Assign house nodes to each user according to graph structure
             self.add_house_nodes()
             self.create_friends()
             self.bus_users = self.create_buses()
+            self.create_buses_schedule(self.bus_users)            
         else:
             # self.users = self.users[1:]
             self.reset()
@@ -600,6 +648,27 @@ class Simulator:
                 for bus_driver in self.bus_users:
                     if(len(bus_driver.users_to_pick_up) > 0):
                         users_turn_actors.append(bus_driver)
+
+
+                # print("people wanted public transport ", len(users_public_transport))
+                # print("people unmatched ", len(public_transport_unmatched))
+                
+                # for actor in users_turn_actors:
+                #     print(actor.users_to_pick_up)
+                #     print(actor.start_time)
+                #     print(actor.schedule)
+                #     print("pick up ")
+                #     for rider in actor.users_to_pick_up:
+                #         print(rider.start_time)
+                #         print(rider.house_node)
+                #         print(rider.personality.willingness_to_wait)
+
+                # print("unmatched")
+                # for unmatched in public_transport_unmatched:
+                #     print(unmatched.start_time)
+                #     print(rider.house_node)
+                #     print(unmatched.personality.willingness_to_wait)
+
             if(service == "bike"):
                 users_turn_actors = users_turn_actors + cyclists
             if(service == "walk"):

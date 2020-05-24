@@ -27,7 +27,7 @@ class UnimodalDistribution:
 
     @staticmethod
     def default():
-        return UnimodalDistribution([7, 3])
+        return UnimodalDistribution([8, 2])
 
 # class MultimodalDistribution:
 #     """
