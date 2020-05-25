@@ -31,7 +31,7 @@ import copy
 
 import csv
 
-run_name = "mudar_unimodal"
+run_name = "testing_bus_emissions"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -183,7 +183,12 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
 
     print("resultados iniciais")
 
+    contador = 1
+
     for s in all_s:
+        print(contador)
+        print("\n")
+        contador += 1
         for key in s.actors_atis.keys():
             s.actors_atis[key] = s.actors_atis[key][1:]
             for tuple in s.actors_atis[key]:
@@ -194,6 +199,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
 
     actors_flow_acc = defaultdict(lambda: [(0.0, 0)])
 
+    print("actors flow ")
     for key in actors_flow.keys():
         for actor_tuple in actors_flow[key]:
             actors_flow_acc[key].append([actor_tuple[0],
@@ -349,8 +355,11 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
             if(actor.service == "bus"):
                 #if its serving users
                 if(actor.user.riders_num > 0):
-                    run_emissions_dict[actor.service] += actor.emissions
-                    run_emissions_dict["total"] += actor.emissions
+                    for house_stop in actor.user.house_nodes_riders:
+                        #see the time the bus reached the user's house
+                        run_emissions_dict[actor.service] += actor.emissions_bus(actor.rider_travel_time(house_stop))
+                        run_emissions_dict["total"] += actor.emissions_bus(
+                            actor.rider_travel_time(house_stop))
             elif(actor.service == "bike" or actor.service=="walk"):
                 None
             else:
@@ -628,7 +637,7 @@ def main(args):
 
     if args.traffic_peaks is None:
         # Needed since "action=append" doesn't overwrite "default=X"
-        args.traffic_peaks = [(7, 3)]
+        args.traffic_peaks = [(8, 2)]
 
     print_args(args)
 
@@ -638,11 +647,12 @@ def main(args):
     # providers = [Personal(), STCP(), Bicycle()]
     # providers = [Personal()]
     # providers = [Personal(), Bicycle()]
-    # providers = [Personal(), STCP()]
+    providers = [Personal(), STCP()]
     # providers = [ Friends()]
     # providers = [STCP()]
     # providers = [Bicycle()]
-    providers = [Personal(), Bicycle(), Walking()]
+    # providers = [Personal(), Friends(), STCP(), Bicycle(), Walking()]
+
     sim = Simulator(config=args,
                     input_config = input_config,
                     actor_constructor=partial(
@@ -652,7 +662,7 @@ def main(args):
                     traffic_distribution=UnimodalDistribution(
                         *args.traffic_peaks)
                     )
-    n_inputs = 10
+    n_inputs = 12
     n_output = len(providers)
     agent = DQNAgent(n_inputs, n_output)
     # gather stats from all runs

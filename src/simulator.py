@@ -404,10 +404,12 @@ class Simulator:
                     wait_time = abs(bus.schedule[user.house_node] - user.start_time)
                     #if the bus is within the time window
                     if(wait_time <= (MAX_WAITING_TIME * user.personality.willingness_to_wait)):
-                        #and the bus has space for the user
-                        if(bus.available_seats > 0):
-                            min_time_index = i
-                            min_time = wait_time
+                        #if this bus get to the user faster
+                        if(wait_time < min_time):
+                            #and the bus has space for the user
+                            if(bus.available_seats > 0):
+                                min_time_index = i
+                                min_time = wait_time
                 #if he was matched
                 if(min_time_index != -1):
                     poss_buses[min_time_index].users_to_pick_up.append(user)
@@ -531,6 +533,13 @@ class Simulator:
     def assess_can_walk_var(self,user:User):
         return (self.graph.check_has_route(user.house_node, "walk"))
 
+    def assess_cycle_walk(self,users: List[User]):
+        for user in self.users:
+            can_cycle = self.assess_can_cycle_var(user)
+            can_walk = self.assess_can_walk_var(user)
+            user.can_cycle = can_cycle
+            user.can_walk= can_walk
+
     def run(self, agent: DQNAgent):
         # Empty actors list, in case of consecutive calls to this method
         self.actors = []
@@ -553,6 +562,7 @@ class Simulator:
             self.create_dist_dict()
             #Assign house nodes to each user according to graph structure
             self.add_house_nodes()
+            self.assess_cycle_walk(self.users)
             self.create_friends()
             self.bus_users = self.create_buses()
             self.create_buses_schedule(self.bus_users)            
@@ -966,6 +976,10 @@ class Simulator:
         #             print("\n", file=f)
 
         # for user_info in final_users:
+        #     print("fui de ", user_info["commute_output"].mean_transportation)
+        #     print("vivia no nó ", user_info["user"].house_node)
+        #     print("custo ", user_info["commute_output"].cost)
+        # exit()
         #     with open("utility_teste.txt", 'a+') as f:
         #         print("eu sou o user: ", user_info["user"], "\n", file=f)
         #         print("este foi o meu custo: ", user_info["commute_output"].cost, "\n", file=f)
@@ -1002,6 +1016,16 @@ class Simulator:
         #     for t_tuple in self.list_times:
         #         print("{},{}".format(t_tuple[0], t_tuple[1]), file=f)
 
+        # exit()
+
+        # for user_info in final_users:
+        #     current_state = user_info["user"].get_user_current_state()
+        #     print(user_info["user"].mean_transportation)
+        #     print(user_info["user"].house_node)
+        #     print(user_info["user"].can_cycle)
+        #     print(user_info["user"].can_walk)
+        #     print(user_info["user"].has_bike)
+        #     print(current_state)
         # exit()
         for user_info in final_users:
             current_state = user_info["user"].get_user_current_state()

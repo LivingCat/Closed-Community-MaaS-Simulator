@@ -150,6 +150,10 @@ class Actor():
     def emissions(self):
         return self.provider.get_emissions(self.total_travel_time)
 
+    def emissions_bus(self,tt:float):
+        return self.provider.get_emissions(tt)
+
+
     def calculate_transporte_subsidy(self, num_travelled_nodes: int):
         # traveled nodes has all the nodes the actor travelled through, minus 1 gives us the number of edges he used and consequently the km travelled
         if(self.service == "car"):

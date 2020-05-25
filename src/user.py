@@ -54,6 +54,8 @@ class User:
     has_bike: bool
     credits_own: int
     credits_spent: int
+    can_cycle: bool
+    can_walk: bool
 
 
     def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int, distance_from_destination: int, has_bike: bool):
@@ -74,6 +76,9 @@ class User:
        self.has_bike = has_bike
        self.credits_own = 0
        self.credits_spent = 0
+
+       self.can_cycle = False
+       self.can_walk = False
 
     @staticmethod
     def default():
@@ -130,7 +135,7 @@ class User:
 
     def get_user_current_state(self):
         personality = self.personality
-        return [self.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference, int(personality.has_private), int(self.has_bike), self.credits_own, self.distance_from_destination, self.capacity ]
+        return [self.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference, int(personality.has_private), int(self.has_bike), self.credits_own, self.distance_from_destination, self.capacity, self.can_cycle, self.can_walk]
     
     def add_credits(self,credits_gained:int):
         self.credits_own += credits_gained
@@ -152,26 +157,4 @@ class User:
 
     def __str__(self):
         return "I live here %s, cluster %s, have private %s, have bike %s , credits i own %s, credits i spent %s, mode chosen %s \n" % (self.house_node, self.cluster, self.personality.has_private, self.has_bike, self.credits_own, self.credits_spent,self.mean_transportation)
-    def pprint(self):
-        # personality = self.personality
-        # print("cluster: {} \n". format(self.cluster))
-        # print("course: {} \n". format(self.course))
-        # print("grade: {} \n". format(self.grade))
-        # print("salary: {} \n". format(self.salary))
-        # print("budget: {} \n". format(self.budget))
-        # print("willingness to pay: {} \n". format(personality.willingness_to_pay))
-        # print("willingness to wait: {} \n". format(personality.willingness_to_wait))
-        # print("awareness: {} \n". format(personality.awareness))
-        # print("comfort preference: {} \n". format(personality.comfort_preference))
-        # print("friendliness: {} \n". format(personality.friendliness))
-        # print("suscetible: {} \n". format(personality.suscetible))
-        # print("transport: {} \n". format(personality.transport))
-        # print("urban: {} \n". format(personality.urban))
-        # print("willing: {} \n". format(personality.willing))
-        # print("friends: {} \n".format(self.friends))
-        # print("has private: {} \n". format(personality.has_private))
-        # print("available seats: {} \n".format(self.available_seats))
-        # print("distance: {} \n".format(self.distance_from_destination))
-        # print("house node: {} \n".format(self.house_node))
-        return True
 

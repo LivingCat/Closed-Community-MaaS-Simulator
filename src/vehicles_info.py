@@ -1,9 +1,10 @@
 class Car:
 	speed = 50
+	car_em = 139
 
 	@staticmethod
 	def	emissions(time):
-		return time * (139 * Car.speed)
+		return time * (Car.car_em * Car.speed)
 
 	@staticmethod
 	def awareness():
@@ -16,10 +17,11 @@ class Car:
 class Bus:
 
 	speed = 50
+	pass_em = 1250/20.0
 
 	@staticmethod
 	def emissions(time):
-		return time * (1250 * Bus.speed)
+		return time * (Bus.pass_em * Bus.speed)
 	
 	@staticmethod
 	def awareness():
