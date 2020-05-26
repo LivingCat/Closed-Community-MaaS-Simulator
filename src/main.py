@@ -647,11 +647,11 @@ def main(args):
     # providers = [Personal(), STCP(), Bicycle()]
     # providers = [Personal()]
     # providers = [Personal(), Bicycle()]
-    providers = [Personal(), STCP()]
+    # providers = [Personal(), STCP()]
     # providers = [ Friends()]
     # providers = [STCP()]
     # providers = [Bicycle()]
-    # providers = [Personal(), Friends(), STCP(), Bicycle(), Walking()]
+    providers = [Personal(), Friends(), STCP(), Bicycle(), Walking()]
 
     sim = Simulator(config=args,
                     input_config = input_config,
@@ -818,13 +818,20 @@ def main(args):
         "Walking": [],
         "Total": []
     }
+    just_total_utility = {
+        "total":[],
+        "mean":[]
+    }
 
     for key in utility_per_mode_total:
         for run in utility_per_mode_total[key]:
             if(len(run) == 0):
                 average_utility_per_mode_all_runs[key].append(0)
+                just_total_utility["total"].append(sum(run))
             else:
                 average_utility_per_mode_all_runs[key].append(sum(run)/len(run))
+                just_total_utility["total"].append(sum(run))
+                just_total_utility["mean"].append(sum(run)/len(run))
 
     # print(len(utility_per_mode_total["Personal"][0]))
     # print("utility per mode total ")
@@ -860,6 +867,13 @@ def main(args):
     json_object['graph'] = nx.readwrite.jit_data(sim.graph.graph)
 
     json.dump(json_object, open(args.save_path, "w+"))
+
+
+    with open("utility_test.txt",'a+') as f:
+        # write_dict_file(utility_per_mode_last_runs_dict,f)
+        write_dict_file(average_utility_per_mode_all_runs,f)
+        print("just total \n",file=f)
+        write_dict_file(just_total_utility,f)
 
     # print("all stats")
     # for i in all_stats:
