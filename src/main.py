@@ -31,7 +31,7 @@ import copy
 
 import csv
 
-run_name = "testing_bus_emissions"
+run_name = "normal_800_users_4000_free"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -590,14 +590,14 @@ def read_json_file(file: str):
 
 def get_user_current_state(user: User):
     personality = user.personality
-    return [user.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, int(personality.has_private)]
+    return [user.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, int(user.has_private)]
 
 
-def write_user_info(actors: List[Actor], run: int, file:str):
+def write_user_info(actors: List[Actor], run: int, file:str, final_users: List):
     run_header = ["Run"]
     run_row = [run]
     fields = ["Course", "Grade", "Cluster", "Willingness to pay", "Willingness to wait", "Awareness", "Comfort preference",
-              "has private", "has bike","Friendliness", "Suscetible", "Transport", "Urban", "Willing", "Distance from Destination", "House Node", "Car Capacity", "Users he picked up","Transportation"]
+              "has private", "has bike","Friendliness", "Suscetible", "Transport", "Urban", "Willing", "Distance from Destination", "House Node", "Car Capacity", "Users he picked up","Utility","Transportation"]
 
     # writing to csv file
     
@@ -613,16 +613,24 @@ def write_user_info(actors: List[Actor], run: int, file:str):
         for act in actors:
             if(act.service != "bus"):
                 us = act.user
+                for u in final_users:
+                    if (u["user"] == us):
+                        util = u["utility"]
+                        break
                 personality = us.personality
                 info = [us.course, us.grade, us.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
-                    personality.has_private, us.has_bike,personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
-                        us.distance_from_destination, us.house_node, us.capacity, len(us.users_to_pick_up), us.provider.service]
+                    us.has_private, us.has_bike,personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
+                        us.distance_from_destination, us.house_node, us.capacity, len(us.users_to_pick_up), util, us.provider.service]
                 csvwriter.writerow(info)
             for rider in act.user.users_to_pick_up:
                 personality = rider.personality
+                for u in final_users:
+                    if (u["user"] == rider):
+                        util = u["utility"]
+                        break
                 info = [rider.course, rider.grade, rider.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
-                        personality.has_private, rider.has_bike, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
-                        rider.distance_from_destination, rider.house_node, rider.capacity, len(rider.users_to_pick_up), rider.provider.service]
+                        rider.has_private, rider.has_bike, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
+                        rider.distance_from_destination, rider.house_node, rider.capacity, len(rider.users_to_pick_up), util,rider.provider.service]
                 csvwriter.writerow(info)
       
 
@@ -634,6 +642,8 @@ def main(args):
     AGGREGATE_STATS_EVERY = 50  # episodes
     MIN_REWARD=1
     MODEL_NAME = 'Maas_simulator'
+
+    RUN_ENSEMBLE = False
 
     if args.traffic_peaks is None:
         # Needed since "action=append" doesn't overwrite "default=X"
@@ -659,12 +669,19 @@ def main(args):
                         actor_constructor),
                     providers=providers,
                     stats_constructor=stats_constructor,
+                    run_ensamble=RUN_ENSEMBLE,
                     traffic_distribution=UnimodalDistribution(
                         *args.traffic_peaks)
                     )
     n_inputs = 12
     n_output = len(providers)
-    agent = DQNAgent(n_inputs, n_output)
+    n_agent = 0
+
+    if(RUN_ENSEMBLE):
+        agents = [DQNAgent(n_inputs, n_output, n_agent), DQNAgent(n_inputs, n_output, (n_agent+1)), DQNAgent(
+            n_inputs, n_output, (n_agent+2)), DQNAgent(n_inputs, n_output, (n_agent+3))]
+    else:
+        agent = DQNAgent(n_inputs, n_output,n_agent)
     # gather stats from all runs
     all_stats = []
 
@@ -710,13 +727,22 @@ def main(args):
         # print(" episode")
         # print(episode)
         # Update tensorboard step every episode
-        agent.tensorboard.step = episode
+        if(RUN_ENSEMBLE):
+            for agent in agents:
+                agent.tensorboard.step = episode
+        else:
+            agent.tensorboard.step = episode
+
         if(episode == 0):
             sim.first_run = True
         else:
             sim.first_run = False
+
         #runs the simulation
-        final_users = sim.run(agent)
+        if(RUN_ENSEMBLE):
+            final_users = sim.run_ensemble(agents)
+        else:
+            final_users = sim.run(agent)
         # final_users = sim.run_descriptive()
 
         utility_per_mode_per_run = {
@@ -764,27 +790,51 @@ def main(args):
                 ep_rewards[-AGGREGATE_STATS_EVERY:])/len(ep_rewards[-AGGREGATE_STATS_EVERY:])
             min_reward = min(ep_rewards[-AGGREGATE_STATS_EVERY:])
             max_reward = max(ep_rewards[-AGGREGATE_STATS_EVERY:])
-            agent.tensorboard.update_stats(
-                reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=agent.epsilon)
+
+            if(RUN_ENSEMBLE):
+                for agent in agents:
+                    agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=agent.epsilon)
+                # agents[0].tensorboard.update_stats(
+                    #  reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=agent.epsilon)
+            else:
+                agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=agent.epsilon)
 
             # Save model, but only when min reward is greater or equal a set value
             if min_reward >= MIN_REWARD:
-                agent.model.save(
-                    'models/{}__{}.model'.format(
-                        MODEL_NAME, int(time.time())
-                    ))
+                if(RUN_ENSEMBLE):
+                    for agent in agents:
+                        agent.model.save(
+                            'models/{}__{}.model'.format(
+                                MODEL_NAME, int(time.time())
+                            ))
+                    # agents[0].model.save(
+                    #      'models/{}__{}.model'.format(
+                    #          MODEL_NAME, int(time.time())
+                    #      ))
+                else:
+                    agent.model.save(
+                        'models/{}__{}.model'.format(
+                            MODEL_NAME, int(time.time())
+                        ))
 
         # print("sai do if")
         # current_state, action, reward, new_current_state, done
-        agent.update_epsilon()
+        if(RUN_ENSEMBLE):
+            for agent in agents:
+                agent.update_epsilon()
+        else:
+            agent.update_epsilon()
+
+        # agent.update_epsilon()
         # print("update epsilon")
         
         # a = copy.deepcopy(sim.actors)
         copy_actors = []
 
+
         save_user_file = run_name + "_users_info.csv"
         if(episode == args.n_runs - 1):
-            write_user_info(sim.actors, episode,save_user_file)
+            write_user_info(sim.actors, episode,save_user_file, final_users)
 
         for actor in sim.actors:
             new_actor = actor.my_copy()

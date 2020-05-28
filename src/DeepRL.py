@@ -18,7 +18,8 @@ REPLAY_MEMORY_SIZE = 50000  # How many last steps to keep for model training
 MIN_REPLAY_MEMORY_SIZE = 1000
 MINIBATCH_SIZE = 64  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
-MODEL_NAME = '2x256'
+# MODEL_NAME = '2x256'
+MODEL_NAME = 'normal'
 MIN_REWARD = -200  # For model save
 MEMORY_FRACTION = 0.20
 
@@ -88,11 +89,13 @@ class ModifiedTensorBoard(TensorBoard):
 
 # Agent class
 class DQNAgent:
-    def __init__(self, input_dim: int, output_dim: int):
+    def __init__(self, input_dim: int, output_dim: int, number: int):
         self.input_dim = input_dim
         self.output_dim = output_dim
         # Main model
         self.model = self.create_model()
+
+        self.number = number
 
         # Target network
         self.target_model = self.create_model()
@@ -103,7 +106,7 @@ class DQNAgent:
 
         # Custom tensorboard object
         self.tensorboard = ModifiedTensorBoard(
-            log_dir="logs/{}-{}".format(MODEL_NAME, int(time.time())))
+            log_dir="logs/{}-{}-{}-800-2".format(MODEL_NAME, int(time.time()), self.number))
 
         # Used to count when to update target network with main network's weights
         self.target_update_counter = 0
