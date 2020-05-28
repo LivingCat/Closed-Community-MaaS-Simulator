@@ -3,12 +3,11 @@ from typing import List
 class Personality:
     """Represents the user's preferences of the system"""
 
-    def __init__(self, willingness_to_pay, willingness_to_wait, awareness, comfort_preference, has_private, friendliness, suscetible, transport, urban, willing, mean_transportation=""):
+    def __init__(self, willingness_to_pay, willingness_to_wait, awareness, comfort_preference, friendliness, suscetible, transport, urban, willing, mean_transportation=""):
         self.willingness_to_pay = willingness_to_pay
         self.willingness_to_wait = willingness_to_wait
         self.awareness = awareness
         self.comfort_preference = comfort_preference
-        self.has_private = has_private
         self.mean_transportation = mean_transportation
 
         #Factors
@@ -58,7 +57,7 @@ class User:
     can_walk: bool
 
 
-    def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int, distance_from_destination: int, has_bike: bool):
+    def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int, distance_from_destination: int, has_bike: bool, has_private: bool):
        self.personality = personality
        self.start_time = start_time
        self.cluster = cluster
@@ -74,6 +73,7 @@ class User:
        self.users_to_pick_up = []
        self.time_spent_waiting = 0.0
        self.has_bike = has_bike
+       self.has_private = has_private
        self.credits_own = 0
        self.credits_spent = 0
 
@@ -82,7 +82,7 @@ class User:
 
     @staticmethod
     def default():
-        return User(Personality(0,0,0,0,0,0,0,0,0,0), 0.0, "","","",0.0,0.0,0,0,False)
+        return User(Personality(0,0,0,0,0,0,0,0,0), 0.0, "","","",0.0,0.0,0,0,False,False)
 
     def my_copy(self, service: str):
         new_user = User.default()
@@ -135,7 +135,7 @@ class User:
 
     def get_user_current_state(self):
         personality = self.personality
-        return [self.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference, int(personality.has_private), int(self.has_bike), self.credits_own, self.distance_from_destination, self.capacity, self.can_cycle, self.can_walk]
+        return [self.start_time, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference, int(self.has_private), int(self.has_bike), self.credits_own, self.distance_from_destination, self.capacity, self.can_cycle, self.can_walk]
     
     def add_credits(self,credits_gained:int):
         self.credits_own += credits_gained
@@ -156,5 +156,5 @@ class User:
         
 
     def __str__(self):
-        return "I live here %s, cluster %s, have private %s, have bike %s , credits i own %s, credits i spent %s, mode chosen %s \n" % (self.house_node, self.cluster, self.personality.has_private, self.has_bike, self.credits_own, self.credits_spent,self.mean_transportation)
+        return "I live here %s, cluster %s, have private %s, have bike %s , credits i own %s, credits i spent %s, mode chosen %s \n" % (self.house_node, self.cluster, self.has_private, self.has_bike, self.credits_own, self.credits_spent,self.mean_transportation)
 
