@@ -638,6 +638,8 @@ def time_if_car(user:User):
     return user.distance_from_destination/Personal().get_speed()
 
 
+def cost_if_car(user:User, time_car: float):
+    return ( Personal().get_cost(time_car) - 0.36*user.distance_from_destination )
     
 def calculate_qos(actors: List[Actor], users_info: List):
     average_qos_time_final_run = {
@@ -645,34 +647,41 @@ def calculate_qos(actors: List[Actor], users_info: List):
         "Friends": [],
         "STCP": [],
         "Bicycle": [],
-        "Walking": [],
-        "Total": []
+        "Walking": []
     }
 
-    # average_qos_utility_final_run = {
-    #     "Personal": [],
-    #     "Friends": [],
-    #     "STCP": [],
-    #     "Bicycle": [],
-    #     "Walking": [],
-    #     "Total": []
-    # }
-
-    
-
-    print(average_qos_time_final_run)
-    # print(average_qos_utility_final_run)
+    average_qos_cost_final_run = {
+        "Personal": [],
+        "Friends": [],
+        "STCP": [],
+        "Bicycle": [],
+        "Walking": []
+    }
 
     for user_info in users_info:
         time_car = time_if_car(user_info["user"]) 
         # utility_if_car = 
         delay = - ((user_info["commute_output"].total_time -
                     time_car)/user_info["commute_output"].total_time)
+
+        cost_car = cost_if_car(user_info["user"], time_car)
+        if(user_info["commute_output"].cost == 0):
+            c = 0.000000001
+            dif_cost = - ((c -cost_car)/c)
+        else:
+            dif_cost = - ((user_info["commute_output"].cost -
+                        cost_car)/user_info["commute_output"].cost)
         # print("user time ", user_info["commute_output"].total_time)
         # print("time car ", time_car)
         # print("delay ", delay)
+        # print("user cost ", user_info["commute_output"].cost)
+        # print("user start time ", user_info["user"].start_time)
+        # print("user time spent waiting ", user_info["user"].time_spent_waiting)
+        # print("dif cost ", dif_cost)
         # print("\n")
         average_qos_time_final_run[user_info["user"].provider.name].append(delay)
+        average_qos_cost_final_run[user_info["user"].provider.name].append(
+            dif_cost)
 
     for service in average_qos_time_final_run.keys():
         if(len(average_qos_time_final_run[service]) == 0):
@@ -680,7 +689,13 @@ def calculate_qos(actors: List[Actor], users_info: List):
         else:
             average_qos_time_final_run[service] = sum(average_qos_time_final_run[service])/len(average_qos_time_final_run[service])
 
-    return average_qos_time_final_run     
+        if(len(average_qos_cost_final_run[service]) == 0):
+            average_qos_cost_final_run[service] = 0
+        else:
+            average_qos_cost_final_run[service] = sum(
+                average_qos_cost_final_run[service])/len(average_qos_cost_final_run[service])
+
+    return (average_qos_time_final_run, average_qos_cost_final_run)
 
 
 
@@ -907,18 +922,13 @@ def main(args):
 
     # exit()
 
-    print("fora")
-    print("actor fora ", sim.actors)
-    print("final users fora", final_users)
-    for info in final_users:
-        print(info["user"])
+    # print("fora")
+    # print("actor fora ", sim.actors)
+    # print("final users fora", final_users)
+    # for info in final_users:
+    #     print(info["user"])
     
-
-    average_qos_time_final_run  = calculate_qos(sim.actors, final_users)
-
-    print(average_qos_time_final_run)
-    exit()
-
+    average_qos_time_final_run, average_qos_cost_final_run = calculate_qos(sim.actors, final_users)
 
     utility_per_mode_last_runs = {
         "Personal": 0,
@@ -987,13 +997,19 @@ def main(args):
     json.dump(json_object, open(args.save_path, "w+"))
 
 
-    with open("utility_test.txt",'a+') as f:
-        print("qos last run \n", file=f)
-        write_dict_file(average_qos_time_final_run,f)
-        # write_dict_file(utility_per_mode_last_runs_dict,f)
-        write_dict_file(average_utility_per_mode_all_runs,f)
-        print("just total \n",file=f)
-        write_dict_file(just_total_utility,f)
+    # with open("Utility.txt",'a+') as f:
+    #     # write_dict_file(utility_per_mode_last_runs_dict,f)
+    #     write_dict_file(average_utility_per_mode_all_runs,f)
+    #     print("just total \n",file=f)
+    #     write_dict_file(just_total_utility,f)
+
+    with open("QOS.txt", 'a+') as f:
+        print("Quality of Service - Time last run \n", file=f)
+        write_dict_file(average_qos_time_final_run, f)
+        print("Quality of Service - Cost last run \n",file=f)
+        write_dict_file(average_qos_cost_final_run, f)
+    
+
 
     # print("all stats")
     # for i in all_stats:
