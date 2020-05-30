@@ -632,7 +632,57 @@ def write_user_info(actors: List[Actor], run: int, file:str, final_users: List):
                         rider.has_private, rider.has_bike, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
                         rider.distance_from_destination, rider.house_node, rider.capacity, len(rider.users_to_pick_up), util,rider.provider.service]
                 csvwriter.writerow(info)
-      
+    
+
+def time_if_car(user:User):
+    return user.distance_from_destination/Personal().get_speed()
+
+
+    
+def calculate_qos(actors: List[Actor], users_info: List):
+    average_qos_time_final_run = {
+        "Personal": [],
+        "Friends": [],
+        "STCP": [],
+        "Bicycle": [],
+        "Walking": [],
+        "Total": []
+    }
+
+    # average_qos_utility_final_run = {
+    #     "Personal": [],
+    #     "Friends": [],
+    #     "STCP": [],
+    #     "Bicycle": [],
+    #     "Walking": [],
+    #     "Total": []
+    # }
+
+    
+
+    print(average_qos_time_final_run)
+    # print(average_qos_utility_final_run)
+
+    for user_info in users_info:
+        time_car = time_if_car(user_info["user"]) 
+        # utility_if_car = 
+        delay = - ((user_info["commute_output"].total_time -
+                    time_car)/user_info["commute_output"].total_time)
+        # print("user time ", user_info["commute_output"].total_time)
+        # print("time car ", time_car)
+        # print("delay ", delay)
+        # print("\n")
+        average_qos_time_final_run[user_info["user"].provider.name].append(delay)
+
+    for service in average_qos_time_final_run.keys():
+        if(len(average_qos_time_final_run[service]) == 0):
+            average_qos_time_final_run[service] = 0
+        else:
+            average_qos_time_final_run[service] = sum(average_qos_time_final_run[service])/len(average_qos_time_final_run[service])
+
+    return average_qos_time_final_run     
+
+
 
 
 def main(args):
@@ -857,6 +907,19 @@ def main(args):
 
     # exit()
 
+    print("fora")
+    print("actor fora ", sim.actors)
+    print("final users fora", final_users)
+    for info in final_users:
+        print(info["user"])
+    
+
+    average_qos_time_final_run  = calculate_qos(sim.actors, final_users)
+
+    print(average_qos_time_final_run)
+    exit()
+
+
     utility_per_mode_last_runs = {
         "Personal": 0,
         "Friends": 0,
@@ -925,6 +988,8 @@ def main(args):
 
 
     with open("utility_test.txt",'a+') as f:
+        print("qos last run \n", file=f)
+        write_dict_file(average_qos_time_final_run,f)
         # write_dict_file(utility_per_mode_last_runs_dict,f)
         write_dict_file(average_utility_per_mode_all_runs,f)
         print("just total \n",file=f)
