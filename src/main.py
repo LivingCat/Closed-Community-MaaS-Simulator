@@ -31,7 +31,7 @@ import copy
 
 import csv
 
-run_name = "normal_800_users_3000_weights_credits-0.05"
+run_name = "normal_800_users_3000"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -569,7 +569,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         write_dict_file(utility_per_mode_last_runs,f)
         print("Average Cost by mode (last 100 runs): ", file=f)
         write_dict_file(cost_per_mode_last_runs_dict,f)
-        print("Average Credits used by mode: ", file=f)
+        print("Total Credits used by mode: ", file=f)
         write_dict_file(credits_used,f)
 
     return results
@@ -709,7 +709,8 @@ def main(args):
     MODEL_NAME = 'Maas_simulator'
 
     RUN_ENSEMBLE = False
-    RUN_AGENT_CLUSTER = True
+    RUN_AGENT_CLUSTER = False
+    
 
     if args.traffic_peaks is None:
         # Needed since "action=append" doesn't overwrite "default=X"
@@ -815,7 +816,7 @@ def main(args):
             final_users = sim.run_agent_cluster(agents)
         else:
             final_users = sim.run(agent)
-        # final_users = sim.run_descriptive()
+            # final_users = sim.run_descriptive()
 
         utility_per_mode_per_run = {
             "Personal": [],

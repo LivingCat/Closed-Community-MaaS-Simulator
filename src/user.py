@@ -51,10 +51,14 @@ class User:
     capacity: int
     time_spent_waiting: float
     has_bike: bool
-    credits_own: int
-    credits_spent: int
+    credits_own: float
+    credits_spent: float
+    credits_won_round: float
     can_cycle: bool
     can_walk: bool
+  
+
+    static_model_id = 1
 
 
     def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int, distance_from_destination: int, has_bike: bool, has_private: bool):
@@ -74,11 +78,17 @@ class User:
        self.time_spent_waiting = 0.0
        self.has_bike = has_bike
        self.has_private = has_private
-       self.credits_own = 0
-       self.credits_spent = 0
+       self.credits_own = 10
+       self.credits_spent = 0.0
+       self.credits_won_round = 0.0
 
        self.can_cycle = False
        self.can_walk = False
+
+
+       """"Initializer for the ID of all user models"""
+       self.user_id = User.static_model_id
+       User.static_model_id += 1
 
     @staticmethod
     def default():
@@ -139,6 +149,7 @@ class User:
     
     def add_credits(self,credits_gained:int):
         self.credits_own += credits_gained
+        self.credits_won_round = credits_gained
         return self.credits_own
 
     def remove_credits(self,credits_spent:int):
@@ -154,7 +165,29 @@ class User:
             self.remove_credits(min_credits)
         return discount
         
+    def get_social_credits(self, percent: float):
+        if(self.mean_transportation == "car" or self.mean_transportation == "bike" or self.mean_transportation == "walk"):
+            print("am either car or bike or walk")
+            return 0
+        else:
+            soc_cre = 0
+            for friend in self.friends:
+                c = friend.credits_won_round * percent
+                #user gains credits from his friend
+                soc_cre += c
+                #friend loses credits he gave away
+                friend.give_social_credits(c)
+            return soc_cre                
+
+
+    def add_social_credits(self,soc_credits:float):
+        self.credits_own += soc_credits
+        return self.credits_own
+
+    def give_social_credits(self, soc_credits:float):
+        self.credits_own -= soc_credits
+
 
     def __str__(self):
-        return "I live here %s, cluster %s, have private %s, have bike %s , credits i own %s, credits i spent %s, mode chosen %s \n" % (self.house_node, self.cluster, self.has_private, self.has_bike, self.credits_own, self.credits_spent,self.mean_transportation)
+        return "I am %s, I live here %s, cluster %s, have private %s, have bike %s , credits i own %s, credits i spent %s, mode chosen %s \n" % (self.user_id,self.house_node, self.cluster, self.has_private, self.has_bike, self.credits_own, self.credits_spent,self.mean_transportation)
 
