@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 import scipy
+import csv
 
 from parking_lot import ParkingLot
 
@@ -54,6 +55,9 @@ class Simulator:
                  stats_constructor,
                  run_ensamble,
                  run_agent_cluster_bool,
+                 save_population,
+                 import_population,
+                 save_file,
                  traffic_distribution=UnimodalDistribution.default(),
                  seed=42):
         self.config = config
@@ -66,10 +70,14 @@ class Simulator:
         self.max_run_time = config.max_run_time
         self.stats = None
         self.actors = None
+        self.users = []
         self.providers = providers
         self.first_run = False
         self.runn = 0
         self.users_lost = dict(dict())
+        self.save_population = save_population
+        self.import_population = import_population
+        self.save_file = save_file
         self.credits_used = {
             "car": 0,
             "bus": 0,
@@ -1408,6 +1416,111 @@ class Simulator:
 
         return final_users
 
+    def import_pop(self):
+        print("tou no import pop \n")
+        # print(self.users)
+        # print(self.users)
+        # for user in self.users:
+        #     print(user.user_id)
+        with open(self.save_file, mode='r') as csv_file:
+            csv_reader = csv.DictReader(csv_file)
+            line_count = 0
+            for row in csv_reader:
+                if line_count == 0:
+                    line_count += 1            
+            
+                personality = Personality(
+                    float(row["willingness_to_pay"]), float(row["willingness_to_wait"]), float(row["awareness"]), float(row["comfort_preference"]),
+                    float(row["friendliness"]), float(row["suscetible"]), float(row["transport"]),float( row["urban"]), float(row["willing"]))
+
+                user = User(personality,float(row["time"]),row["chosen_cluster"], row["chosen_course"], row["chosen_grade"], float(row["salary"]),
+                            float(row["budget"]), int(row["available_seats"]), int(row["distance_from_destination"]), eval(row["has_bike"]), eval(row["has_private"])) 
+                user.house_node = int(row["house_node"])
+                user.can_cycle = eval(row["can_cycle"])
+                user.can_walk = eval(row["can_walk"])
+                user.num_friends = int(row["num_friends"])
+                user.user_id = int(row["user_id"])
+                user.friends_ids = row["friends_ids"]
+                self.users.append(user)
+                line_count += 1
+
+        print(f'Processed {line_count} lines.')
+
+        # for user in self.users:
+        #     print(user.user_id)
+        #     print(user.friends_ids)
+        # print(self.users)
+        for user in self.users:
+            # print("antes")
+            # print(user.friends_ids)
+            user.friends_ids = user.friends_ids.replace('[', '')
+            user.friends_ids = user.friends_ids.replace(']', '')
+            # print("depois")
+            # print(user.friends_ids)
+            if(user.friends_ids == ""):
+                user.friends = []
+            else:
+                split = user.friends_ids.split(',')
+                # print(split)
+                f_ids = [int(i) for i in split]
+                # print("f ids", f_ids)
+                user.friends = [f for f in self.users if(f.user_id in f_ids)]
+
+       
+        # for user in self.users:
+        #     print(user.friends)
+        #     print(user.friends_ids)
+            # print(user.personality.willingness_to_pay)
+            # print(user.available_seats)
+            # print(user.has_private)
+            # print(user.can_walk)
+            # print(user.house_node)
+
+    def save_pop(self):
+        print("tou no save pop \n")
+
+        fields = ["willingness_to_pay", "willingness_to_wait", "awareness", "comfort_preference", "friendliness", "suscetible", "transport","urban","willing",
+                  "time", "chosen_cluster","chosen_course", "chosen_grade", "salary","budget","available_seats",
+                  "distance_from_destination","has_bike","has_private","house_node","can_cycle","can_walk","num_friends","user_id","friends_ids"]
+            
+
+        with open(self.save_file,"w+") as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=fields)
+            writer.writeheader()
+            
+            for user in self.users:
+                f_ids = []
+                for friend in user.friends:
+                    f_ids.append(friend.user_id)
+
+                writer.writerow({
+                'willingness_to_pay': user.personality.willingness_to_pay, 
+                'willingness_to_wait': user.personality.willingness_to_wait,
+                'awareness': user.personality.awareness ,
+                'comfort_preference':user.personality.comfort_preference,
+                'friendliness':user.personality.friendliness,
+                'suscetible':user.personality.suscetible,
+                'transport':user.personality.transport,
+                'urban':user.personality.urban,
+                'willing':user.personality.willing,
+                'time':user.start_time,
+                'chosen_cluster':user.cluster,
+                'chosen_course': user.course,
+                'chosen_grade': user.grade,
+                'salary': user.salary,
+                'budget': user.budget,
+                'available_seats': user.available_seats,
+                'distance_from_destination': user.distance_from_destination,
+                'has_bike': user.has_bike,
+                'has_private': user.has_private,
+                'house_node': user.house_node,
+                'can_cycle': user.can_cycle,
+                'can_walk': user.can_walk,
+                'num_friends': user.num_friends,
+                'user_id': user.user_id,
+                'friends_ids': f_ids
+                 })
+        
 
     def run(self, agent: DQNAgent):
         # Empty actors list, in case of consecutive calls to this method
@@ -1422,21 +1535,32 @@ class Simulator:
         if(self.first_run):
             print(" first run")
             print(" tou no run normal")
-            self.users = self.create_users()
-            # for user in self.users:
-            #     print(user.salary)
-            #     print(user.budget)
-            #     print(user.personality.willingness_to_pay)
-            #     print("\n")
-          
-            #Create distance dictionary
-            self.create_dist_dict()
-            #Assign house nodes to each user according to graph structure
-            self.add_house_nodes()
-            self.assess_cycle_walk(self.users)
-            self.create_friends()      
+
+            if(self.import_population):
+                #Creates users using an existent file
+                self.import_pop()
+                #Create distance dictionary
+                self.create_dist_dict()
+            else:
+                self.users = self.create_users()
+                # for user in self.users:
+                #     print(user.salary)
+                #     print(user.budget)
+                #     print(user.personality.willingness_to_pay)
+                #     print("\n")
+            
+                #Create distance dictionary
+                self.create_dist_dict()
+                #Assign house nodes to each user according to graph structure
+                self.add_house_nodes()
+                self.assess_cycle_walk(self.users)
+                self.create_friends()      
+
+            if(self.save_population):
+                self.save_pop()   
+
             self.bus_users = self.create_buses()
-            self.create_buses_schedule(self.bus_users)            
+            self.create_buses_schedule(self.bus_users)
         else:
             # self.users = self.users[1:]
             self.reset()
@@ -1688,8 +1812,7 @@ class Simulator:
                         actor.cost + actor.get_parking_cost(), actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 else:
                     # new_tuple_t = (actor.user.distance_from_destination, actor.total_travel_time)
-                    # new_tuple_c = (actor.user.distance_from_destination, actor.provider.get_cost(
-                    #     actor.total_travel_time))
+                    # new_tuple_c = (actor.user.distance_from_destination, actor.cost)
                     # self.list_times.append(new_tuple_t)
                     # self.list_cost.append(new_tuple_c)
 
@@ -2186,10 +2309,10 @@ class Simulator:
                 personality_params["comfort_preference"]["stand_div"]
             )
 
-            willingness_to_pay = min(max([0.01, willingness_to_pay]), 1)
-            willingness_to_wait = min(max([0.01, willingness_to_wait]), 1)
-            comfort_preference = min(max([0.01, comfort_preference]), 1)
-            awareness = min(max([0.000, awareness]), 1)
+            willingness_to_pay = min(max([0.01, willingness_to_pay]), 1.0)
+            willingness_to_wait = min(max([0.01, willingness_to_wait]), 1.0)
+            comfort_preference = min(max([0.01, comfort_preference]), 1.0)
+            awareness = min(max([0.000, awareness]), 1.0)
 
             ###################################################################################################################
 

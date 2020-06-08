@@ -39,6 +39,8 @@ def parse_args():
         description='Systems Modelling and Simulation')
 
     parser.add_argument("-js", "--json", default="input.json", type=str, dest='json_file', metavar="JSON", help="input configuration file")
+    parser.add_argument("-save", "--save", default="saved_file.csv", type=str,
+                        dest='saved_file', metavar="SAVE", help="save population file")
 
     parser.add_argument("-n", "--num_actors", default=500, type=int, metavar="N",
                         help="number of vehicles/actors to generate per simulation run")
@@ -458,7 +460,10 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         run_ttt = 0
         for a in stats.actors:
             run_ttt += a.total_travel_time
-        average_ttt_all_runs.append(run_ttt/len(stats.actors))
+        if(len(stats.actors) == 0):
+             average_ttt_all_runs.append(0)
+        else:
+            average_ttt_all_runs.append(run_ttt/len(stats.actors))
 
     # for key in dictionary.keys():
     #     print(key,file=f)
@@ -712,6 +717,8 @@ def main(args):
 
     RUN_ENSEMBLE = False
     RUN_AGENT_CLUSTER = False
+    SAVE_POPULATION = True
+    IMPORT_POPULATION = True
     
 
     if args.traffic_peaks is None:
@@ -721,6 +728,7 @@ def main(args):
     print_args(args)
 
     input_config = read_json_file(args.json_file)
+    saved_file = args.saved_file
 
     # providers = [Personal(),Friends(),STCP(), Bicycle()]
     # providers = [Personal(), STCP(), Bicycle()]
@@ -740,12 +748,16 @@ def main(args):
                     stats_constructor=stats_constructor,
                     run_ensamble=RUN_ENSEMBLE,
                     run_agent_cluster_bool=RUN_AGENT_CLUSTER,
+                    save_population=SAVE_POPULATION,
+                    import_population=IMPORT_POPULATION,
+                    save_file= saved_file,
                     traffic_distribution=UnimodalDistribution(
                         *args.traffic_peaks)
                     )
     n_inputs = 12
     n_output = len(providers)
     n_agent = 0
+
 
     if(RUN_ENSEMBLE):
         agents = [DQNAgent(n_inputs, n_output, n_agent), DQNAgent(n_inputs, n_output, (n_agent+1)), DQNAgent(

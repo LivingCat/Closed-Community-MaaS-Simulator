@@ -3,7 +3,7 @@ from typing import List
 class Personality:
     """Represents the user's preferences of the system"""
 
-    def __init__(self, willingness_to_pay, willingness_to_wait, awareness, comfort_preference, friendliness, suscetible, transport, urban, willing, mean_transportation=""):
+    def __init__(self, willingness_to_pay: float, willingness_to_wait: float, awareness: float, comfort_preference: float, friendliness: float, suscetible: float, transport: float, urban: float, willing: float, mean_transportation=""):
         self.willingness_to_pay = willingness_to_pay
         self.willingness_to_wait = willingness_to_wait
         self.awareness = awareness
@@ -85,6 +85,8 @@ class User:
        self.can_cycle = False
        self.can_walk = False
 
+       self.friends_ids = []
+
 
        """"Initializer for the ID of all user models"""
        self.user_id = User.static_model_id
@@ -121,18 +123,22 @@ class User:
 
     def cost_util(self, commute_out: CommuteOutput):
         max_cost = 22
-        if(commute_out.cost == 0):
-            return 0
-        else:
-            #normalize 
-            return (1 - (commute_out.cost/max_cost)) * self.personality.willingness_to_pay
+        # if(commute_out.cost == 0):
+        #     return 0
+        # else:
+        #     #normalize 
+        #     return (1 - (commute_out.cost/max_cost)) * self.personality.willingness_to_pay
             # return 1/(commute_out.cost) * self.personality.willingness_to_pay
+        normalize_cost = commute_out.cost/max_cost
+        return (-1/(self.personality.willingness_to_pay * 10))* (normalize_cost**2) + 1
 
     def time_util(self, commute_out: CommuteOutput):
         max_time = 0.85
         #normalize
-        return (1 - (commute_out.total_time/max_time)) * self.personality.willingness_to_wait
+        # return (1 - (commute_out.total_time/max_time)) * self.personality.willingness_to_wait
         # return 1/(commute_out.total_time) * self.personality.willingness_to_wait
+        normalize_time = commute_out.total_time/max_time
+        return (-1/(self.personality.willingness_to_wait * 10)) * (normalize_time**2) + 1
 
     def social_util(self, commute_out: CommuteOutput):
         return commute_out.awareness * self.personality.awareness
@@ -189,5 +195,5 @@ class User:
 
 
     def __str__(self):
-        return "I am %s, I live here %s, cluster %s, have private %s, have bike %s , credits i own %s, credits i spent %s, mode chosen %s \n" % (self.user_id,self.house_node, self.cluster, self.has_private, self.has_bike, self.credits_own, self.credits_spent,self.mean_transportation)
+        return "I am %s, I live here %s, cluster %s, have private %s, have bike %s , credits i own %s, credits i spent %s \n" % (self.user_id,self.house_node, self.cluster, self.has_private, self.has_bike, self.credits_own, self.credits_spent)
 
