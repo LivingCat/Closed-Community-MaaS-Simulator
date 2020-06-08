@@ -30,8 +30,8 @@ MAX_WAITING_TIME = 0.5
 #Credits
 N_CREDITS_DISCOUNT = 10
 CREDIT_VALUE = 0.05
-CREDIT_INCENTIVE = True
-SOCIAL_CREDIT = True
+CREDIT_INCENTIVE = False
+SOCIAL_CREDIT = False
 SOCIAL_PERCENT = 0.1
 
 #Agents indexes
@@ -76,6 +76,11 @@ class Simulator:
             "sharedCar": 0,
             "bike": 0,
             "walk": 0,
+            "total": 0
+        }
+        self.credits_used_run = {
+            "bus": 0,
+            "sharedCar": 0,
             "total": 0
         }
 
@@ -465,6 +470,25 @@ class Simulator:
     def sort_actors_fun(self,actor:Actor):
         return actor.traveled_nodes[-1][0]
 
+    def pick_random_rider(self,driver,users_want_ride_sharing,start_node):
+         #start a new list for the possible riders
+        possible_pickup = []
+        poss_routes = self.graph.get_all_routes(
+            start_node, driver.mean_transportation)
+        all_nodes = [node for route in poss_routes for node in route]
+
+        for rider in users_want_ride_sharing:
+            if(rider.house_node in all_nodes and rider != driver and self.in_time_slot(rider, driver)):
+                possible_pickup.append(rider)
+
+        #There doesn't exist any other user that the driver can pick up
+        if(len(possible_pickup) == 0):
+            chosen_rider = ""
+        else:
+            chosen_rider = random.choice(possible_pickup)
+        return (chosen_rider,possible_pickup)
+
+
     def ride_sharing_matching(self,users: List['User']):
         users_want_ride_sharing = users
         possible_drivers = [user for user in users if user.has_private]
@@ -486,6 +510,8 @@ class Simulator:
                 # and self.in_time_slot(rider, driver)
                 if(rider.house_node in all_nodes and rider != driver and self.in_time_slot(rider, driver)):
                     possible_pickup.append(rider)
+
+            # chosen_rider,possible_pickup = self.pick_random_rider(driver, users_want_ride_sharing,driver.house_node)
 
             #There doesn't exist a user that the driver can pick up
             if(len(possible_pickup) == 0):
@@ -688,6 +714,9 @@ class Simulator:
 
         self.parking_lot.available_seats_personal = self.parking_lot.lot_capacity - self.parking_lot.lot_capacity_shared
         self.parking_lot.available_seats_shared = self.parking_lot.lot_capacity_shared
+        
+        for key in self.credits_used_run.keys():
+            self.credits_used_run[key] = 0
 
 
     def unviable_choice(self, agent: DQNAgent, users: List['User'], action_index: int):
@@ -880,6 +909,7 @@ class Simulator:
 
 
         for actor in self.actors:
+
             if(actor.service == "car" or actor.service == "bike" or actor.service == "walk"):
                 if(CREDIT_INCENTIVE):
                     actor.user.add_credits(actor.provider.get_credits())
@@ -913,7 +943,9 @@ class Simulator:
                             driver_cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                     else:
                         #this means the user has the minimum amount of credits and will have a discounted trip
-                        self.credits_used[actor.service] += discount
+                        self.credits_used[actor.service] += N_CREDITS_DISCOUNT
+                        self.credits_used_run[actor.service] += N_CREDITS_DISCOUNT
+                        self.credits_used_run["total"] += N_CREDITS_DISCOUNT
                         commute_out = CommuteOutput(
                             driver_cost - discount, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 else:
@@ -944,7 +976,9 @@ class Simulator:
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                         else:
                             #this means the user has the minimum amount of credits and will have a discounted trip
-                            self.credits_used[actor.service] += discount
+                            self.credits_used[actor.service] += N_CREDITS_DISCOUNT
+                            self.credits_used_run[actor.service] += N_CREDITS_DISCOUNT
+                            self.credits_used_run["total"] += N_CREDITS_DISCOUNT
                             commute_out = CommuteOutput(rider_cost - discount, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     else:
@@ -979,7 +1013,9 @@ class Simulator:
                             #this means the user has the minimum amount of credits and will have a discounted trip
                             # print(discount)
                             # print("gastei creditos!")
-                            self.credits_used[actor.service] += discount
+                            self.credits_used[actor.service] += N_CREDITS_DISCOUNT
+                            self.credits_used_run[actor.service] += N_CREDITS_DISCOUNT
+                            self.credits_used_run["total"] += N_CREDITS_DISCOUNT
                             commute_out = CommuteOutput(actor.rider_cost(rider.house_node) - discount, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     else:
@@ -1001,6 +1037,8 @@ class Simulator:
                     final_users.append(user_info)
 
               #add social credits to everybody if SOCIAL_CREDITS is true
+        
+
         if(CREDIT_INCENTIVE and SOCIAL_CREDIT):
             self.social_credits_computation()
         users_copy = self.users
@@ -1214,7 +1252,9 @@ class Simulator:
                         #this means the user has the minimum amount of credits and will have a discounted trip
                         # print(discount)
                         # print("gastei creditos!")
-                        self.credits_used[actor.service] += discount
+                        self.credits_used[actor.service] += N_CREDITS_DISCOUNT
+                        self.credits_used_run[actor.service]+= N_CREDITS_DISCOUNT
+                        self.credits_used_run["total"] += N_CREDITS_DISCOUNT
                         commute_out = CommuteOutput(
                             driver_cost - discount, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 else:
@@ -1257,7 +1297,9 @@ class Simulator:
                             #this means the user has the minimum amount of credits and will have a discounted trip
                             # print(discount)
                             # print("gastei creditos!")
-                            self.credits_used[actor.service] += discount
+                            self.credits_used[actor.service] += N_CREDITS_DISCOUNT
+                            self.credits_used_run[actor.service]+= N_CREDITS_DISCOUNT
+                            self.credits_used_run["total"] += N_CREDITS_DISCOUNT
                             commute_out = CommuteOutput(rider_cost - discount, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     else:
@@ -1296,7 +1338,9 @@ class Simulator:
                             #this means the user has the minimum amount of credits and will have a discounted trip
                             # print(discount)
                             # print("gastei creditos!")
-                            self.credits_used[actor.service] += discount
+                            self.credits_used[actor.service] += N_CREDITS_DISCOUNT
+                            self.credits_used_run[actor.service] += N_CREDITS_DISCOUNT
+                            self.credits_used_run["total"] += N_CREDITS_DISCOUNT
                             commute_out = CommuteOutput(actor.rider_cost(rider.house_node) - discount, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     else:
@@ -1681,7 +1725,9 @@ class Simulator:
                         #this means the user has the minimum amount of credits and will have a discounted trip
                         # print(discount)
                         # print("gastei creditos!")
-                        self.credits_used[actor.service] += discount
+                        self.credits_used[actor.service] += N_CREDITS_DISCOUNT
+                        self.credits_used_run[actor.service]+= N_CREDITS_DISCOUNT
+                        self.credits_used_run["total"] += N_CREDITS_DISCOUNT
                         commute_out = CommuteOutput(
                             driver_cost - discount, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 else:
@@ -1718,7 +1764,9 @@ class Simulator:
                             #this means the user has the minimum amount of credits and will have a discounted trip
                             # print(discount)
                             # print("gastei creditos!")
-                            self.credits_used[actor.service] += discount
+                            self.credits_used[actor.service] += N_CREDITS_DISCOUNT
+                            self.credits_used_run[actor.service]+= N_CREDITS_DISCOUNT
+                            self.credits_used_run["total"] += N_CREDITS_DISCOUNT
                             commute_out = CommuteOutput(rider_cost - discount, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     else:
@@ -1753,7 +1801,9 @@ class Simulator:
                             #this means the user has the minimum amount of credits and will have a discounted trip
                             # print(discount)
                             # print("gastei creditos!")
-                            self.credits_used[actor.service] += discount
+                            self.credits_used[actor.service] += N_CREDITS_DISCOUNT
+                            self.credits_used_run[actor.service] += N_CREDITS_DISCOUNT
+                            self.credits_used_run["total"] += N_CREDITS_DISCOUNT
                             commute_out = CommuteOutput(actor.rider_cost(rider.house_node) - discount, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     else:
@@ -1797,25 +1847,24 @@ class Simulator:
         #         print("esta foi a minha utilidade: ", user_info["utility"], "\n", file=f)
         #         print("\n", file=f)
 
-
-
         #add social credits to everybody if SOCIAL_CREDITS is true
         if(CREDIT_INCENTIVE and SOCIAL_CREDIT):
             self.social_credits_computation()
 
-        print("final prints")
-        for user in self.users:
-            print(user)
-            if(user in users_not_participating):
-                print("i did not participate")
-                continue
-            print("i have {} friends".format(len(user.friends)))
-            for friend in user.friends:
-                print(friend)
-            print("\n")
+        # print("final prints")
+        # for user in self.users:
+        #     print(user)
+        #     if(user in users_not_participating):
+        #         print("i did not participate")
+        #         continue
+        #     print("i have {} friends".format(len(user.friends)))
+        #     for friend in user.friends:
+        #         print(friend)
+        #     print("\n")
 
+        # print("next run")
 
-        exit()
+        # exit()
 
 
 
@@ -2137,9 +2186,9 @@ class Simulator:
                 personality_params["comfort_preference"]["stand_div"]
             )
 
-            willingness_to_pay = min(max([0.0001, willingness_to_pay]), 1)
-            willingness_to_wait = min(max([0.0001, willingness_to_wait]), 1)
-            comfort_preference = min(max([0.0001, comfort_preference]), 1)
+            willingness_to_pay = min(max([0.01, willingness_to_pay]), 1)
+            willingness_to_wait = min(max([0.01, willingness_to_wait]), 1)
+            comfort_preference = min(max([0.01, comfort_preference]), 1)
             awareness = min(max([0.000, awareness]), 1)
 
             ###################################################################################################################
@@ -2300,16 +2349,16 @@ class Simulator:
                 for rider in actor.user.users_to_pick_up:
                     soc_cre = rider.get_social_credits(SOCIAL_PERCENT)
                     rider.add_social_credits(soc_cre)
-                    print(rider)
-                    print("i got {} social credits".format(soc_cre))
+                    # print(rider)
+                    # print("i got {} social credits".format(soc_cre))
             elif(actor.service == "sharedCar"):
                 soc_cre = actor.user.get_social_credits(SOCIAL_PERCENT)
                 actor.user.add_social_credits(soc_cre)
-                print(actor.user)
-                print("i got {} social credits".format(soc_cre))
+                # print(actor.user)
+                # print("i got {} social credits".format(soc_cre))
                 for rider in actor.user.users_to_pick_up:
                     soc_cre = rider.get_social_credits(SOCIAL_PERCENT)
                     rider.add_social_credits(soc_cre)
-                    print(rider)
-                    print("i got {} social credits".format(soc_cre))
-            print("\n")
+                    # print(rider)
+                    # print("i got {} social credits".format(soc_cre))
+            # print("\n")

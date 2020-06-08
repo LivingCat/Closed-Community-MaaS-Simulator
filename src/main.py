@@ -31,7 +31,7 @@ import copy
 
 import csv
 
-run_name = "normal_800_users_3000"
+run_name = "agent_cluster_800_users_3000"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -124,7 +124,7 @@ def statistics_print(sim: Simulator):
     print("ATIS NO: mean: %f || std: %f" % (np.mean(atis_no), np.std(atis_no)))
 
 
-def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: dict(dict()), time_per_mode_last_runs: dict(), utility_per_mode_last_runs: dict(), cost_per_mode_last_runs_dict: dict(), credits_used: dict(), average_utility_per_mode_all_runs: dict()):
+def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: dict(dict()), time_per_mode_last_runs: dict(), utility_per_mode_last_runs: dict(), cost_per_mode_last_runs_dict: dict(), credits_used: dict(), avg_credits_used_last_runs: dict(),average_utility_per_mode_all_runs: dict()):
 
     #Get Min Users lost run
     min_val = 99999999
@@ -205,8 +205,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
             actors_flow_acc[key].append([actor_tuple[0],
                                         actor_tuple[1] + actors_flow_acc[key][-1][1]])
 
-    # plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
-    # plt.waitforbuttonpress(0)
+    # # plot_accumulated_actor_graph(actors_flow_acc, len(all_s))
+    # # plt.waitforbuttonpress(0)
 
     print("flow")
     results['actors_atis_natis'] = actors_flow_acc
@@ -571,6 +571,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         write_dict_file(cost_per_mode_last_runs_dict,f)
         print("Total Credits used by mode: ", file=f)
         write_dict_file(credits_used,f)
+        print("Avg Credits used by mode (last 100 runs): ",file=f)
+        write_dict_file(avg_credits_used_last_runs,f)
 
     return results
 
@@ -794,6 +796,12 @@ def main(args):
 
     bu = []
 
+    avg_credits_used_last_runs = {
+        "bus": [],
+        "sharedCar": [],
+        "total": []
+    }
+
     for episode in trange(args.n_runs, leave=False):
         # print(" episode")
         # print(episode)
@@ -826,6 +834,7 @@ def main(args):
             "Walking": [],
             "Total": []
         }
+
         
         # print("final users ", len(final_users))
 
@@ -843,12 +852,16 @@ def main(args):
 
             if(episode >= last_episodes):
                 time_per_mode_last_runs[user_info["commute_output"].mean_transportation].append(user_info["commute_output"].total_time)
+
                 # print(utility_per_mode_last_runs_dict)
                 # print(user_info["commute_output"].mean_transportation)
                 utility_per_mode_last_runs_dict[user_info["commute_output"].mean_transportation].append(user_info["utility"])
                 cost_per_mode_last_runs_dict[user_info["commute_output"].mean_transportation].append(
                     user_info["commute_output"].cost)
 
+        for key in sim.credits_used_run.keys():
+            avg_credits_used_last_runs[key].append(
+                sim.credits_used_run[key])
 
         for key in utility_per_mode_total:
             utility_per_mode_total[key].append(utility_per_mode_per_run[key])
@@ -928,7 +941,12 @@ def main(args):
     # print("final users fora", final_users)
     # for info in final_users:
     #     print(info["user"])
-    
+
+
+    for key in avg_credits_used_last_runs.keys():
+        avg_credits_used_last_runs[key] = sum(
+            avg_credits_used_last_runs[key])/len(avg_credits_used_last_runs[key])
+
     average_qos_time_final_run, average_qos_cost_final_run = calculate_qos(sim.actors, final_users)
 
     utility_per_mode_last_runs = {
@@ -992,7 +1010,7 @@ def main(args):
     #Add distance info to results file
     write_user_distance_interval_info(sim)
     json_object = average_all_results(
-        all_stats, args.plots, sim.users_lost, time_per_mode_last_runs, utility_per_mode_last_runs, cost_per_mode_last_runs_dict, sim.credits_used, average_utility_per_mode_all_runs)
+        all_stats, args.plots, sim.users_lost, time_per_mode_last_runs, utility_per_mode_last_runs, cost_per_mode_last_runs_dict, sim.credits_used, avg_credits_used_last_runs,average_utility_per_mode_all_runs)
     json_object['graph'] = nx.readwrite.jit_data(sim.graph.graph)
 
     json.dump(json_object, open(args.save_path, "w+"))
