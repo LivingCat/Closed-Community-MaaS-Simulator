@@ -29,7 +29,7 @@ class Bus:
 
 	@staticmethod
 	def credits():
-		return 2
+		return 3
 
 
 class Bike:
@@ -46,7 +46,7 @@ class Bike:
 
 	@staticmethod
 	def credits():
-		return 4
+		return 5
 
 
 class Walk:
@@ -63,4 +63,4 @@ class Walk:
 
 	@staticmethod
 	def credits():
-		return 4
+		return 5
