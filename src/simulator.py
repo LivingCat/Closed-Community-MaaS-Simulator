@@ -31,7 +31,7 @@ MAX_WAITING_TIME = 0.5
 #Credits
 N_CREDITS_DISCOUNT = 10
 CREDIT_VALUE = 0.05
-CREDIT_INCENTIVE = False
+CREDIT_INCENTIVE = True
 SOCIAL_CREDIT = False
 SOCIAL_PERCENT = 0.1
 
@@ -97,7 +97,7 @@ class Simulator:
 
         self.distance_dict = dict()
 
-        self.parking_lot = ParkingLot(400,200,0,0)
+        self.parking_lot = ParkingLot(400,200,1,0)
 
         self.run_ensamble = run_ensamble
         self.run_agent_cluster_bool = run_agent_cluster_bool
@@ -770,14 +770,23 @@ class Simulator:
         if(self.first_run):
             print(" first run")
             print(" tou no run agent cluster")
-            self.users = self.create_users()
-          
-            #Create distance dictionary
-            self.create_dist_dict()
-            #Assign house nodes to each user according to graph structure
-            self.add_house_nodes()
-            self.assess_cycle_walk(self.users)
-            self.create_friends()
+
+
+            if(self.import_population):
+                #Creates users using an existent file
+                self.import_pop()
+                #Create distance dictionary
+                self.create_dist_dict()
+            else:
+                self.users = self.create_users()
+
+                #Create distance dictionary
+                self.create_dist_dict()
+                #Assign house nodes to each user according to graph structure
+                self.add_house_nodes()
+                self.assess_cycle_walk(self.users)
+                self.create_friends()
+
             self.bus_users = self.create_buses()
             self.create_buses_schedule(self.bus_users)            
         else:
@@ -950,6 +959,10 @@ class Simulator:
                         commute_out = CommuteOutput(
                             driver_cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                     else:
+                        #check if the discount is bigger than the cost of the trip.
+                            # if discount is bigger than discount is now equal to the cost, to avoid getting "negative cost"
+                        discount = min(discount, actor.rider_cost(rider.house_node))
+
                         #this means the user has the minimum amount of credits and will have a discounted trip
                         self.credits_used[actor.service] += N_CREDITS_DISCOUNT
                         self.credits_used_run[actor.service] += N_CREDITS_DISCOUNT
@@ -1021,6 +1034,12 @@ class Simulator:
                             #this means the user has the minimum amount of credits and will have a discounted trip
                             # print(discount)
                             # print("gastei creditos!")
+
+                            #check if the discount is bigger than the cost of the trip. 
+                            # if discount is bigger than discount is now equal to the cost, to avoid getting "negative cost"
+                            discount = min(
+                                discount, actor.rider_cost(rider.house_node))
+
                             self.credits_used[actor.service] += N_CREDITS_DISCOUNT
                             self.credits_used_run[actor.service] += N_CREDITS_DISCOUNT
                             self.credits_used_run["total"] += N_CREDITS_DISCOUNT
@@ -1089,13 +1108,20 @@ class Simulator:
         if(self.first_run):
             print(" first run")
             print("am in run ensemble")
-            self.users = self.create_users()          
-            #Create distance dictionary
-            self.create_dist_dict()
-            #Assign house nodes to each user according to graph structure
-            self.add_house_nodes()
-            self.assess_cycle_walk(self.users)
-            self.create_friends()
+
+            if(self.import_population):
+                #Creates users using an existent file
+                self.import_pop()
+                #Create distance dictionary
+                self.create_dist_dict()
+            else:
+                self.users = self.create_users()          
+                #Create distance dictionary
+                self.create_dist_dict()
+                #Assign house nodes to each user according to graph structure
+                self.add_house_nodes()
+                self.assess_cycle_walk(self.users)
+                self.create_friends()
             self.bus_users = self.create_buses()
             self.create_buses_schedule(self.bus_users)            
         else:
@@ -1260,6 +1286,10 @@ class Simulator:
                         #this means the user has the minimum amount of credits and will have a discounted trip
                         # print(discount)
                         # print("gastei creditos!")
+                        #check if the discount is bigger than the cost of the trip.
+                            # if discount is bigger than discount is now equal to the cost, to avoid getting "negative cost"
+                        discount = min(
+                                discount, actor.rider_cost(rider.house_node))
                         self.credits_used[actor.service] += N_CREDITS_DISCOUNT
                         self.credits_used_run[actor.service]+= N_CREDITS_DISCOUNT
                         self.credits_used_run["total"] += N_CREDITS_DISCOUNT
@@ -1346,6 +1376,10 @@ class Simulator:
                             #this means the user has the minimum amount of credits and will have a discounted trip
                             # print(discount)
                             # print("gastei creditos!")
+                            #check if the discount is bigger than the cost of the trip.
+                            # if discount is bigger than discount is now equal to the cost, to avoid getting "negative cost"
+                            discount = min(
+                                discount, actor.rider_cost(rider.house_node))
                             self.credits_used[actor.service] += N_CREDITS_DISCOUNT
                             self.credits_used_run[actor.service] += N_CREDITS_DISCOUNT
                             self.credits_used_run["total"] += N_CREDITS_DISCOUNT
@@ -1848,6 +1882,10 @@ class Simulator:
                         #this means the user has the minimum amount of credits and will have a discounted trip
                         # print(discount)
                         # print("gastei creditos!")
+                        #check if the discount is bigger than the cost of the trip. 
+                        # if discount is bigger than discount is now equal to the cost, to avoid getting "negative cost"
+                        discount = min(
+                                discount, actor.rider_cost(rider.house_node))
                         self.credits_used[actor.service] += N_CREDITS_DISCOUNT
                         self.credits_used_run[actor.service]+= N_CREDITS_DISCOUNT
                         self.credits_used_run["total"] += N_CREDITS_DISCOUNT
@@ -1924,6 +1962,9 @@ class Simulator:
                             #this means the user has the minimum amount of credits and will have a discounted trip
                             # print(discount)
                             # print("gastei creditos!")
+                            #check if the discount is bigger than the cost of the trip.
+                            # if discount is bigger than discount is now equal to the cost, to avoid getting "negative cost"
+                            discount = min(discount, actor.rider_cost(rider.house_node))
                             self.credits_used[actor.service] += N_CREDITS_DISCOUNT
                             self.credits_used_run[actor.service] += N_CREDITS_DISCOUNT
                             self.credits_used_run["total"] += N_CREDITS_DISCOUNT
