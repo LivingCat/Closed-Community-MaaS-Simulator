@@ -31,7 +31,7 @@ import copy
 
 import csv
 
-run_name = "agent_cluster_800_users_3000"
+run_name = "normal_800_users_3000_newutility5linear_parking"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -488,6 +488,26 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
     #bus and shared car users from the last 100 runs
     bus_last_100_users = number_users_dict["bus"][-last_runs:]
     shared_car_last_100_users = number_users_dict["sharedCar"][-last_runs:]
+    car_last_100_users = number_users_dict["car"][-last_runs:]
+    bike_last_100_users = number_users_dict["bike"][-last_runs:]
+    walk_last_100_users = number_users_dict["walk"][-last_runs:]
+    total_last_100_users = number_users_dict["total"][-last_runs:]
+
+    # print(car_last_100_users)
+    # print(bus_last_100_users)
+    # print(shared_car_last_100_users)
+    # print(bike_last_100_users)
+    # print(walk_last_100_users)
+    # print(total_last_100_users)
+
+    users_last_100_runs = {
+        "car": car_last_100_users,
+        "bus": bus_last_100_users,
+        "sharedCar": shared_car_last_100_users,
+        "bike": bike_last_100_users,
+        "walk": walk_last_100_users,
+        "total": total_last_100_users
+    }
 
     # print("sum bus users")
     # print(sum(bus_last_100_users))
@@ -497,6 +517,48 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
     # print(sum(shared_car_last_100_users))
     # print("sum shared car actors")
     # print(sum(shared_car_last_100_actors))
+
+    average_utilization_last_100_runs= {
+        "car":[],
+        "bus":[],
+        "sharedCar":[],
+        "bike":[],
+        "walk":[]
+    }
+
+    avg_avg_utilization_last_100_runs = {
+        "car": 0,
+        "bus": 0,
+        "sharedCar": 0,
+        "bike": 0,
+        "walk": 0
+
+    }
+
+    for key in users_last_100_runs.keys():
+        if(key == "total"):
+            continue
+        for i, u in enumerate(users_last_100_runs[key]):
+             average_utilization_last_100_runs[key].append(
+                 u/users_last_100_runs["total"][i])
+    
+    for key in average_utilization_last_100_runs:
+        avg_avg_utilization_last_100_runs[key] = sum(
+            average_utilization_last_100_runs[key])/len(average_utilization_last_100_runs[key])
+
+    # print("avg avg",avg_avg_utilization_last_100_runs)
+
+
+
+
+       
+
+    # bus_last_100_users = number_users_dict["bus"][-last_runs:]
+    # shared_car_last_100_users = number_users_dict["sharedCar"][-last_runs:]
+    # car_last_100_users = number_users_dict["car"][-last_runs:]
+    # bike_last_100_users = number_users_dict["bike"][-last_runs:]
+    # walk_last_100_users = number_users_dict["walk"][-last_runs:]
+    # total_last_100_users = number_users_dict["total"][-last_runs:]
 
     if(sum(bus_last_100_actors) == 0 or sum(shared_car_last_100_actors) == 0):
         if(sum(bus_last_100_actors) == 0 and sum(shared_car_last_100_actors) == 0):
@@ -535,6 +597,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         # print("\n", file=f)
         print("Average Bus Ocuppancy (last 100 runs): {} \n".format(average_bus_occupancy), file=f)
         print("Average Shared Ride Ocuppancy (last 100 runs): {} \n".format(average_sharedCar_occupancy), file=f)
+        print("Average Utilization per mode last 100 runs: \n", file=f)
+        write_dict_file(avg_avg_utilization_last_100_runs,f)
         print("Emissions: \n", file=f)
         write_dict_file(emissions_dict, f)
         # print(emissions_dict, file=f)
@@ -564,8 +628,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         print("Max Combined Cost (Carbon Tax + Transport Subsidy): \n", file=f)
         print(max_combined_cost, file=f)
         print("\n", file=f)
-        print("Average and STD Total Travel Time: {} - {} \n".format(results["time_atis_no"][0], results["time_atis_no"][1]), file=f)
-        print("Average Total Travel Time By Run: \n", file=f)
+        print("Average and STD Travel Time: {} - {} \n".format(results["time_atis_no"][0], results["time_atis_no"][1]), file=f)
+        print("Average Travel Time By Run: \n", file=f)
         print(average_ttt_all_runs, file=f)
         print("\n", file=f)
         print("Average Total Travel Time by mode (last 100 runs):", file=f)
@@ -717,7 +781,7 @@ def main(args):
 
     RUN_ENSEMBLE = False
     RUN_AGENT_CLUSTER = False
-    SAVE_POPULATION = True
+    SAVE_POPULATION = False
     IMPORT_POPULATION = True
     
 
