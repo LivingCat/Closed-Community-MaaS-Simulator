@@ -122,7 +122,7 @@ class User:
         self.house_node = house_node
 
     def cost_util(self, commute_out: CommuteOutput):
-        max_cost = 22
+        max_cost = 15
         # if(commute_out.cost == 0):
         #     return 0
         # else:
@@ -130,15 +130,23 @@ class User:
         #     return (1 - (commute_out.cost/max_cost)) * self.personality.willingness_to_pay
             # return 1/(commute_out.cost) * self.personality.willingness_to_pay
         normalize_cost = commute_out.cost/max_cost
-        return (-1/(self.personality.willingness_to_pay * 10))* (normalize_cost**2) + 1
+        # return (-1/(self.personality.willingness_to_pay * 10))* (normalize_cost**2) + 1
+        #return (-1/(self.personality.willingness_to_pay * 5))* (normalize_cost**2) + 1
+        # return ((-1/(self.personality.willingness_to_pay * 2)) * normalize_cost + 1)
+        return ((-1/(self.personality.willingness_to_pay * 5)) * normalize_cost + 1)
+        # return ((-1/(self.personality.willingness_to_pay * 10)) * normalize_cost + 1)
 
     def time_util(self, commute_out: CommuteOutput):
-        max_time = 0.85
+        max_time = 0.70
         #normalize
         # return (1 - (commute_out.total_time/max_time)) * self.personality.willingness_to_wait
         # return 1/(commute_out.total_time) * self.personality.willingness_to_wait
         normalize_time = commute_out.total_time/max_time
-        return (-1/(self.personality.willingness_to_wait * 10)) * (normalize_time**2) + 1
+        # return (-1/(self.personality.willingness_to_wait * 10)) * (normalize_time**2) + 1
+        # return (-1/(self.personality.willingness_to_wait * 5)) * (normalize_time**2) + 1
+        # return ((-1/(self.personality.willingness_to_wait * 2)) * normalize_time + 1)
+        return ((-1/(self.personality.willingness_to_wait * 5)) * normalize_time + 1)
+        # return ((-1/(self.personality.willingness_to_wait * 10)) * normalize_time + 1)
 
     def social_util(self, commute_out: CommuteOutput):
         return commute_out.awareness * self.personality.awareness
