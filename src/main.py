@@ -781,7 +781,8 @@ def main(args):
 
     RUN_ENSEMBLE = False
     RUN_AGENT_CLUSTER = False
-    RUN_EVERY_AGENT_NN = True
+    RUN_EVERY_AGENT_NN = False
+    RUN_EVERY_AGENT_ENSEMBLE = True
 
     SAVE_POPULATION = False
     IMPORT_POPULATION = True
@@ -826,6 +827,9 @@ def main(args):
 
     agents = []
 
+    dict_agents = {}
+    keys = range(int(input_config["users"]["num_users"]))
+
 
     if(RUN_ENSEMBLE):
         agents = [DQNAgent(n_inputs, n_output, n_agent), DQNAgent(n_inputs, n_output, (n_agent+1)), DQNAgent(
@@ -837,6 +841,11 @@ def main(args):
         for i in range(input_config["users"]["num_users"]):
             agents.append(DQNAgent(n_inputs, n_output, n_agent))
             n_agent +=1
+    elif(RUN_EVERY_AGENT_ENSEMBLE):
+        for i in keys:
+            dict_agents[i] = (DQNAgent(n_inputs, n_output, n_agent), DQNAgent(n_inputs, n_output, (n_agent+1)), DQNAgent(
+                n_inputs, n_output, (n_agent+2)), DQNAgent(n_inputs, n_output, (n_agent+3)))
+            n_agent += 4
     else:
         agent = DQNAgent(n_inputs, n_output,n_agent)
     # gather stats from all runs
@@ -893,6 +902,10 @@ def main(args):
         if(RUN_ENSEMBLE or RUN_AGENT_CLUSTER or RUN_EVERY_AGENT_NN):
             for agent in agents:
                 agent.tensorboard.step = episode
+        elif(RUN_EVERY_AGENT_ENSEMBLE):
+            for key in dict_agents.keys():
+                for agent in dict_agents[key]:
+                    agent.tensorboard.step = episode
         else:            
             agent.tensorboard.step = episode
 
@@ -908,6 +921,8 @@ def main(args):
             final_users = sim.run_agent_cluster(agents)
         elif(RUN_EVERY_AGENT_NN):
             final_users = sim.run_every_agent_nn(agents)
+        elif(RUN_EVERY_AGENT_ENSEMBLE):
+            final_users = sim.run_every_agent_ensemble(dict_agents)
         else:
             final_users = sim.run(agent)
             # final_users = sim.run_descriptive()
@@ -966,6 +981,11 @@ def main(args):
             if(RUN_ENSEMBLE or RUN_AGENT_CLUSTER or RUN_EVERY_AGENT_NN):
                 for agent in agents:
                     agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=agent.epsilon)
+            elif(RUN_EVERY_AGENT_ENSEMBLE):
+                for key in dict_agents.keys():
+                    for agent in dict_agents[key]:
+                        agent.tensorboard.update_stats(
+                            reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=agent.epsilon)
             else:
                 agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=agent.epsilon)
 
@@ -981,6 +1001,13 @@ def main(args):
                     #      'models/{}__{}.model'.format(
                     #          MODEL_NAME, int(time.time())
                     #      ))
+                elif(RUN_EVERY_AGENT_ENSEMBLE):
+                    for key in dict_agents.keys():
+                        for agent in dict_agents[key]:
+                            agent.model.save(
+                                'models/{}__{}.model'.format(
+                                    MODEL_NAME, int(time.time())
+                                ))
                 else:
                     agent.model.save(
                         'models/{}__{}.model'.format(
@@ -992,6 +1019,10 @@ def main(args):
         if(RUN_ENSEMBLE or RUN_AGENT_CLUSTER or RUN_EVERY_AGENT_NN):
             for agent in agents:
                 agent.update_epsilon()
+        elif(RUN_EVERY_AGENT_ENSEMBLE):
+             for key in dict_agents.keys():
+                for agent in dict_agents[key]:
+                    agent.update_epsilon()
         else:
             agent.update_epsilon()
 

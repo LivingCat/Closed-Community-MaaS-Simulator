@@ -58,7 +58,7 @@ class User:
     can_walk: bool
   
 
-    static_model_id = 1
+    static_model_id = 0
 
 
     def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int, distance_from_destination: int, has_bike: bool, has_private: bool):
@@ -131,7 +131,7 @@ class User:
             # return 1/(commute_out.cost) * self.personality.willingness_to_pay
         normalize_cost = commute_out.cost/max_cost
         # return (-1/(self.personality.willingness_to_pay * 10))* (normalize_cost**2) + 1
-        #return (-1/(self.personality.willingness_to_pay * 5))* (normalize_cost**2) + 1
+        # return (-1/(self.personality.willingness_to_pay * 5))* (normalize_cost**2) + 1
         # return ((-1/(self.personality.willingness_to_pay * 2)) * normalize_cost + 1)
         return ((-1/(self.personality.willingness_to_pay * 5)) * normalize_cost + 1)
         # return ((-1/(self.personality.willingness_to_pay * 10)) * normalize_cost + 1)
