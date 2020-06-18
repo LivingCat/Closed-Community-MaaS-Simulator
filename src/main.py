@@ -31,7 +31,7 @@ import copy
 
 import csv
 
-run_name = "normal_800_users_3000_newutility5linear_parking"
+run_name = "agentcluster_800_users_3000_newpoly5"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -781,6 +781,8 @@ def main(args):
 
     RUN_ENSEMBLE = False
     RUN_AGENT_CLUSTER = False
+    RUN_EVERY_AGENT_NN = True
+
     SAVE_POPULATION = False
     IMPORT_POPULATION = True
     
@@ -822,6 +824,8 @@ def main(args):
     n_output = len(providers)
     n_agent = 0
 
+    agents = []
+
 
     if(RUN_ENSEMBLE):
         agents = [DQNAgent(n_inputs, n_output, n_agent), DQNAgent(n_inputs, n_output, (n_agent+1)), DQNAgent(
@@ -829,6 +833,10 @@ def main(args):
     elif(RUN_AGENT_CLUSTER):
         agents = [DQNAgent(n_inputs, n_output, n_agent), DQNAgent(n_inputs, n_output, (n_agent+1)), DQNAgent(
             n_inputs, n_output, (n_agent+2)), DQNAgent(n_inputs, n_output, (n_agent+3)), DQNAgent(n_inputs, n_output, (n_agent+4))]
+    elif(RUN_EVERY_AGENT_NN):
+        for i in range(input_config["users"]["num_users"]):
+            agents.append(DQNAgent(n_inputs, n_output, n_agent))
+            n_agent +=1
     else:
         agent = DQNAgent(n_inputs, n_output,n_agent)
     # gather stats from all runs
@@ -882,10 +890,10 @@ def main(args):
         # print(" episode")
         # print(episode)
         # Update tensorboard step every episode
-        if(RUN_ENSEMBLE or RUN_AGENT_CLUSTER):
+        if(RUN_ENSEMBLE or RUN_AGENT_CLUSTER or RUN_EVERY_AGENT_NN):
             for agent in agents:
                 agent.tensorboard.step = episode
-        else:
+        else:            
             agent.tensorboard.step = episode
 
         if(episode == 0):
@@ -898,6 +906,8 @@ def main(args):
             final_users = sim.run_ensemble(agents)
         elif(RUN_AGENT_CLUSTER):
             final_users = sim.run_agent_cluster(agents)
+        elif(RUN_EVERY_AGENT_NN):
+            final_users = sim.run_every_agent_nn(agents)
         else:
             final_users = sim.run(agent)
             # final_users = sim.run_descriptive()
@@ -953,7 +963,7 @@ def main(args):
             min_reward = min(ep_rewards[-AGGREGATE_STATS_EVERY:])
             max_reward = max(ep_rewards[-AGGREGATE_STATS_EVERY:])
 
-            if(RUN_ENSEMBLE or RUN_AGENT_CLUSTER):
+            if(RUN_ENSEMBLE or RUN_AGENT_CLUSTER or RUN_EVERY_AGENT_NN):
                 for agent in agents:
                     agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=agent.epsilon)
             else:
@@ -961,7 +971,7 @@ def main(args):
 
             # Save model, but only when min reward is greater or equal a set value
             if min_reward >= MIN_REWARD:
-                if(RUN_ENSEMBLE or RUN_AGENT_CLUSTER):
+                if(RUN_ENSEMBLE or RUN_AGENT_CLUSTER or RUN_EVERY_AGENT_NN):
                     for agent in agents:
                         agent.model.save(
                             'models/{}__{}.model'.format(
@@ -979,7 +989,7 @@ def main(args):
 
         # print("sai do if")
         # current_state, action, reward, new_current_state, done
-        if(RUN_ENSEMBLE or RUN_AGENT_CLUSTER):
+        if(RUN_ENSEMBLE or RUN_AGENT_CLUSTER or RUN_EVERY_AGENT_NN):
             for agent in agents:
                 agent.update_epsilon()
         else:
