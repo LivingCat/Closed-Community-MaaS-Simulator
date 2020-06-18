@@ -31,7 +31,7 @@ MAX_WAITING_TIME = 0.5
 #Credits
 N_CREDITS_DISCOUNT = 10
 CREDIT_VALUE = 0.05
-CREDIT_INCENTIVE = True
+CREDIT_INCENTIVE = False
 SOCIAL_CREDIT = False
 SOCIAL_PERCENT = 0.1
 
@@ -97,7 +97,7 @@ class Simulator:
 
         self.distance_dict = dict()
 
-        self.parking_lot = ParkingLot(400,200,1,0)
+        self.parking_lot = ParkingLot(400,200,0,0)
 
         self.run_ensamble = run_ensamble
         self.run_agent_cluster_bool = run_agent_cluster_bool
@@ -961,7 +961,7 @@ class Simulator:
                     else:
                         #check if the discount is bigger than the cost of the trip.
                             # if discount is bigger than discount is now equal to the cost, to avoid getting "negative cost"
-                        discount = min(discount, actor.rider_cost(rider.house_node))
+                        discount = min(discount, driver_cost)
 
                         #this means the user has the minimum amount of credits and will have a discounted trip
                         self.credits_used[actor.service] += N_CREDITS_DISCOUNT
@@ -1289,7 +1289,7 @@ class Simulator:
                         #check if the discount is bigger than the cost of the trip.
                             # if discount is bigger than discount is now equal to the cost, to avoid getting "negative cost"
                         discount = min(
-                                discount, actor.rider_cost(rider.house_node))
+                            discount, driver_cost)
                         self.credits_used[actor.service] += N_CREDITS_DISCOUNT
                         self.credits_used_run[actor.service]+= N_CREDITS_DISCOUNT
                         self.credits_used_run["total"] += N_CREDITS_DISCOUNT
@@ -1885,7 +1885,7 @@ class Simulator:
                         #check if the discount is bigger than the cost of the trip. 
                         # if discount is bigger than discount is now equal to the cost, to avoid getting "negative cost"
                         discount = min(
-                                discount, actor.rider_cost(rider.house_node))
+                            discount, driver_cost)
                         self.credits_used[actor.service] += N_CREDITS_DISCOUNT
                         self.credits_used_run[actor.service]+= N_CREDITS_DISCOUNT
                         self.credits_used_run["total"] += N_CREDITS_DISCOUNT
