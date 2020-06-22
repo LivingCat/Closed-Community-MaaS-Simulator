@@ -4,7 +4,7 @@ Main project source file.
 from typing import List, Tuple
 from ipdb import set_trace
 from actor import Actor
-from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs, plot_emissions_development, plot_number_users_development, plot_utility_development
+from data_plotting import plot_accumulated_actor_graph, plot_accumulated_edges_graphs, plot_emissions_development, plot_number_users_development, plot_utility_development, plot_emissions_development_per_user
 from simulator import Simulator
 from provider import Provider, Personal, Friends, STCP, Bicycle, Walking
 from graph import RoadGraph
@@ -445,6 +445,8 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
         plot_emissions_development(emissions_dict)
         plot_number_users_development(number_users_dict)
         plot_utility_development(average_utility_per_mode_all_runs)
+        plot_emissions_development_per_user(emissions_dict,number_users_dict)
+
     plt.waitforbuttonpress(0)  
 
     total_cost_list = []
@@ -779,11 +781,11 @@ def main(args):
     MIN_REWARD=1
     MODEL_NAME = 'Maas_simulator'
 
-    RUN_ENSEMBLE = True
+    RUN_ENSEMBLE = False
     RUN_AGENT_CLUSTER = False
     RUN_EVERY_AGENT_NN = False
     RUN_EVERY_AGENT_ENSEMBLE = False
-    RUN_EVERY_AGENT_FAST = False
+    RUN_EVERY_AGENT_FAST = True
     RUN_EVERY_AGENT_FAST_ENSEMBLE = False
 
     SAVE_POPULATION = False

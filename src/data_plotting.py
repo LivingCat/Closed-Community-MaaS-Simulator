@@ -135,3 +135,53 @@ def plot_utility_development(utility_dict: Dict[str, List[float]]):
     plt.ylabel("utility")
     plt.legend(loc='upper right')
     plt.show()
+
+
+def plot_emissions_development_per_user(emissions_dict: Dict[str, List[float]], number_users_dict: Dict[str, List[float]]):
+    print("am in plot emissions per user")
+    new_emissions_dict = {
+        "car" : [],
+        "bus": [],
+        "sharedCar": []
+    }
+
+    for service in emissions_dict.keys():
+        if(service == "total"):
+            continue
+        for index,_ in enumerate(emissions_dict[service]):
+            if(number_users_dict[service][index] == 0):
+                new_emissions_dict[service].append(0)
+            else:
+                new_emissions_dict[service].append(
+                    emissions_dict[service][index]/number_users_dict[service][index])
+
+    fig = plt.figure()
+
+    print("tou no plot_emissions_development per user")
+
+    ax1 = fig.add_subplot(111)
+
+    for key in new_emissions_dict:
+        ax1.plot(new_emissions_dict[key], label=key, alpha=0.4)
+
+    plt.xlabel("runs")
+    plt.ylabel("emissions CO2 (g)/user")
+    plt.legend(loc='upper right')
+    plt.show()
+
+
+# def plot_emissions_development_per_actor(emissions_dict, number_actors_dict):
+#     print("am in emissions per actor")
+#     new_emissions_dict = {
+#         "car": []
+#         "bus": [],
+#         "sharedCar": []
+#     }
+
+#     for service in emissions_dict.keys():
+#         for run in emissions_dict[service]:
+#             if(number_actors_dict == 0):
+#                 new_emissions_dict[service].append(0)
+#             else:
+#                 new_emissions_dict[service].append(emissions_dict[service][run]/number_actors_dict[service][run])
+
