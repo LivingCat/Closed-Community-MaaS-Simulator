@@ -12,7 +12,7 @@ from user import User, Personality
 from queue import PriorityQueue
 from utils import softmax_travel_times, compute_average_over_time, UnimodalDistribution, get_time_from_traffic_distribution
 from statistics import SimStats
-from DeepRL import DQNAgent
+from DeepRL import DQNAgent, FastAgent
 from pprint import pprint
 from collections import defaultdict
 from tqdm import trange
@@ -31,7 +31,7 @@ import copy
 
 import csv
 
-run_name = "agentcluster_800_users_3000_newpoly5"
+run_name = "ensemble_100_free"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -779,10 +779,12 @@ def main(args):
     MIN_REWARD=1
     MODEL_NAME = 'Maas_simulator'
 
-    RUN_ENSEMBLE = False
+    RUN_ENSEMBLE = True
     RUN_AGENT_CLUSTER = False
     RUN_EVERY_AGENT_NN = False
-    RUN_EVERY_AGENT_ENSEMBLE = True
+    RUN_EVERY_AGENT_ENSEMBLE = False
+    RUN_EVERY_AGENT_FAST = False
+    RUN_EVERY_AGENT_FAST_ENSEMBLE = False
 
     SAVE_POPULATION = False
     IMPORT_POPULATION = True
@@ -846,6 +848,15 @@ def main(args):
             dict_agents[i] = (DQNAgent(n_inputs, n_output, n_agent), DQNAgent(n_inputs, n_output, (n_agent+1)), DQNAgent(
                 n_inputs, n_output, (n_agent+2)), DQNAgent(n_inputs, n_output, (n_agent+3)))
             n_agent += 4
+    elif(RUN_EVERY_AGENT_FAST):
+        for i in range(input_config["users"]["num_users"]):
+            agents.append(FastAgent(n_output, n_agent))
+            n_agent += 1
+    elif(RUN_EVERY_AGENT_FAST_ENSEMBLE):
+        for i in keys:
+            dict_agents[i] = (FastAgent(n_output, n_agent), FastAgent(
+                n_output, n_agent + 1), FastAgent(n_output, n_agent + 2), FastAgent(n_output, n_agent + 3))
+            n_agent += 4
     else:
         agent = DQNAgent(n_inputs, n_output,n_agent)
     # gather stats from all runs
@@ -906,6 +917,8 @@ def main(args):
             for key in dict_agents.keys():
                 for agent in dict_agents[key]:
                     agent.tensorboard.step = episode
+        elif(RUN_EVERY_AGENT_FAST or RUN_EVERY_AGENT_FAST_ENSEMBLE):
+            pass
         else:            
             agent.tensorboard.step = episode
 
@@ -923,9 +936,13 @@ def main(args):
             final_users = sim.run_every_agent_nn(agents)
         elif(RUN_EVERY_AGENT_ENSEMBLE):
             final_users = sim.run_every_agent_ensemble(dict_agents)
+        elif(RUN_EVERY_AGENT_FAST):
+            final_users = sim.run_every_agent_fast(agents)
+        elif(RUN_EVERY_AGENT_FAST_ENSEMBLE):
+            final_users = sim.run_every_agent_fast_ensemble(dict_agents)
         else:
-            final_users = sim.run(agent)
-            # final_users = sim.run_descriptive()
+            # final_users = sim.run(agent)
+            final_users = sim.run_descriptive()
 
         utility_per_mode_per_run = {
             "Personal": [],
@@ -986,40 +1003,42 @@ def main(args):
                     for agent in dict_agents[key]:
                         agent.tensorboard.update_stats(
                             reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=agent.epsilon)
+            elif(RUN_EVERY_AGENT_FAST or RUN_EVERY_AGENT_FAST_ENSEMBLE):
+                pass
             else:
                 agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=agent.epsilon)
 
             # Save model, but only when min reward is greater or equal a set value
-            if min_reward >= MIN_REWARD:
-                if(RUN_ENSEMBLE or RUN_AGENT_CLUSTER or RUN_EVERY_AGENT_NN):
-                    for agent in agents:
-                        agent.model.save(
-                            'models/{}__{}.model'.format(
-                                MODEL_NAME, int(time.time())
-                            ))
-                    # agents[0].model.save(
-                    #      'models/{}__{}.model'.format(
-                    #          MODEL_NAME, int(time.time())
-                    #      ))
-                elif(RUN_EVERY_AGENT_ENSEMBLE):
-                    for key in dict_agents.keys():
-                        for agent in dict_agents[key]:
-                            agent.model.save(
-                                'models/{}__{}.model'.format(
-                                    MODEL_NAME, int(time.time())
-                                ))
-                else:
-                    agent.model.save(
-                        'models/{}__{}.model'.format(
-                            MODEL_NAME, int(time.time())
-                        ))
+            # if min_reward >= MIN_REWARD:
+            #     if(RUN_ENSEMBLE or RUN_AGENT_CLUSTER or RUN_EVERY_AGENT_NN):
+            #         for agent in agents:
+            #             agent.model.save(
+            #                 'models/{}__{}.model'.format(
+            #                     MODEL_NAME, int(time.time())
+            #                 ))
+            #         # agents[0].model.save(
+            #         #      'models/{}__{}.model'.format(
+            #         #          MODEL_NAME, int(time.time())
+            #         #      ))
+            #     elif(RUN_EVERY_AGENT_ENSEMBLE):
+            #         for key in dict_agents.keys():
+            #             for agent in dict_agents[key]:
+            #                 agent.model.save(
+            #                     'models/{}__{}.model'.format(
+            #                         MODEL_NAME, int(time.time())
+            #                     ))
+            #     else:
+            #         agent.model.save(
+            #             'models/{}__{}.model'.format(
+            #                 MODEL_NAME, int(time.time())
+            #             ))
 
         # print("sai do if")
         # current_state, action, reward, new_current_state, done
-        if(RUN_ENSEMBLE or RUN_AGENT_CLUSTER or RUN_EVERY_AGENT_NN):
+        if(RUN_ENSEMBLE or RUN_AGENT_CLUSTER or RUN_EVERY_AGENT_NN or RUN_EVERY_AGENT_FAST):
             for agent in agents:
                 agent.update_epsilon()
-        elif(RUN_EVERY_AGENT_ENSEMBLE):
+        elif(RUN_EVERY_AGENT_ENSEMBLE or RUN_EVERY_AGENT_FAST_ENSEMBLE):
              for key in dict_agents.keys():
                 for agent in dict_agents[key]:
                     agent.update_epsilon()
