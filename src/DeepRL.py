@@ -19,7 +19,7 @@ MIN_REPLAY_MEMORY_SIZE = 1000
 MINIBATCH_SIZE = 64  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 # MODEL_NAME = '2x256'
-MODEL_NAME = 'normal'
+MODEL_NAME = 'ensemble'
 MIN_REWARD = -200  # For model save
 MEMORY_FRACTION = 0.20
 
@@ -106,7 +106,7 @@ class DQNAgent:
 
         # Custom tensorboard object
         self.tensorboard = ModifiedTensorBoard(
-            log_dir="logs/{}-{}-{}-800-2".format(MODEL_NAME, int(time.time()), self.number))
+            log_dir="logs/{}-{}-{}-100-l5-free".format(MODEL_NAME, int(time.time()), self.number))
 
         # Used to count when to update target network with main network's weights
         self.target_update_counter = 0
@@ -187,6 +187,150 @@ class DQNAgent:
     def update_epsilon(self):
         self.epsilon *= EPSILON_DECAY
         self.epsilon = max(MIN_EPSILON, self.epsilon)
+
+
+# Agent class
+class FastAgent:
+    def __init__(self, output_dim: int, number: int):
+        self.output_dim = output_dim
+        self.number = number
+
+        self.REPLAY_MEMORY_SIZE = 200
+        self.MIN_REPLAY_MEMORY_SIZE = 20
+
+        self.weights_91 = {
+            '0-6':0.5,
+            '7-29':0.3,
+            '30-89':0.15,
+            '90':0.05
+
+        }
+
+        self.weights_30 = {
+            '0-6':0.5,
+            '7':0.5
+        }
+
+        self.weights_90 = {
+            '0-6': 0.5,
+            '7-29': 0.3,
+            '30': 0.2,
+
+        }
+
+       
+
+        self.predicted_rewards = [0 for _ in range(output_dim)]
+
+
+        self.replay_memory = []
+
+        for _ in range(output_dim):
+            self.replay_memory.append(deque(maxlen=self.REPLAY_MEMORY_SIZE))
+
+
+
+        # Used to count when to update target network with main network's weights
+        self.target_update_counter = 0
+        self.epsilon = 1
+
+    # Adds step's data to a memory replay array
+    # (observation space, action, reward, new observation space, done)
+    def update_replay_memory(self, transition):
+        # print("update replay memory")
+        # print(transition[1])
+        # print(transition[2])
+        # print(self.replay_memory[transition[1]])
+        self.replay_memory[transition[1]].append(transition[2])
+
+    # Trains
+    def train(self, terminal_state, step):
+        # Start training only if certain number of samples is already saved
+        min_rep = min([ len(i) for i in self.replay_memory])
+       
+        if min_rep < self.MIN_REPLAY_MEMORY_SIZE:
+            return
+  
+        # for index,action in enumerate(self.replay_memory):
+        #     mean = 0
+        #     # mean = np.mean(self.replay_memory[index])
+        #     for mem_index,mem in enumerate(self.replay_memory[index]):
+        #         for key in self.weights.keys():
+        #             key_copy = str(key)
+        #             limits = key_copy.split("-")
+        #             limits = [int(limit) for limit in limits]
+
+        #             #we are within the first three months
+        #             if(len(limits) == 2):
+        #                 if(mem_index >= limits[0] and mem_index <= limits[1]):
+        #                     mean = mean +  mem* self.weights[key]
+        #             elif(len(limits) == 1):
+        #                 if(index >= limits[0]):
+        #                     mean = mean * self.weights[key]
+
+        # print("am in train")
+        for index,action in enumerate(self.replay_memory):
+            mean = 0
+            mem_len = len(self.replay_memory[index])
+            # print("index",index)
+            # print("mem ", self.replay_memory[index])
+            # print("memories len ", len(self.replay_memory[index]))
+
+            if(len(self.replay_memory[index]) < 30):
+                weights_use = self.weights_30
+                # print("weights 30")
+            elif(len(self.replay_memory[index]) >= 30 and len(self.replay_memory[index]) < 90):
+                weights_use = self.weights_90
+                # print("weights 90")
+            else:
+                weights_use = self.weights_91
+                # print("weights 91")
+
+            for key in weights_use.keys():
+                key_copy = str(key)
+                limits = key_copy.split("-")
+                limits = [int(limit) for limit in limits]
+
+                elements = np.array(self.replay_memory[index])
+
+                #we are within the first three months
+                if(len(limits) == 2):
+                    if(mem_len >= limits[0] and mem_len <= limits[1]):
+                        mean = mean + weights_use[key] * \
+                            np.mean(elements[limits[0]:mem_len])
+                        # print("mean ", mean)
+                        break
+                    else:
+                        mean = mean + \
+                            weights_use[key] * \
+                            np.mean(elements[limits[0]:(limits[1]+1)])
+                        # print("mean ", mean)
+                      
+                elif(len(limits) == 1):
+                    if(mem_len >= limits[0]):
+                        mean = mean + weights_use[key] * \
+                            np.mean(elements[limits[0]:mem_len])
+                        # print("mean ", mean)
+                
+
+            self.predicted_rewards[index] = mean
+            # print("final mean",mean)
+
+
+        
+            # self.predicted_rewards[index] = np.mean(self.replay_memory[index])
+        
+
+    # Returns max predicted reward
+    def get_qs(self, state):
+        return self.predicted_rewards.index(max(self.predicted_rewards))
+
+    def update_epsilon(self):
+        self.epsilon *= EPSILON_DECAY
+        self.epsilon = max(MIN_EPSILON, self.epsilon)
+
+
+
 
 
 # agent = DQNAgent()
