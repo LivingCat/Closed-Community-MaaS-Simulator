@@ -18,6 +18,10 @@ from collections import defaultdict
 from tqdm import trange
 from functools import partial
 
+from datetime import datetime
+import time
+
+
 
 import argparse
 import numpy as np
@@ -31,7 +35,7 @@ import copy
 
 import csv
 
-run_name = "ensemble_100_free"
+run_name = "all_services_800_paid_10"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -185,12 +189,12 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
 
     print("resultados iniciais")
 
-    contador = 1
+    # contador = 1
 
     for s in all_s:
-        print(contador)
-        print("\n")
-        contador += 1
+        # print(contador)
+        # print("\n")
+        # contador += 1
         for key in s.actors_atis.keys():
             s.actors_atis[key] = s.actors_atis[key][1:]
             for tuple in s.actors_atis[key]:
@@ -203,6 +207,7 @@ def average_all_results(all_s: List[SimStats], display_plots: bool, users_lost: 
 
     print("actors flow ")
     for key in actors_flow.keys():
+        print("key ", key)
         for actor_tuple in actors_flow[key]:
             actors_flow_acc[key].append([actor_tuple[0],
                                         actor_tuple[1] + actors_flow_acc[key][-1][1]])
@@ -669,7 +674,7 @@ def get_user_current_state(user: User):
 def write_user_info(actors: List[Actor], run: int, file:str, final_users: List):
     run_header = ["Run"]
     run_row = [run]
-    fields = ["Course", "Grade", "Cluster", "Willingness to pay", "Willingness to wait", "Awareness", "Comfort preference",
+    fields = ["ID","Course", "Grade", "Cluster", "Willingness to pay", "Willingness to wait", "Awareness", "Comfort preference",
               "has private", "has bike","Friendliness", "Suscetible", "Transport", "Urban", "Willing", "Distance from Destination", "House Node", "Car Capacity", "Users he picked up","Utility","Transportation"]
 
     # writing to csv file
@@ -691,7 +696,7 @@ def write_user_info(actors: List[Actor], run: int, file:str, final_users: List):
                         util = u["utility"]
                         break
                 personality = us.personality
-                info = [us.course, us.grade, us.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
+                info = [us.user_id,us.course, us.grade, us.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
                     us.has_private, us.has_bike,personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
                         us.distance_from_destination, us.house_node, us.capacity, len(us.users_to_pick_up), util, us.provider.service]
                 csvwriter.writerow(info)
@@ -701,7 +706,7 @@ def write_user_info(actors: List[Actor], run: int, file:str, final_users: List):
                     if (u["user"] == rider):
                         util = u["utility"]
                         break
-                info = [rider.course, rider.grade, rider.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
+                info = [rider.user_id,rider.course, rider.grade, rider.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
                         rider.has_private, rider.has_bike, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
                         rider.distance_from_destination, rider.house_node, rider.capacity, len(rider.users_to_pick_up), util,rider.provider.service]
                 csvwriter.writerow(info)
@@ -810,6 +815,8 @@ def main(args):
     # providers = [STCP()]
     # providers = [Bicycle()]
     providers = [Personal(), Friends(), STCP(), Bicycle(), Walking()]
+    # providers = [Personal(), STCP(), Bicycle(), Walking()]
+    # providers = [Friends(), STCP(), Bicycle(), Walking()]
 
     sim = Simulator(config=args,
                     input_config = input_config,
@@ -908,7 +915,10 @@ def main(args):
         "total": []
     }
 
+    start_time = time.time()
     for episode in trange(args.n_runs, leave=False):
+
+        
         # print(" episode")
         # print(episode)
         # Update tensorboard step every episode
@@ -926,6 +936,12 @@ def main(args):
 
         if(episode == 0):
             sim.first_run = True
+            with open("progress.txt", 'a+') as f:
+                # tqdm.write(s, file=f, end='\n', nolock=False)
+                now = datetime.now()
+                current_time = now.strftime("%H:%M:%S")
+                print("Start Time =", current_time, file=f)
+                f.close()
         else:
             sim.first_run = False
 
@@ -962,6 +978,24 @@ def main(args):
         episode_reward = 0
         # step = 1
            # Transform new continous state to new discrete state and count reward
+
+
+        # if (episode >= last_episodes):
+        #     with open("progress.txt", 'a+') as f:
+        #         # tqdm.write(s, file=f, end='\n', nolock=False)
+        #         now = datetime.now()
+        #         current_time = now.strftime("%H:%M:%S")
+        #         print("Current Time =", current_time, file=f)
+        #         f.close()
+        if(episode == args.n_runs-1):
+            with open("progress.txt", 'a+') as f:
+                now = datetime.now()
+                current_time = now.strftime("%H:%M:%S")
+                print("Finish Time =", current_time, file=f)
+                end_time = time.time()
+                print(end_time - start_time,file=f)
+                f.close()
+    
         for user_info in final_users:
             episode_reward += user_info["utility"]
 
@@ -971,6 +1005,7 @@ def main(args):
             # bu.append(episode_reward)
 
             if(episode >= last_episodes):
+                
                 time_per_mode_last_runs[user_info["commute_output"].mean_transportation].append(user_info["commute_output"].total_time)
 
                 # print(utility_per_mode_last_runs_dict)
@@ -1046,6 +1081,8 @@ def main(args):
                     agent.update_epsilon()
         else:
             agent.update_epsilon()
+
+
 
         # agent.update_epsilon()
         # print("update epsilon")
@@ -1165,6 +1202,7 @@ def main(args):
         write_dict_file(average_qos_time_final_run, f)
         print("Quality of Service - Cost last run \n",file=f)
         write_dict_file(average_qos_cost_final_run, f)
+
     
 
 
