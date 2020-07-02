@@ -155,6 +155,14 @@ def plot_emissions_development_per_user(emissions_dict: Dict[str, List[float]], 
                 new_emissions_dict[service].append(
                     emissions_dict[service][index]/number_users_dict[service][index])
 
+    with open("emissions_per_user.txt", 'w+') as f:
+        for key in new_emissions_dict.keys():
+            print(key, file=f)
+            print(new_emissions_dict[key], file=f)
+            print("\n",file=f)
+
+    # print(new_emissions_dict["sharedCar"])
+
     fig = plt.figure()
 
     print("tou no plot_emissions_development per user")
