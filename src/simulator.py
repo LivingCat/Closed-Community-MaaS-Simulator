@@ -97,9 +97,9 @@ class Simulator:
 
         self.distance_dict = dict()
 
-        # self.parking_lot = ParkingLot(400,200,1,0)
-        self.parking_lot = ParkingLot(50,25,0,0)
-
+        self.parking_lot = ParkingLot(200,100,10,0)
+        # self.parking_lot = ParkingLot(50,25,0,0)
+        # self.parking_lot = ParkingLot(400,200,0,0)
 
         self.run_ensamble = run_ensamble
         self.run_agent_cluster_bool = run_agent_cluster_bool
@@ -385,7 +385,11 @@ class Simulator:
 
     def choose_mode_descriptive(self):
         for user in self.users:
+            chosen = False
             percents_cluster = self.input_config["users"]["clusters"][user.cluster]["original_choices"]
+            # print("cluster ", user.cluster)
+            # print("percents ", percents_cluster)
+            # print("dist", user.distance_from_destination)
             # provider = self.providers[action]
             # user.mean_transportation = provider.service
             # user.provider = provider
@@ -406,7 +410,8 @@ class Simulator:
                             if(provider.service == mode[0]):
                                 user.mean_transportation = provider.service
                                 user.provider = provider
-                        break
+                                chosen = True
+                    
                 #upper bound
                 if(len(limits) == 1):
                     if(user.distance_from_destination >= limits[0]):
@@ -415,9 +420,11 @@ class Simulator:
                             if(provider.service == mode[0]):
                                 user.mean_transportation = provider.service
                                 user.provider = provider
-                        break
+                                chosen = True
                     else: 
                         print("erro")
+                if(chosen):
+                    break
                 
               
 
@@ -3031,6 +3038,8 @@ class Simulator:
                 self.import_pop()
                 #Create distance dictionary
                 self.create_dist_dict()
+                # for user in self.users:
+                #     user.has_private = True
             else:
                 self.users = self.create_users()
                 #Create distance dictionary
@@ -3182,11 +3191,15 @@ class Simulator:
                 else:
                     commute_out = CommuteOutput(
                         actor.cost + actor.get_parking_cost(), actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                # print("cost ", actor.cost)
+                # print("pa ", actor.get_parking_cost())
+                
                 user_info = dict()
                 user_info["user"] = actor.user
                 user_info["commute_output"] = commute_out
                 user_info["utility"] = actor.user.calculate_utility_value(
                     commute_out)
+                
                 #update dos creditos do user
                 final_users.append(user_info)
             elif(actor.service == "sharedCar"):
@@ -3258,6 +3271,7 @@ class Simulator:
                             #this means the user has the minimum amount of credits and will have a discounted trip
                             # print(discount)
                             # print("gastei creditos!")
+                            discount = min(discount, rider_cost)
                             self.credits_used[actor.service] += N_CREDITS_DISCOUNT
                             self.credits_used_run[actor.service] += N_CREDITS_DISCOUNT
                             self.credits_used_run["total"] += N_CREDITS_DISCOUNT
@@ -3699,12 +3713,12 @@ class Simulator:
     def run_descriptive(self):
         # Empty actors list, in case of consecutive calls to this method
         self.actors = []
-        print("tou no run descriptive")
         # Cleaning road graph
         self.graph = RoadGraph(self.input_config)
 
         if(self.first_run):
             print("first run")
+            print("tou no run descriptive")
 
             if(self.import_population):
                 #Creates users using an existent file
@@ -3749,6 +3763,15 @@ class Simulator:
             cyclists_not_possible = list(
                 set(possible_cyclists) - set(cyclists))
 
+        walkers = []
+        possible_walkers = [user for user in self.users if (user.mean_transportation == "walk")]
+        walking_not_possible = [user for user in self.users if(
+            user.mean_transportation == "walk" and not user.can_walk)]
+        if(len(possible_walkers) > 0):
+            walkers = list(set(possible_walkers) - set(walking_not_possible))
+            
+            
+
         # Create the Simulation Actors
         event_queue = PriorityQueue()
 
@@ -3786,6 +3809,8 @@ class Simulator:
                         users_turn_actors.append(bus_driver)
             if(service == "bike"):
                 users_turn_actors = users_turn_actors + cyclists
+            if(service == "walk"):
+                users_turn_actors = users_turn_actors + walkers
 
         # print("depois de ver se temos stcp ", len(users_turn_actors))
 
@@ -3793,7 +3818,6 @@ class Simulator:
 
         # print("users {}".format(len(self.users)))
 
-        walking_not_possible = [user for user in self.users if(user.mean_transportation == "walk" and not user.can_walk)]
 
         lost = dict()
         lost["car"] = len(users_no_car_but_chose_car)
