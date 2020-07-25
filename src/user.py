@@ -59,6 +59,7 @@ class User:
   
 
     static_model_id = 0
+    # static_model_id = 1
 
 
     def __init__(self, personality: Personality, start_time: float, cluster: str, course: str, grade:str, salary: float, budget: float, available_seats: int, distance_from_destination: int, has_bike: bool, has_private: bool):
@@ -133,6 +134,9 @@ class User:
         # return (-1/(self.personality.willingness_to_pay * 10))* (normalize_cost**2) + 1
         # return (-1/(self.personality.willingness_to_pay * 5))* (normalize_cost**2) + 1
         # return ((-1/(self.personality.willingness_to_pay * 2)) * normalize_cost + 1)
+        # print("will pay", self.personality.willingness_to_pay)
+        # print("cost util", ((-1/(self.personality.willingness_to_pay * 5))
+        #                     * normalize_cost + 1))
         return ((-1/(self.personality.willingness_to_pay * 5)) * normalize_cost + 1)
         # return ((-1/(self.personality.willingness_to_pay * 10)) * normalize_cost + 1)
 

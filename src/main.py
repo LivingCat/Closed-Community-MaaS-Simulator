@@ -792,6 +792,7 @@ def main(args):
     RUN_EVERY_AGENT_ENSEMBLE = False
     RUN_EVERY_AGENT_FAST = True
     RUN_EVERY_AGENT_FAST_ENSEMBLE = False
+    RUN_DESCRIPTIVE = False
 
     SAVE_POPULATION = False
     IMPORT_POPULATION = True
@@ -958,9 +959,11 @@ def main(args):
             final_users = sim.run_every_agent_fast(agents)
         elif(RUN_EVERY_AGENT_FAST_ENSEMBLE):
             final_users = sim.run_every_agent_fast_ensemble(dict_agents)
-        else:
-            # final_users = sim.run(agent)
+        elif(RUN_DESCRIPTIVE):
             final_users = sim.run_descriptive()
+        else:
+            final_users = sim.run(agent)
+           
 
         utility_per_mode_per_run = {
             "Personal": [],
