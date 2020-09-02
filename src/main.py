@@ -35,7 +35,7 @@ import copy
 
 import csv
 
-run_name = "all_services_800_paid_10"
+run_name = "teste_nova_free_parking"
 CARBON_TAX = 180.0
 
 def parse_args():
@@ -674,9 +674,13 @@ def get_user_current_state(user: User):
 def write_user_info(actors: List[Actor], run: int, file:str, final_users: List):
     run_header = ["Run"]
     run_row = [run]
-    fields = ["ID","Course", "Grade", "Cluster", "Willingness to pay", "Willingness to wait", "Awareness", "Comfort preference",
-              "has private", "has bike","Friendliness", "Suscetible", "Transport", "Urban", "Willing", "Distance from Destination", "House Node", "Car Capacity", "Users he picked up","Utility","Transportation"]
+    ########################## ORIGINAL ################################
+    #fields = ["ID","Course", "Grade", "Cluster", "Willingness to pay", "Willingness to wait", "Awareness", "Comfort preference",
+       #       "has private", "has bike","Friendliness", "Suscetible", "Transport", "Urban", "Willing", "Distance from Destination", "House Node", "Car Capacity", "Users he picked up","Utility","Transportation"]
+    ######################################################################
 
+    fields = ["ID", "Course", "Grade", "Cluster", "Willingness to pay", "Willingness to wait", "Awareness", "Comfort preference",
+              "has private", "has bike", "dim1", "dim2", "dim3", "dim4", "dim5", "dim6", "Distance from Destination", "House Node", "Car Capacity", "Users he picked up", "Utility", "Transportation"]
     # writing to csv file
     
     with open(file, 'a+', newline='') as csvfile:
@@ -697,7 +701,7 @@ def write_user_info(actors: List[Actor], run: int, file:str, final_users: List):
                         break
                 personality = us.personality
                 info = [us.user_id,us.course, us.grade, us.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
-                    us.has_private, us.has_bike,personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
+                        us.has_private, us.has_bike, personality.dim1, personality.dim2, personality.dim3, personality.dim4, personality.dim5, personality.dim6,
                         us.distance_from_destination, us.house_node, us.capacity, len(us.users_to_pick_up), util, us.provider.service]
                 csvwriter.writerow(info)
             for rider in act.user.users_to_pick_up:
@@ -707,7 +711,7 @@ def write_user_info(actors: List[Actor], run: int, file:str, final_users: List):
                         util = u["utility"]
                         break
                 info = [rider.user_id,rider.course, rider.grade, rider.cluster, personality.willingness_to_pay, personality.willingness_to_wait, personality.awareness, personality.comfort_preference,
-                        rider.has_private, rider.has_bike, personality.friendliness, personality.suscetible, personality.transport, personality.urban, personality.willing,
+                        rider.has_private, rider.has_bike, personality.dim1, personality.dim2, personality.dim3, personality.dim4, personality.dim5, personality.dim6,
                         rider.distance_from_destination, rider.house_node, rider.capacity, len(rider.users_to_pick_up), util,rider.provider.service]
                 csvwriter.writerow(info)
     
@@ -795,7 +799,7 @@ def main(args):
     RUN_DESCRIPTIVE = False
 
     SAVE_POPULATION = False
-    IMPORT_POPULATION = True
+    IMPORT_POPULATION = False
     
 
     if args.traffic_peaks is None:

@@ -21,6 +21,7 @@ import csv
 from parking_lot import ParkingLot
 
 
+
 DEFAULT_VALUE_NUM = -100.0
 DEFAULT_VALUE_STRING = ""
 MIN_HOUSE_DISTANCE = 1
@@ -36,7 +37,7 @@ SOCIAL_PERCENT = 0.1
 
 #Agents indexes
 AGENT_COST_INDEX = 0
-AGENT_TIME_INDEX = 1
+AGENT_TIME_INDEX= 1
 AGENT_ENVIRONMENT_INDEX = 2
 AGENT_COMFORT_INDEX = 3
 
@@ -96,7 +97,7 @@ class Simulator:
 
         self.distance_dict = dict()
 
-        self.parking_lot = ParkingLot(200, 100, 0, 0)
+        self.parking_lot = ParkingLot(200,100,10,0)
 
         self.run_ensamble = run_ensamble
         self.run_agent_cluster_bool = run_agent_cluster_bool
@@ -116,8 +117,7 @@ class Simulator:
     def calculate_distance_nodes_destination(self):
         distance = []
         for node in range(0, int(self.input_config["graph"]["num_nodes"])):
-            dist = nx.shortest_path_length(
-                self.graph.graph, source=node, target=self.graph.nend)
+            dist = nx.shortest_path_length(self.graph.graph,source = node, target=self.graph.nend)
             distance.append(dist)
         return distance
 
@@ -128,8 +128,7 @@ class Simulator:
 
         #Go through all the users of the system and input num_friends for each of them following the distribution
         for user in self.users:
-            num_friend = int(dist.rvs(
-                loc=friend_distrib_info["mean"], scale=friend_distrib_info["stand_div"]))
+            num_friend = int(dist.rvs(loc=friend_distrib_info["mean"], scale=friend_distrib_info["stand_div"]))
             if(num_friend > friend_distrib_info["max"]):
                 user.num_friends = friend_distrib_info["max"]
             else:
@@ -145,16 +144,15 @@ class Simulator:
             # 1 - friends from same course but different grades (+1 or -1) (20%)
             # 2 - friends from same grade but different courses (20%)
             # 3 - friends from different courses and grades (10%)
-            friend_categories = [0, 1, 2, 3]
-            friend_categories_probs = [0.5, 0.2, 0.2, 0.1]
+            friend_categories = [0,1,2,3]
+            friend_categories_probs = [0.5,0.2,0.2,0.1]
 
             #categories
-            cats = random.choices(
-                friend_categories, weights=friend_categories_probs, k=user.num_friends)
+            cats = random.choices(friend_categories,weights = friend_categories_probs, k = user.num_friends)
             for cat in cats:
                 if(cat == 0):
                     for poss_friend in self.users:
-                       if(poss_friend != user and user.course == poss_friend.course and user.grade == poss_friend.grade and poss_friend.num_friends > 0 and (poss_friend not in user.friends)):
+                       if(poss_friend != user and user.course == poss_friend.course and user.grade == poss_friend.grade and poss_friend.num_friends > 0 and (poss_friend not in user.friends) ):
                            user.friends.append(poss_friend)
                            user.num_friends -= 1
                            poss_friend.friends.append(user)
@@ -162,8 +160,7 @@ class Simulator:
                            break
                 elif(cat == 1):
                     for poss_friend in self.users:
-                        grade_num = int(
-                            user.grade[(user.grade.index("_") + 1)])
+                        grade_num = int(user.grade[(user.grade.index("_") + 1)])
                         prev_grade_num = grade_num - 1
                         next_grade_num = grade_num + 1
                         prev_grade = "year_" + str(prev_grade_num)
@@ -189,27 +186,27 @@ class Simulator:
                             user.num_friends -= 1
                             poss_friend.friends.append(user)
                             poss_friend.num_friends -= 1
-                            break
+                            break              
 
         return True
 
     #Service selection when running mode is "Agent Cluster"
     #This mode means that we have a neural net responsible for each cluster
     #Neural net learns only with cluster members
-    def choose_mode_agent_cluster(self, agents: List[DQNAgent]):
+    def choose_mode_agent_cluster(self,agents: List[DQNAgent]):
 
         agent_clusters_dict = {
-            "cluster_0": 0,
-            "cluster_1": 1,
-            "cluster_2": 2,
-            "cluster_3": 3,
-            "cluster_4": 4
+            "cluster_0":0,
+            "cluster_1":1,
+            "cluster_2":2,
+            "cluster_3":3,
+            "cluster_4":4
         }
 
         for user in self.users:
             cluster_index = agent_clusters_dict[user.cluster]
             agent = agents[cluster_index]
-
+           
             while True:
                 if random.random() > agent.epsilon:
                     # Get action from Q table
@@ -255,18 +252,18 @@ class Simulator:
     def choose_mode_ensemble(self, agents: List[DQNAgent]):
 
         actions_dict = {
-            "agent_cost": -1,
-            "agent_time": -1,
-            "agent_environmental": -1,
-            "agent_comfort": -1
+            "agent_cost":-1,
+            "agent_time":-1,
+            "agent_environmental":-1,
+            "agent_comfort":-1
         }
 
         for user in self.users:
-            #Users chooses action to take
+        #Users chooses action to take
             while True:
                 #save the action each agent chose
-                for index, agent in enumerate(agents):
-                    if random.random() > agent.epsilon:
+                for index,agent in enumerate(agents):
+                    if random.random() > agent.epsilon: 
                         # Get action from Q table
                         current_state = np.array(user.get_user_current_state())
                         action = np.argmax(agent.get_qs(current_state))
@@ -288,21 +285,20 @@ class Simulator:
                 # random
 
                 count_action_dict = {
-                    "0": 0,
-                    "1": 0,
-                    "2": 0,
-                    "3": 0,
-                    "4": 0
+                    "0":0,
+                    "1":0,
+                    "2":0,
+                    "3":0,
+                    "4":0
                 }
 
                 for agent_choice in actions_dict:
                     choice = actions_dict[agent_choice]
                     count_action_dict[str(choice)] += 1
-
+                
                 maxi = max(count_action_dict.values())
-                indexes_max = [index for index in count_action_dict.keys(
-                ) if count_action_dict[index] == maxi]
-
+                indexes_max = [index for index in count_action_dict.keys() if count_action_dict[index] == maxi ]
+                
                 #if there is only one action that received the most votes
                 if(len(indexes_max) == 1):
                     provider = self.providers[int(indexes_max[0])]
@@ -314,7 +310,7 @@ class Simulator:
                     # print("random")
                     action = int(random.choice(indexes_max))
                     provider = self.providers[action]
-
+                                
                 #if the user chose to use "personal", as in, personal engine powered vehicle bu it doesnt own one, it gets a punishment
                 if((not user.has_private) and provider.name == "Personal"):
                     for agent in agents:
@@ -347,7 +343,7 @@ class Simulator:
                     break
             user.mean_transportation = provider.service
             user.provider = provider
-
+        
     #Service selection when running mode is "descriptive"
     #This mode means that the users don't have learning capability and choose service based on the percentages from the survey
     #These percentages differ between clusters and are defined in the JSON file as "original choices"
@@ -355,7 +351,7 @@ class Simulator:
         for user in self.users:
             chosen = False
             percents_cluster = self.input_config["users"]["clusters"][user.cluster]["original_choices"]
-
+            
             for key in percents_cluster.keys():
                 key_copy = str(key)
                 limits = key_copy.split("-")
@@ -371,24 +367,24 @@ class Simulator:
                                 user.mean_transportation = provider.service
                                 user.provider = provider
                                 chosen = True
-
+                    
                 #upper bound
                 if(len(limits) == 1):
                     if(user.distance_from_destination >= limits[0]):
-                        mode = random.choices(list(keys), list(values), k=1)
+                        mode = random.choices(list(keys),list(values),k=1)
                         for provider in self.providers:
                             if(provider.service == mode[0]):
                                 user.mean_transportation = provider.service
                                 user.provider = provider
                                 chosen = True
-                    else:
+                    else: 
                         print("error")
                 if(chosen):
                     break
-
+                
+              
     #Service selection when running on the default mode
     #Default mode has a single learner, using deep q-learning, that is responsible for all users
-
     def choose_mode(self, agent: DQNAgent):
         for user in self.users:
             #Users chooses action to take
@@ -421,7 +417,7 @@ class Simulator:
                             self.input_config["users"]["punishment_doesnt_have_mode"], 1, True))
                     agent.train(True, 1)
                 #user wants to walk but lives too far away
-                elif(provider.name == "Walking" and not self.graph.check_has_route(user.house_node, "walk")):
+                elif(provider.name == "Walking" and not self.graph.check_has_route(user.house_node,"walk")):
                     agent.update_replay_memory(
                         (user.get_user_current_state(), action,
                             self.input_config["users"]["punishment_doesnt_have_mode"], 1, True))
@@ -433,7 +429,7 @@ class Simulator:
 
     #Service selection when running mode is "every agent nn"
     #This mode means that each of the users has their personal learner agent that applies deep q-learning (using a neural net)
-    def choose_mode_every_agent_nn(self, agents):
+    def choose_mode_every_agent_nn(self,agents):
         for user in self.users:
             #Users chooses action to take
             agent = agents[user.user_id-1]
@@ -529,7 +525,7 @@ class Simulator:
                 maxi = max(count_action_dict.values())
                 indexes_max = [index for index in count_action_dict.keys(
                 ) if count_action_dict[index] == maxi]
-
+            
                 #if there is only one action that received the most votes
                 if(len(indexes_max) == 1):
                     provider = self.providers[int(indexes_max[0])]
@@ -619,33 +615,32 @@ class Simulator:
             user.mean_transportation = provider.service
             user.provider = provider
 
-    #Attribute house nodes to the users, according to the user's distance from destination
 
+    #Attribute house nodes to the users, according to the user's distance from destination 
     def add_house_nodes(self):
         distances = self.calculate_distance_nodes_destination()
         for user in self.users:
-            res_list = [i for i, value in enumerate(
-                distances) if value == user.distance_from_destination]
+            res_list = [i for i, value in enumerate(distances) if value == user.distance_from_destination]
             node = random.choice(res_list)
-            user.add_house_node(node)
+            user.add_house_node(node)   
 
     #Sorting drivers function
     #Sorts drivers by their available seats
-    def sort_drivers_fun(self, driver: User):
+    def sort_drivers_fun(self,driver: User):
         return driver.available_seats
 
     #Sorting buses function
     #Sorts buses by the length of their route
-    def sort_bus_func(self, bus_driver: User):
+    def sort_bus_func(self,bus_driver: User):
         return len(bus_driver.route)
 
     #Sorting actors function
     #Sorts actors by the time they arrived to the destination
-    def sort_actors_fun(self, actor: Actor):
+    def sort_actors_fun(self,actor:Actor):
         return actor.traveled_nodes[-1][0]
 
     #Pick random rider user from a list
-    def pick_random_rider(self, driver, users_want_ride_sharing, start_node):
+    def pick_random_rider(self,driver,users_want_ride_sharing,start_node):
          #start a new list for the possible riders
         possible_pickup = []
         poss_routes = self.graph.get_all_routes(
@@ -661,13 +656,13 @@ class Simulator:
             chosen_rider = ""
         else:
             chosen_rider = random.choice(possible_pickup)
-        return (chosen_rider, possible_pickup)
+        return (chosen_rider,possible_pickup)
 
     #Ride Sharing matching algorithm
-    def ride_sharing_matching(self, users: List['User']):
+    def ride_sharing_matching(self,users: List['User']):
         users_want_ride_sharing = users
         possible_drivers = [user for user in users if user.has_private]
-        possible_drivers.sort(reverse=True, key=self.sort_drivers_fun)
+        possible_drivers.sort(reverse= True, key=self.sort_drivers_fun)
 
         while(len(possible_drivers) > 0):
             driver = possible_drivers[0]
@@ -702,7 +697,7 @@ class Simulator:
             possible_pickup.remove(chosen_rider)
             driver.available_seats -= 1
 
-            while (driver.available_seats > 0 and len(possible_pickup) > 0):
+            while (driver.available_seats > 0 and len(possible_pickup) > 0 ):
                 #moves to the next node
                 #checks the users it can pickup from the new node
                 #start a new list for the possible riders
@@ -719,7 +714,7 @@ class Simulator:
                 #There doesn't exist any other user that the driver can pick up
                 if(len(possible_pickup) == 0):
                     break
-
+                    
                 chosen_rider = random.choice(possible_pickup)
                 pickup.append(chosen_rider)
 
@@ -740,37 +735,35 @@ class Simulator:
         return users_want_ride_sharing
 
     #Check if the time difference between driver and rider start time is within an acceptable amount
-    def in_time_slot(self, rider: User, driver: User):
+    def in_time_slot(self,rider:User, driver: User):
         wait_time = MAX_WAITING_TIME * rider.personality.willingness_to_wait
         return (abs(driver.start_time - rider.start_time) <= wait_time)
 
+
     #Public Transport Matching algorithm
-
     def public_transport_matching(self, users: List['User'], bus_users: List['User']):
-
+        
         users_want_public_transport = users
 
         users_not_matched = []
 
         bus_drivers = bus_users
-
+        
         bus_drivers.sort(key=self.sort_bus_func)
 
         for user in users_want_public_transport:
             #get buses that pass by the user's house
-            poss_buses = [bus for bus in bus_users if(
-                user.house_node in bus.schedule)]
+            poss_buses = [bus for bus in bus_users if(user.house_node in bus.schedule)]
             #there are no buses that pass through his house
             if(len(poss_buses) == 0):
                 users_not_matched.append(user)
                 continue
             else:
                 #there are buses that pass through his house
-                min_time = 1000  # big number
+                min_time = 1000 #big number
                 min_time_index = -1
-                for i, bus in enumerate(poss_buses):
-                    wait_time = abs(
-                        bus.schedule[user.house_node] - user.start_time)
+                for i,bus in enumerate(poss_buses):
+                    wait_time = abs(bus.schedule[user.house_node] - user.start_time)
                     #if the bus is within the time window
                     if(wait_time <= (MAX_WAITING_TIME * user.personality.willingness_to_wait)):
                         #if this bus get to the user faster
@@ -795,20 +788,20 @@ class Simulator:
         #     possible_pickup = []
         #     for user in users_want_public_transport:
         #         # and in_time_slot(user, driver)
-        #         if(user.house_node in driver.route and self.in_time_slot(user,driver)):
+        #         if(user.house_node in driver.route and self.in_time_slot(user,driver)): 
         #             possible_pickup.append(user)
 
         #     for user in possible_pickup:
         #         if(driver.available_seats > 0):
         #             pickup.append(user)
         #             driver.available_seats -= 1
-
+                    
         #     driver.users_to_pick_up = pickup
         #     users_want_public_transport = list(set(users_want_public_transport) - set(pickup))
         # return users_want_public_transport
 
     #Check if user can use the bicycle service
-    def can_cycle(self, users: List['User']):
+    def can_cycle(self,users: List['User']):
         allowed_users = []
         for user in users:
             has_path = self.graph.check_has_route(user.house_node, "bike")
@@ -831,8 +824,8 @@ class Simulator:
         while value < 16:
             bus_times.append(value)
             #check if the time is between any of peaks +- standard deviation
-            for peak, std in peaks:
-                if((peak - std) <= value < (peak + std)):
+            for peak,std in peaks:
+                if( (peak - std) <= value < (peak + std) ):
                     #If in peak time the bus comes every 10 minutes
                     value += 10/60
                     peak_time = True
@@ -841,7 +834,7 @@ class Simulator:
                 value += 0.5
             #reset the flag
             peak_time = False
-
+ 
         bus_users = []
         #for all the bus_times
         # for all bus routes
@@ -876,68 +869,68 @@ class Simulator:
             user.mean_transportation = ""
             user.credits_won_round = 0
 
-        self.parking_lot.available_seats_personal = self.parking_lot.lot_capacity - \
-            self.parking_lot.lot_capacity_shared
+        self.parking_lot.available_seats_personal = self.parking_lot.lot_capacity - self.parking_lot.lot_capacity_shared
         self.parking_lot.available_seats_shared = self.parking_lot.lot_capacity_shared
-
+        
         for key in self.credits_used_run.keys():
             self.credits_used_run[key] = 0
 
     #Insert into each of the learner agent's training set, the utility for that action when the user was unmatched
-    def unviable_choice_dict(self, dict_agents, users: List['User'], action_index: int):
+    def unviable_choice_dict(self,dict_agents, users: List['User'], action_index:int):
         for user in users:
             agents = dict_agents[user.user_id]
             for agent in agents:
                 agent.update_replay_memory((user.get_user_current_state(
                 ), action_index, self.input_config["users"]["unviable_choice"], 1, True))
 
-    #Insert into the learner agent's training set, the utility for that action when the user was unmatched
 
+    #Insert into the learner agent's training set, the utility for that action when the user was unmatched
     def unviable_choice(self, agents: List[DQNAgent], users: List['User'], action_index: int):
         if(len(agents) == 1):
             agent = agents[0]
             for user in users:
-                agent.update_replay_memory((user.get_user_current_state(
-                ), action_index, self.input_config["users"]["unviable_choice"], 1, True))
+                agent.update_replay_memory((user.get_user_current_state(), action_index, self.input_config["users"]["unviable_choice"], 1, True))
         else:
             for user in users:
                 agent = agents[user.user_id-1]
                 agent.update_replay_memory((user.get_user_current_state(
                 ), action_index, self.input_config["users"]["unviable_choice"], 1, True))
+                
 
     #Create buses schedule
-    def create_buses_schedule(self, buses: List[User]):
+    def create_buses_schedule(self,buses: List[User]):
         #go through all the buses and create their schedule
         for bus in buses:
             schedule = {}
-            for i, node in enumerate(bus.route):
+            for i,node in enumerate(bus.route):
                 schedule[node] = bus.start_time + i/STCP().get_speed()
             bus.schedule = schedule
 
     #Check if user can use their bicycle
-    def assess_can_cycle_var(self, user: User):
+    def assess_can_cycle_var(self,user:User):
         return (user.has_bike and self.graph.check_has_route(user.house_node, "bike"))
 
     #Check if user can possibly walk to the destination
-    def assess_can_walk_var(self, user: User):
+    def assess_can_walk_var(self,user:User):
         return (self.graph.check_has_route(user.house_node, "walk"))
 
     #Asses bicycling and walking variables values for all the users of the society
-    def assess_cycle_walk(self, users: List[User]):
+    def assess_cycle_walk(self,users: List[User]):
         for user in self.users:
             can_cycle = self.assess_can_cycle_var(user)
             can_walk = self.assess_can_walk_var(user)
             user.can_cycle = can_cycle
-            user.can_walk = can_walk
+            user.can_walk= can_walk
+
 
     ###############################################################################
     ################### Learning techniques ########################################
     ###############################################################################
-
+     
     #Run "agent cluster" technique
     #There are a total of 5 learning agents that apply deep q-learning for choosing the mobility service.
     #Each agent is in charge of learning and making decisions for a single cluster
-    def run_agent_cluster(self, agents: List[DQNAgent]):
+    def run_agent_cluster(self,agents: List[DQNAgent]):
         # Empty actors list, in case of consecutive calls to this method
         self.actors = []
         # Cleaning road graph
@@ -950,7 +943,7 @@ class Simulator:
             "cluster_3": 3,
             "cluster_4": 4
         }
-
+      
         if(self.first_run):
             print(" first run")
             print(" am in run agent cluster")
@@ -970,7 +963,7 @@ class Simulator:
                 self.create_friends()
 
             self.bus_users = self.create_buses()
-            self.create_buses_schedule(self.bus_users)
+            self.create_buses_schedule(self.bus_users)            
         else:
             self.reset()
         self.choose_mode_agent_cluster(agents)
@@ -979,7 +972,8 @@ class Simulator:
         users_public_transport = []
         for user in self.users:
             if (user.mean_transportation == "bus"):
-                users_public_transport.append(user)
+                users_public_transport.append(user)   
+
 
         #Take care of the ride sharing option - matching
         users_ride_sharing = []
@@ -993,18 +987,16 @@ class Simulator:
         #check if people that wish to ride share exist, if so match them
         ride_sharing_unmatched = []
         if(len(users_ride_sharing) > 0):
-            ride_sharing_unmatched = self.ride_sharing_matching(
-                users_ride_sharing)
+            ride_sharing_unmatched = self.ride_sharing_matching(users_ride_sharing)
 
-        cyclists = [user for user in self.users if(
-            user.mean_transportation == "bike")]
+        cyclists = [user for user in self.users if(user.mean_transportation == "bike")]
 
         walkers = [user for user in self.users if(
             user.mean_transportation == "walk")]
 
         # Create the Simulation Actors
         event_queue = PriorityQueue()
-
+   
         users_turn_actors = []
         for user in self.users:
             if(user.mean_transportation == "car"):
@@ -1018,11 +1010,10 @@ class Simulator:
             services.append(provider.service)
 
         public_transport_unmatched = []
-        for service in services:
+        for service in services:           
             if(service == "bus"):
                 # add bus drivers to the users who will become actors
-                public_transport_unmatched = self.public_transport_matching(
-                    users_public_transport, self.bus_users)
+                public_transport_unmatched = self.public_transport_matching(users_public_transport, self.bus_users)
                 #create actors representing only the buses that are going to pick people up
                 for bus_driver in self.bus_users:
                     if(len(bus_driver.users_to_pick_up) > 0):
@@ -1033,11 +1024,12 @@ class Simulator:
             if(service == "walk"):
                 users_turn_actors = users_turn_actors + walkers
 
+
         #Make list combining all the users that aren't gonna participate in this run
-        users_not_participating = public_transport_unmatched + ride_sharing_unmatched
+        users_not_participating = public_transport_unmatched  + ride_sharing_unmatched
 
         #Training the users to learn that the mode choice they made was not good, they weren't matched
-        for index in range(0, len(self.providers)):
+        for index in range(0,len(self.providers)):
             if(self.providers[index].service == "bus"):
                 public_index = index
 
@@ -1058,15 +1050,14 @@ class Simulator:
                         user for user in ride_sharing_unmatched if(user.cluster == cluster)]
                     if(len(ride_sharing_c) > 0):
                         self.unviable_choice(
-                            [agent], ride_sharing_c, ride_sharing_index)
-
+                            [agent], ride_sharing_c, ride_sharing_index) 
+        
         create_actor_events = self.create_actors_events(users_turn_actors)
 
         lost = dict()
         lost["sharedCar"] = len(ride_sharing_unmatched)
         lost["bus"] = len(public_transport_unmatched)
-        lost["total"] = len(ride_sharing_unmatched) + \
-            len(public_transport_unmatched)
+        lost["total"] = len(ride_sharing_unmatched) + len(public_transport_unmatched)
 
         self.users_lost[self.runn] = lost
 
@@ -1092,7 +1083,7 @@ class Simulator:
         self.actors.sort(key=self.sort_actors_fun)
         for a in self.actors:
             if (a.service == "car" or a.service == "sharedCar"):
-                parking_cost = self.parking_lot.park_vehicle(a.service)
+                parking_cost =  self.parking_lot.park_vehicle(a.service)
                 a.add_parking_cost(parking_cost)
 
         final_users = []
@@ -1115,11 +1106,8 @@ class Simulator:
             elif(actor.service == "sharedCar"):
                 #create commute output for the driver
                 travel_cost = actor.sharing_travel_cost() + actor.get_parking_cost()
-                travel_cost_portion = travel_cost / \
-                    (len(actor.user.users_to_pick_up) + 1)
-                driver_cost = travel_cost_portion - \
-                    actor.calculate_transporte_subsidy(
-                        len(actor.traveled_nodes)-1)
+                travel_cost_portion = travel_cost / (len(actor.user.users_to_pick_up) + 1)        
+                driver_cost = travel_cost_portion - actor.calculate_transporte_subsidy(len(actor.traveled_nodes)-1)
                 if(CREDIT_INCENTIVE):
                     discount = actor.user.credits_discount(
                         N_CREDITS_DISCOUNT, CREDIT_VALUE)
@@ -1141,8 +1129,7 @@ class Simulator:
                         commute_out = CommuteOutput(
                             driver_cost - discount, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 else:
-                    commute_out = CommuteOutput(
-                        driver_cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                    commute_out = CommuteOutput(driver_cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 user_info = dict()
                 user_info["user"] = actor.user
                 user_info["commute_output"] = commute_out
@@ -1155,14 +1142,11 @@ class Simulator:
                     #calculate the time the user spent waiting (difference between user starting time and time when the actor arrived to the house node)
                     time_waiting = actor.driver_reached_pick_up(
                         rider.house_node) - rider.start_time
-                    rider.time_spent_waiting = max(time_waiting, 0)
-                    rider_cost = travel_cost_portion - \
-                        actor.calculate_transporte_subsidy(
-                            actor.rider_traveled_dist(rider.house_node))
+                    rider.time_spent_waiting = max(time_waiting,0)
+                    rider_cost = travel_cost_portion - actor.calculate_transporte_subsidy(actor.rider_traveled_dist(rider.house_node))
 
                     if(CREDIT_INCENTIVE):
-                        discount = rider.credits_discount(
-                            N_CREDITS_DISCOUNT, CREDIT_VALUE)
+                        discount = rider.credits_discount(N_CREDITS_DISCOUNT, CREDIT_VALUE)
                         if(discount == -1):
                             #this means that the user doesn't have the minimum amount of credits to have discount
                             #since the user didnt spent credits, he will gain credits for his trip
@@ -1177,8 +1161,7 @@ class Simulator:
                             commute_out = CommuteOutput(rider_cost - discount, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     else:
-                        commute_out = CommuteOutput(rider_cost, actor.rider_travel_time(
-                            rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
+                        commute_out = CommuteOutput(rider_cost, actor.rider_travel_time(rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     user_info = dict()
                     user_info["user"] = rider
                     user_info["commute_output"] = commute_out
@@ -1203,7 +1186,7 @@ class Simulator:
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                         else:
                             #this means the user has the minimum amount of credits and will have a discounted trip
-                            #check if the discount is bigger than the cost of the trip.
+                            #check if the discount is bigger than the cost of the trip. 
                             # if discount is bigger than discount is now equal to the cost, to avoid getting "negative cost"
                             discount = min(
                                 discount, actor.rider_cost(rider.house_node))
@@ -1248,10 +1231,11 @@ class Simulator:
 
         return final_users
 
+
     #Run "ensemble" technique
     #There are a total of 4 learning agents that apply deep q-learning for choosing the mobility service.
     #Each agent is in charge of learning and making decisions for all the users, knowing only a segment of the utility function
-    def run_ensemble(self, agents: List[DQNAgent]):
+    def run_ensemble(self, agents: List[DQNAgent]):     
         # Empty actors list, in case of consecutive calls to this method
         self.actors = []
         # Cleaning road graph
@@ -1267,7 +1251,7 @@ class Simulator:
                 #Create distance dictionary
                 self.create_dist_dict()
             else:
-                self.users = self.create_users()
+                self.users = self.create_users()          
                 #Create distance dictionary
                 self.create_dist_dict()
                 #Assign house nodes to each user according to graph structure
@@ -1275,7 +1259,7 @@ class Simulator:
                 self.assess_cycle_walk(self.users)
                 self.create_friends()
             self.bus_users = self.create_buses()
-            self.create_buses_schedule(self.bus_users)
+            self.create_buses_schedule(self.bus_users)            
         else:
             self.reset()
 
@@ -1285,7 +1269,8 @@ class Simulator:
         users_public_transport = []
         for user in self.users:
             if (user.mean_transportation == "bus"):
-                users_public_transport.append(user)
+                users_public_transport.append(user)     
+
 
         #Take care of the ride sharing option - matching
         users_ride_sharing = []
@@ -1299,11 +1284,9 @@ class Simulator:
         #check if people that wish to ride share exist, if so match them
         ride_sharing_unmatched = []
         if(len(users_ride_sharing) > 0):
-            ride_sharing_unmatched = self.ride_sharing_matching(
-                users_ride_sharing)
+            ride_sharing_unmatched = self.ride_sharing_matching(users_ride_sharing)
 
-        cyclists = [user for user in self.users if(
-            user.mean_transportation == "bike")]
+        cyclists = [user for user in self.users if(user.mean_transportation == "bike")]
 
         walkers = [user for user in self.users if(
             user.mean_transportation == "walk")]
@@ -1324,31 +1307,31 @@ class Simulator:
             services.append(provider.service)
 
         public_transport_unmatched = []
-        for service in services:
+        for service in services:           
             if(service == "bus"):
                 # add bus drivers to the users who will become actors
-                public_transport_unmatched = self.public_transport_matching(
-                    users_public_transport, self.bus_users)
+                public_transport_unmatched = self.public_transport_matching(users_public_transport, self.bus_users)
                 #create actors representing only the buses that are going to pick people up
                 for bus_driver in self.bus_users:
                     if(len(bus_driver.users_to_pick_up) > 0):
                         users_turn_actors.append(bus_driver)
+
 
             if(service == "bike"):
                 users_turn_actors = users_turn_actors + cyclists
             if(service == "walk"):
                 users_turn_actors = users_turn_actors + walkers
 
+
         #Make list combining all the users that aren't gonna participate in this run
-        users_not_participating = public_transport_unmatched + ride_sharing_unmatched
+        users_not_participating = public_transport_unmatched  + ride_sharing_unmatched
 
         #Training the users to learn that the mode choice they made was not good, they weren't matched
-        for index in range(0, len(self.providers)):
+        for index in range(0,len(self.providers)):
             if(self.providers[index].service == "bus"):
                 public_index = index
                 for agent in agents:
-                    self.unviable_choice(
-                        [agent], public_transport_unmatched, public_index)
+                    self.unviable_choice([agent], public_transport_unmatched, public_index)
             elif(self.providers[index].service == "sharedCar"):
                 ride_sharing_index = index
                 for agent in agents:
@@ -1360,8 +1343,7 @@ class Simulator:
         lost = dict()
         lost["sharedCar"] = len(ride_sharing_unmatched)
         lost["bus"] = len(public_transport_unmatched)
-        lost["total"] = len(ride_sharing_unmatched) + \
-            len(public_transport_unmatched)
+        lost["total"] = len(ride_sharing_unmatched) + len(public_transport_unmatched)
 
         self.users_lost[self.runn] = lost
 
@@ -1384,11 +1366,11 @@ class Simulator:
             if not a.reached_dest():
                 a.total_travel_time = self.max_run_time
 
-        #Sort actors using time they arrived to the destination
+        #Sort actors using time they arrived to the destination 
         self.actors.sort(key=self.sort_actors_fun)
         for a in self.actors:
             if (a.service == "car" or a.service == "sharedCar"):
-                parking_cost = self.parking_lot.park_vehicle(a.service)
+                parking_cost =  self.parking_lot.park_vehicle(a.service)
                 a.add_parking_cost(parking_cost)
 
         final_users = []
@@ -1411,20 +1393,15 @@ class Simulator:
                     commute_out)
                 user_info["cost_util"] = actor.user.cost_util(commute_out)
                 user_info["time_util"] = actor.user.time_util(commute_out)
-                user_info["environmental_util"] = actor.user.social_util(
-                    commute_out)
-                user_info["comfort_util"] = actor.user.comfort_util(
-                    commute_out)
-
+                user_info["environmental_util"] = actor.user.social_util(commute_out)
+                user_info["comfort_util"] = actor.user.comfort_util(commute_out)
+               
                 final_users.append(user_info)
             elif(actor.service == "sharedCar"):
                 #create commute output for the driver
                 travel_cost = actor.sharing_travel_cost() + actor.get_parking_cost()
-                travel_cost_portion = travel_cost / \
-                    (len(actor.user.users_to_pick_up) + 1)
-                driver_cost = travel_cost_portion - \
-                    actor.calculate_transporte_subsidy(
-                        len(actor.traveled_nodes)-1)
+                travel_cost_portion = travel_cost / (len(actor.user.users_to_pick_up) + 1)
+                driver_cost = travel_cost_portion - actor.calculate_transporte_subsidy(len(actor.traveled_nodes)-1)
                 if(CREDIT_INCENTIVE):
                     discount = actor.user.credits_discount(
                         N_CREDITS_DISCOUNT, CREDIT_VALUE)
@@ -1441,13 +1418,12 @@ class Simulator:
                         discount = min(
                             discount, driver_cost)
                         self.credits_used[actor.service] += N_CREDITS_DISCOUNT
-                        self.credits_used_run[actor.service] += N_CREDITS_DISCOUNT
+                        self.credits_used_run[actor.service]+= N_CREDITS_DISCOUNT
                         self.credits_used_run["total"] += N_CREDITS_DISCOUNT
                         commute_out = CommuteOutput(
                             driver_cost - discount, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 else:
-                    commute_out = CommuteOutput(
-                        driver_cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                    commute_out = CommuteOutput(driver_cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 user_info = dict()
                 user_info["user"] = actor.user
                 user_info["commute_output"] = commute_out
@@ -1460,7 +1436,7 @@ class Simulator:
                     commute_out)
                 user_info["comfort_util"] = actor.user.comfort_util(
                     commute_out)
-
+               
                 #update user credits
                 final_users.append(user_info)
 
@@ -1469,14 +1445,11 @@ class Simulator:
                     #calculate the time the user spent waiting (difference between user starting time and time when the actor arrived to the house node)
                     time_waiting = actor.driver_reached_pick_up(
                         rider.house_node) - rider.start_time
-                    rider.time_spent_waiting = max(time_waiting, 0)
-                    rider_cost = travel_cost_portion - \
-                        actor.calculate_transporte_subsidy(
-                            actor.rider_traveled_dist(rider.house_node))
+                    rider.time_spent_waiting = max(time_waiting,0)
+                    rider_cost = travel_cost_portion - actor.calculate_transporte_subsidy(actor.rider_traveled_dist(rider.house_node))
 
                     if(CREDIT_INCENTIVE):
-                        discount = rider.credits_discount(
-                            N_CREDITS_DISCOUNT, CREDIT_VALUE)
+                        discount = rider.credits_discount(N_CREDITS_DISCOUNT, CREDIT_VALUE)
                         if(discount == -1):
                             #this means that the user doesn't have the minimum amount of credits to have discount
                             #since the user didnt spent credits, he will gain credits for his trip
@@ -1486,13 +1459,12 @@ class Simulator:
                         else:
                             #this means the user has the minimum amount of credits and will have a discounted trip
                             self.credits_used[actor.service] += N_CREDITS_DISCOUNT
-                            self.credits_used_run[actor.service] += N_CREDITS_DISCOUNT
+                            self.credits_used_run[actor.service]+= N_CREDITS_DISCOUNT
                             self.credits_used_run["total"] += N_CREDITS_DISCOUNT
                             commute_out = CommuteOutput(rider_cost - discount, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     else:
-                        commute_out = CommuteOutput(rider_cost, actor.rider_travel_time(
-                            rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
+                        commute_out = CommuteOutput(rider_cost, actor.rider_travel_time(rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     user_info = dict()
                     user_info["user"] = rider
                     user_info["commute_output"] = commute_out
@@ -1501,10 +1473,9 @@ class Simulator:
 
                     user_info["cost_util"] = rider.cost_util(commute_out)
                     user_info["time_util"] = rider.time_util(commute_out)
-                    user_info["environmental_util"] = rider.social_util(
-                        commute_out)
+                    user_info["environmental_util"] = rider.social_util(commute_out)
                     user_info["comfort_util"] = rider.comfort_util(commute_out)
-
+                    
                     final_users.append(user_info)
             elif(actor.service == "bus"):
                 #go through each user this actor represents
@@ -1535,7 +1506,7 @@ class Simulator:
                             commute_out = CommuteOutput(actor.rider_cost(rider.house_node) - discount, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     else:
-
+                      
                         commute_out = CommuteOutput(actor.rider_cost(rider.house_node), actor.rider_travel_time(
                             rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     user_info = dict()
@@ -1549,8 +1520,9 @@ class Simulator:
                     user_info["environmental_util"] = rider.social_util(
                         commute_out)
                     user_info["comfort_util"] = rider.comfort_util(commute_out)
-
+                    
                     final_users.append(user_info)
+
 
         #add social credits to everybody if SOCIAL_CREDITS is true
         if(CREDIT_INCENTIVE and SOCIAL_CREDIT):
@@ -1566,7 +1538,7 @@ class Simulator:
                 if type(self.providers[i]) is type(user_info["user"].provider):
                     provider_index = i
 
-            for index, agent in enumerate(agents):
+            for index,agent in enumerate(agents):
                 if(index == AGENT_COST_INDEX):
                     util = user_info["cost_util"]
                 elif(index == AGENT_TIME_INDEX):
@@ -1587,8 +1559,8 @@ class Simulator:
 
         return final_users
 
-    #Create agent population from file information
 
+    #Create agent population from file information
     def import_pop(self):
         print("I am importing a population \n")
         with open(self.save_file, mode='r') as csv_file:
@@ -1596,15 +1568,14 @@ class Simulator:
             line_count = 0
             for row in csv_reader:
                 if line_count == 0:
-                    line_count += 1
-
+                    line_count += 1            
+            
                 personality = Personality(
-                    float(row["willingness_to_pay"]), float(row["willingness_to_wait"]), float(
-                        row["awareness"]), float(row["comfort_preference"]),
-                    float(row["dim1"]), float(row["dim2"]), float(row["dim3"]), float(row["dim4"]), float(row["dim5"]), float(row["dim6"]))
+                    float(row["willingness_to_pay"]), float(row["willingness_to_wait"]), float(row["awareness"]), float(row["comfort_preference"]),
+                    float(row["friendliness"]), float(row["suscetible"]), float(row["transport"]),float( row["urban"]), float(row["willing"]))
 
-                user = User(personality, float(row["time"]), row["chosen_cluster"], row["chosen_course"], row["chosen_grade"], float(row["salary"]),
-                            float(row["budget"]), int(row["available_seats"]), int(row["distance_from_destination"]), eval(row["has_bike"]), eval(row["has_private"]))
+                user = User(personality,float(row["time"]),row["chosen_cluster"], row["chosen_course"], row["chosen_grade"], float(row["salary"]),
+                            float(row["budget"]), int(row["available_seats"]), int(row["distance_from_destination"]), eval(row["has_bike"]), eval(row["has_private"])) 
                 user.house_node = int(row["house_node"])
                 user.can_cycle = eval(row["can_cycle"])
                 user.can_walk = eval(row["can_walk"])
@@ -1626,58 +1597,57 @@ class Simulator:
                 f_ids = [int(i) for i in split]
                 user.friends = [f for f in self.users if(f.user_id in f_ids)]
 
-    #Saving agent population information to a file
 
+    #Saving agent population information to a file
     def save_pop(self):
         print("I am saving the population \n")
 
-        fields = ["willingness_to_pay", "willingness_to_wait", "awareness", "comfort_preference", "dim1", "dim2", "dim3", "dim4", "dim5","dim6",
-                  "time", "chosen_cluster", "chosen_course", "chosen_grade", "salary", "budget", "available_seats",
-                  "distance_from_destination", "has_bike", "has_private", "house_node", "can_cycle", "can_walk", "num_friends", "user_id", "friends_ids"]
-
-        with open(self.save_file, "w+") as csv_file:
+        fields = ["willingness_to_pay", "willingness_to_wait", "awareness", "comfort_preference", "friendliness", "suscetible", "transport","urban","willing",
+                  "time", "chosen_cluster","chosen_course", "chosen_grade", "salary","budget","available_seats",
+                  "distance_from_destination","has_bike","has_private","house_node","can_cycle","can_walk","num_friends","user_id","friends_ids"]
+            
+        with open(self.save_file,"w+") as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=fields)
             writer.writeheader()
-
+            
             for user in self.users:
                 f_ids = []
                 for friend in user.friends:
                     f_ids.append(friend.user_id)
 
                 writer.writerow({
-                    'willingness_to_pay': user.personality.willingness_to_pay,
-                    'willingness_to_wait': user.personality.willingness_to_wait,
-                    'awareness': user.personality.awareness,
-                    'comfort_preference': user.personality.comfort_preference,
-                    'dim1': user.personality.dim1,
-                    'dim2': user.personality.dim2,
-                    'dim3': user.personality.dim3,
-                    'dim4': user.personality.dim4,
-                    'dim5': user.personality.dim5,
-                    'dim6': user.personality.dim6,
-                    'time': user.start_time,
-                    'chosen_cluster': user.cluster,
-                    'chosen_course': user.course,
-                    'chosen_grade': user.grade,
-                    'salary': user.salary,
-                    'budget': user.budget,
-                    'available_seats': user.available_seats,
-                    'distance_from_destination': user.distance_from_destination,
-                    'has_bike': user.has_bike,
-                    'has_private': user.has_private,
-                    'house_node': user.house_node,
-                    'can_cycle': user.can_cycle,
-                    'can_walk': user.can_walk,
-                    'num_friends': user.num_friends,
-                    'user_id': user.user_id,
-                    'friends_ids': f_ids
-                })
-
+                'willingness_to_pay': user.personality.willingness_to_pay, 
+                'willingness_to_wait': user.personality.willingness_to_wait,
+                'awareness': user.personality.awareness ,
+                'comfort_preference':user.personality.comfort_preference,
+                'friendliness':user.personality.friendliness,
+                'suscetible':user.personality.suscetible,
+                'transport':user.personality.transport,
+                'urban':user.personality.urban,
+                'willing':user.personality.willing,
+                'time':user.start_time,
+                'chosen_cluster':user.cluster,
+                'chosen_course': user.course,
+                'chosen_grade': user.grade,
+                'salary': user.salary,
+                'budget': user.budget,
+                'available_seats': user.available_seats,
+                'distance_from_destination': user.distance_from_destination,
+                'has_bike': user.has_bike,
+                'has_private': user.has_private,
+                'house_node': user.house_node,
+                'can_cycle': user.can_cycle,
+                'can_walk': user.can_walk,
+                'num_friends': user.num_friends,
+                'user_id': user.user_id,
+                'friends_ids': f_ids
+                 })
+        
     #Run "default" technique
     #There is only one learner agent that applies deep q-learning to the population's mobility choice
     def run(self, agent: DQNAgent):
         # Empty actors list, in case of consecutive calls to this method
-        self.actors = []
+        self.actors = []       
 
         # Cleaning road graph
         self.graph = RoadGraph(self.input_config)
@@ -1692,16 +1662,16 @@ class Simulator:
                 #Create distance dictionary
                 self.create_dist_dict()
             else:
-                self.users = self.create_users()
+                self.users = self.create_users()            
                 #Create distance dictionary
                 self.create_dist_dict()
                 #Assign house nodes to each user according to graph structure
                 self.add_house_nodes()
                 self.assess_cycle_walk(self.users)
-                self.create_friends()
+                self.create_friends()      
 
             if(self.save_population):
-                self.save_pop()
+                self.save_pop()   
 
             self.bus_users = self.create_buses()
             self.create_buses_schedule(self.bus_users)
@@ -1714,7 +1684,7 @@ class Simulator:
         for user in self.users:
             if (user.mean_transportation == "bus"):
                 users_public_transport.append(user)
-
+      
         #Take care of the ride sharing option - matching
         users_ride_sharing = []
         for user in self.users:
@@ -1727,11 +1697,9 @@ class Simulator:
         #check if people that wish to ride share exist, if so match them
         ride_sharing_unmatched = []
         if(len(users_ride_sharing) > 0):
-            ride_sharing_unmatched = self.ride_sharing_matching(
-                users_ride_sharing)
+            ride_sharing_unmatched = self.ride_sharing_matching(users_ride_sharing)
 
-        cyclists = [user for user in self.users if(
-            user.mean_transportation == "bike")]
+        cyclists = [user for user in self.users if(user.mean_transportation == "bike")]
 
         walkers = [user for user in self.users if(
             user.mean_transportation == "walk")]
@@ -1758,11 +1726,10 @@ class Simulator:
             services.append(provider.service)
 
         public_transport_unmatched = []
-        for service in services:
+        for service in services:           
             if(service == "bus"):
                 # add bus drivers to the users who will become actors
-                public_transport_unmatched = self.public_transport_matching(
-                    users_public_transport, self.bus_users)
+                public_transport_unmatched = self.public_transport_matching(users_public_transport, self.bus_users)
                 #create actors representing only the buses that are going to pick people up
                 for bus_driver in self.bus_users:
                     if(len(bus_driver.users_to_pick_up) > 0):
@@ -1773,11 +1740,12 @@ class Simulator:
             if(service == "walk"):
                 users_turn_actors = users_turn_actors + walkers
 
+
         #Make list combining all the users that aren't gonna participate in this run
-        users_not_participating = public_transport_unmatched + ride_sharing_unmatched
+        users_not_participating = public_transport_unmatched  + ride_sharing_unmatched
 
         #Training the users to learn that the mode choice they made was not good, they weren't matched
-        for index in range(0, len(self.providers)):
+        for index in range(0,len(self.providers)):
             if(self.providers[index].service == "bus"):
                 public_index = index
                 self.unviable_choice(
@@ -1792,8 +1760,7 @@ class Simulator:
         lost = dict()
         lost["sharedCar"] = len(ride_sharing_unmatched)
         lost["bus"] = len(public_transport_unmatched)
-        lost["total"] = len(ride_sharing_unmatched) + \
-            len(public_transport_unmatched)
+        lost["total"] = len(ride_sharing_unmatched) + len(public_transport_unmatched)
 
         self.users_lost[self.runn] = lost
 
@@ -1820,7 +1787,7 @@ class Simulator:
         self.actors.sort(key=self.sort_actors_fun)
         for a in self.actors:
             if (a.service == "car" or a.service == "sharedCar"):
-                parking_cost = self.parking_lot.park_vehicle(a.service)
+                parking_cost =  self.parking_lot.park_vehicle(a.service)
                 a.add_parking_cost(parking_cost)
 
         final_users = []
@@ -1843,11 +1810,8 @@ class Simulator:
             elif(actor.service == "sharedCar"):
                 #create commute output for the driver
                 travel_cost = actor.sharing_travel_cost() + actor.get_parking_cost()
-                travel_cost_portion = travel_cost / \
-                    (len(actor.user.users_to_pick_up) + 1)
-                driver_cost = travel_cost_portion - \
-                    actor.calculate_transporte_subsidy(
-                        len(actor.traveled_nodes)-1)
+                travel_cost_portion = travel_cost / (len(actor.user.users_to_pick_up) + 1)
+                driver_cost = travel_cost_portion - actor.calculate_transporte_subsidy(len(actor.traveled_nodes)-1)
                 if(CREDIT_INCENTIVE):
                     discount = actor.user.credits_discount(
                         N_CREDITS_DISCOUNT, CREDIT_VALUE)
@@ -1859,18 +1823,17 @@ class Simulator:
                             driver_cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                     else:
                         #this means the user has the minimum amount of credits and will have a discounted trip
-                        #check if the discount is bigger than the cost of the trip.
+                        #check if the discount is bigger than the cost of the trip. 
                         # if discount is bigger than discount is now equal to the cost, to avoid getting "negative cost"
                         discount = min(
                             discount, driver_cost)
                         self.credits_used[actor.service] += N_CREDITS_DISCOUNT
-                        self.credits_used_run[actor.service] += N_CREDITS_DISCOUNT
+                        self.credits_used_run[actor.service]+= N_CREDITS_DISCOUNT
                         self.credits_used_run["total"] += N_CREDITS_DISCOUNT
                         commute_out = CommuteOutput(
                             driver_cost - discount, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 else:
-                    commute_out = CommuteOutput(
-                        driver_cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
+                    commute_out = CommuteOutput(driver_cost, actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 user_info = dict()
                 user_info["user"] = actor.user
                 user_info["commute_output"] = commute_out
@@ -1883,14 +1846,11 @@ class Simulator:
                     #calculate the time the user spent waiting (difference between user starting time and time when the actor arrived to the house node)
                     time_waiting = actor.driver_reached_pick_up(
                         rider.house_node) - rider.start_time
-                    rider.time_spent_waiting = max(time_waiting, 0)
-                    rider_cost = travel_cost_portion - \
-                        actor.calculate_transporte_subsidy(
-                            actor.rider_traveled_dist(rider.house_node))
+                    rider.time_spent_waiting = max(time_waiting,0)
+                    rider_cost = travel_cost_portion - actor.calculate_transporte_subsidy(actor.rider_traveled_dist(rider.house_node))
 
                     if(CREDIT_INCENTIVE):
-                        discount = rider.credits_discount(
-                            N_CREDITS_DISCOUNT, CREDIT_VALUE)
+                        discount = rider.credits_discount(N_CREDITS_DISCOUNT, CREDIT_VALUE)
                         if(discount == -1):
                             #this means that the user doesn't have the minimum amount of credits to have discount
                             #since the user didnt spent credits, he will gain credits for his trip
@@ -1900,13 +1860,12 @@ class Simulator:
                         else:
                             #this means the user has the minimum amount of credits and will have a discounted trip
                             self.credits_used[actor.service] += N_CREDITS_DISCOUNT
-                            self.credits_used_run[actor.service] += N_CREDITS_DISCOUNT
+                            self.credits_used_run[actor.service]+= N_CREDITS_DISCOUNT
                             self.credits_used_run["total"] += N_CREDITS_DISCOUNT
                             commute_out = CommuteOutput(rider_cost - discount, actor.rider_travel_time(
                                 rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     else:
-                        commute_out = CommuteOutput(rider_cost, actor.rider_travel_time(
-                            rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
+                        commute_out = CommuteOutput(rider_cost, actor.rider_travel_time(rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     user_info = dict()
                     user_info["user"] = rider
                     user_info["commute_output"] = commute_out
@@ -1933,8 +1892,7 @@ class Simulator:
                             #this means the user has the minimum amount of credits and will have a discounted trip
                             #check if the discount is bigger than the cost of the trip.
                             # if discount is bigger than discount is now equal to the cost, to avoid getting "negative cost"
-                            discount = min(
-                                discount, actor.rider_cost(rider.house_node))
+                            discount = min(discount, actor.rider_cost(rider.house_node))
                             self.credits_used[actor.service] += N_CREDITS_DISCOUNT
                             self.credits_used_run[actor.service] += N_CREDITS_DISCOUNT
                             self.credits_used_run["total"] += N_CREDITS_DISCOUNT
@@ -1973,6 +1931,7 @@ class Simulator:
 
         return final_users
 
+
     def run_every_agent_nn(self, agents: List[DQNAgent]):
             # Empty actors list, in case of consecutive calls to this method
         self.actors = []
@@ -2007,6 +1966,7 @@ class Simulator:
             self.reset()
         self.choose_mode_every_agent_nn(agents)
 
+
         #Take care of the public transport option - match users to buses
         users_public_transport = []
         for user in self.users:
@@ -2033,6 +1993,7 @@ class Simulator:
 
         walkers = [user for user in self.users if(
             user.mean_transportation == "walk")]
+
 
         # Create the Simulation Actors
         event_queue = PriorityQueue()
@@ -2067,7 +2028,7 @@ class Simulator:
                 #create actors representing only the buses that are going to pick people up
                 for bus_driver in self.bus_users:
                     if(len(bus_driver.users_to_pick_up) > 0):
-                        users_turn_actors.append(bus_driver)
+                        users_turn_actors.append(bus_driver)    
 
             if(service == "bike"):
                 users_turn_actors = users_turn_actors + cyclists
@@ -2639,7 +2600,7 @@ class Simulator:
             for i in range(len(self.providers)):
                 if type(self.providers[i]) is type(user_info["user"].provider):
                     provider_index = i
-
+            
             agents = dict_agents[user_info["user"].user_id-1]
 
             for index, agent in enumerate(agents):
@@ -2658,13 +2619,13 @@ class Simulator:
 
         for key in dict_agents.keys():
             for agent in dict_agents[key]:
-                agent.train(True, 1)
-
+                agent.train(True,1)
+     
         self.runn += 1
 
         return final_users
 
-    def run_every_agent_fast(self, agents: List[DQNAgent]):
+    def run_every_agent_fast(self,agents: List[DQNAgent]):
             # Empty actors list, in case of consecutive calls to this method
         self.actors = []
 
@@ -2835,13 +2796,13 @@ class Simulator:
                         actor.cost + actor.get_parking_cost(), actor.travel_time, actor.awareness, actor.comfort, actor.provider.name)
                 # print("cost ", actor.cost)
                 # print("pa ", actor.get_parking_cost())
-
+                
                 user_info = dict()
                 user_info["user"] = actor.user
                 user_info["commute_output"] = commute_out
                 user_info["utility"] = actor.user.calculate_utility_value(
                     commute_out)
-
+                
                 #update dos creditos do user
                 final_users.append(user_info)
             elif(actor.service == "sharedCar"):
@@ -2994,7 +2955,7 @@ class Simulator:
 
         return final_users
 
-    def run_every_agent_fast_ensemble(self, dict_agents):
+    def run_every_agent_fast_ensemble(self,dict_agents):
            # Empty actors list, in case of consecutive calls to this method
         self.actors = []
 
@@ -3350,6 +3311,7 @@ class Simulator:
         self.runn += 1
 
         return final_users
+        
 
     def run_descriptive(self):
         # Empty actors list, in case of consecutive calls to this method
@@ -3372,7 +3334,7 @@ class Simulator:
                 self.create_dist_dict()
                 self.add_house_nodes()
                 self.assess_cycle_walk(self.users)
-                self.create_friends()
+                self.create_friends()            
             self.bus_users = self.create_buses()
             self.create_buses_schedule(self.bus_users)
 
@@ -3381,10 +3343,11 @@ class Simulator:
         else:
             # self.users = self.users[1:]
             self.reset()
-
+        
         self.choose_mode_descriptive()
 
-        #Take care of the public transport option - match users to buses
+
+          #Take care of the public transport option - match users to buses
         users_public_transport = []
         for user in self.users:
             if (user.mean_transportation == "bus"):
@@ -3404,12 +3367,13 @@ class Simulator:
                 set(possible_cyclists) - set(cyclists))
 
         walkers = []
-        possible_walkers = [user for user in self.users if (
-            user.mean_transportation == "walk")]
+        possible_walkers = [user for user in self.users if (user.mean_transportation == "walk")]
         walking_not_possible = [user for user in self.users if(
             user.mean_transportation == "walk" and not user.can_walk)]
         if(len(possible_walkers) > 0):
             walkers = list(set(possible_walkers) - set(walking_not_possible))
+            
+            
 
         # Create the Simulation Actors
         event_queue = PriorityQueue()
@@ -3457,13 +3421,13 @@ class Simulator:
 
         # print("users {}".format(len(self.users)))
 
+
         lost = dict()
         lost["car"] = len(users_no_car_but_chose_car)
         lost["bus"] = len(public_transport_unmatched)
         lost["bike"] = len(cyclists_not_possible)
         lost["walk"] = len(walking_not_possible)
-        lost["total"] = len(users_no_car_but_chose_car) + len(public_transport_unmatched) + \
-            len(cyclists_not_possible) + len(walking_not_possible)
+        lost["total"] = len(users_no_car_but_chose_car) + len(public_transport_unmatched) + len(cyclists_not_possible) + len(walking_not_possible)
 
         self.users_lost[self.runn] = lost
 
@@ -3511,7 +3475,7 @@ class Simulator:
                         rider.house_node) - rider.start_time
                     rider.time_spent_waiting = max(time_waiting, 0)
                     commute_out = CommuteOutput(actor.rider_cost(rider.house_node), actor.rider_travel_time(
-                        rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
+                            rider.house_node) + rider.time_spent_waiting, actor.awareness, actor.comfort, actor.provider.name)
                     user_info = dict()
                     user_info["user"] = rider
                     user_info["commute_output"] = commute_out
@@ -3544,7 +3508,7 @@ class Simulator:
             time = get_time_from_traffic_distribution(
                 self.traffic_distribution)
 
-            #personality params we had previously defined, namely, willingness_to_wait/pay, comfort preference
+            #personality params we had previously defined, namely, willingness_to_wait/pay, comfort preference 
             personality_params = self.input_config["users"]["personality_params"]
 
             #####################################################################################################
@@ -3620,10 +3584,8 @@ class Simulator:
 
             #Assign the available seats in the private vehicle for each user who has a private vehicle according to the cluster
             if(has_private):
-                seats_num = list(
-                    (self.input_config["users"]["clusters"][chosen_cluster]["seat_probs"]).keys())
-                seats_percentages = (
-                    self.input_config["users"]["clusters"][chosen_cluster]["seat_probs"]).values()
+                seats_num = list((self.input_config["users"]["clusters"][chosen_cluster]["seat_probs"]).keys())
+                seats_percentages = (self.input_config["users"]["clusters"][chosen_cluster]["seat_probs"]).values()
 
                 available_seats = random.choices(
                     seats_num, weights=seats_percentages, k=1)
@@ -3677,15 +3639,14 @@ class Simulator:
             #get random values for the factors according to the distributions (change these to the beggining so that it's clearer which factors exist)
 
             chosen_cluster_info = self.input_config["users"]["clusters"][chosen_cluster]
-            user_factors = ["dim1", "dim2",
-                            "dim3", "dim4", "dim5","dim6"]
+            user_factors = ["friendliness", "suscetible",
+                            "transport", "willing", "urban"]
             user_factors_values = {
-                "dim1": DEFAULT_VALUE_NUM,
-                "dim2": DEFAULT_VALUE_NUM,
-                "dim3": DEFAULT_VALUE_NUM,
-                "dim4": DEFAULT_VALUE_NUM,
-                "dim5": DEFAULT_VALUE_NUM,
-                "dim6": DEFAULT_VALUE_NUM
+                "friendliness": DEFAULT_VALUE_NUM,
+                "suscetible": DEFAULT_VALUE_NUM,
+                "transport": DEFAULT_VALUE_NUM,
+                "willing": DEFAULT_VALUE_NUM,
+                "urban": DEFAULT_VALUE_NUM
             }
 
             for factor in user_factors:
@@ -3709,7 +3670,7 @@ class Simulator:
             # add cluster info to the users(?)
 
             personality = Personality(willingness_to_pay, willingness_to_wait, awareness, comfort_preference,
-                                      user_factors_values["dim1"], user_factors_values["dim2"], user_factors_values["dim3"], user_factors_values["dim4"], user_factors_values["dim5"], user_factors_values["dim6"])
+                                      user_factors_values["friendliness"], user_factors_values["suscetible"], user_factors_values["transport"], user_factors_values["urban"], user_factors_values["willing"])
             user = User(personality, time, chosen_cluster,
                         chosen_course, chosen_grade, salary, budget, available_seats, distance_from_destination, bool(has_bike), bool(has_private))
 
@@ -3742,9 +3703,8 @@ class Simulator:
             elif(distance >= 1 and distance < 3):
                 self.distance_dict["1-3"] += 1
 
-    def fastest_private_travel_time(self, house_node: int):
-        dist = nx.shortest_path_length(
-            self.graph.graph, source=house_node, target=self.graph.nend)
+    def fastest_private_travel_time(self,house_node: int):
+        dist = nx.shortest_path_length(self.graph.graph, source=house_node, target=self.graph.nend)
         car_p = [provider for provider in self.providers if provider.service == "car"]
         speed = car_p[0].get_speed()
         time = dist/speed

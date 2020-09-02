@@ -3,7 +3,7 @@ from typing import List
 class Personality:
     """Represents the user's preferences of the system"""
 
-    def __init__(self, willingness_to_pay: float, willingness_to_wait: float, awareness: float, comfort_preference: float, friendliness: float, suscetible: float, transport: float, urban: float, willing: float, mean_transportation=""):
+    def __init__(self, willingness_to_pay: float, willingness_to_wait: float, awareness: float, comfort_preference: float, dim1: float, dim2: float, dim3: float, dim4: float, dim5: float, dim6:float, mean_transportation=""):
         self.willingness_to_pay = willingness_to_pay
         self.willingness_to_wait = willingness_to_wait
         self.awareness = awareness
@@ -11,11 +11,17 @@ class Personality:
         self.mean_transportation = mean_transportation
 
         #Factors
-        self.friendliness = friendliness
-        self.suscetible = suscetible
-        self.transport = transport
-        self.urban = urban
-        self.willing = willing
+        #self.friendliness = friendliness
+        #self.suscetible = suscetible
+        #self.transport = transport
+        #self.urban = urban
+        #self.willing = willing
+        self.dim1 = dim1
+        self.dim2=dim2
+        self.dim3=dim3
+        self.dim4=dim4
+        self.dim5=dim5
+        self.dim6=dim6
 
 
 class CommuteOutput:
@@ -95,7 +101,7 @@ class User:
 
     @staticmethod
     def default():
-        return User(Personality(0,0,0,0,0,0,0,0,0), 0.0, "","","",0.0,0.0,0,0,False,False)
+        return User(Personality(0,0,0,0,0,0,0,0,0,0), 0.0, "","","",0.0,0.0,0,0,False,False)
 
     def my_copy(self, service: str):
         new_user = User.default()
